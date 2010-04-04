@@ -1,0 +1,16 @@
+INSTALL
+=======
+
+Software Requirements:
+---------------------
+
+ -Python 2.6.x
+ -PyGTK >= 2.17
+ -Pygoocanvas >= 0.14
+
+
+Install process:
+----------------
+
+To install Synapse , cd to the Synapse source tree and run "./setup.py"
+

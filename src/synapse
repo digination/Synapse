@@ -1,0 +1,992 @@
+#!/usr/bin/env python
+
+import pygtk
+pygtk.require("2.0")
+import gtk
+import os
+import time
+import gobject
+import goocanvas
+
+
+import sys
+sys.path.append("/usr/lib/synapse")
+from synapseObjects import *
+import synapseCanvas
+from synapseCanvas import *
+from synapseCanvas import motion_notify
+from synapseIMVEC import *
+import pickle
+
+
+
+import signal
+import threading
+
+#Global variables definition
+
+RES_PATH = "/usr/share/synapse"
+GOO_COORD= list()
+TARGET_TYPE_PIXMAP = 81
+ 
+LS0 = gtk.ListStore(gtk.gdk.Pixbuf,gobject.TYPE_STRING)
+RENDERER0 =  gtk.CellRendererPixbuf()
+RENDERER1 = gtk.CellRendererText()
+C0= gtk.TreeViewColumn(None,RENDERER0,pixbuf=0)
+C1= gtk.TreeViewColumn(None,RENDERER1,text=1)
+
+
+class thwrapper(threading.Thread):
+
+ 
+   def setMethod(self,method):
+      self.method = method   
+
+   def run(self):
+      self.method()
+
+
+
+#class that defines the synapse document structure and 
+# manipulation methods
+class document(object):
+
+   TARGET_TYPE_TEXT = 80
+   TARGET_TYPE_PIXMAP = 81
+   fromImage = [ ( "text/plain", 0, TARGET_TYPE_TEXT ),
+              ( "image/x-xpixmap", 0, TARGET_TYPE_PIXMAP ) ]
+   toButton = [ ( "text/plain", 0, TARGET_TYPE_TEXT ) ]
+   toCanvas = [ ( "image/x-xpixmap", 0, TARGET_TYPE_PIXMAP ) ]
+
+   nbinst = 0
+   nbnewinst = 0
+
+   
+   def refresh_objects_list(self):
+
+      global LS0
+      global SYNAPP_ICON
+      global C0
+      global C1
+
+      LS0.clear()
+      for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+  
+         if (str(obj.__class__) == "synapseObjects.synapp"):         
+            pixbuf = IMVEC.appPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.syntest"):
+            pixbuf = IMVEC.testPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.syntimer"):
+            pixbuf = IMVEC.timerPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synserv"):
+            pixbuf = IMVEC.servPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synmux"):
+            pixbuf = IMVEC.muxPixbuf_s 
+         elif (str(obj.__class__) == "synapseObjects.syndemux"):
+            pixbuf = IMVEC.demuxPixbuf_s 
+         elif (str(obj.__class__) == "synapseObjects.synjector"):
+            pixbuf = IMVEC.injectorPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.syncom"):
+            pixbuf = IMVEC.commentPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synmonitor"):
+            pixbuf = IMVEC.monitorPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synfilter"):
+            pixbuf = IMVEC.filterPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synlink"):
+            pixbuf = IMVEC.linkPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synserv"):
+            pixbuf = IMVEC.servPixbuf_s
+
+         iter = LS0.append()
+         LS0.set(iter,0,pixbuf,1,obj.getName())
+
+      IMVEC.obrowser.append_column(C0)
+      IMVEC.obrowser.append_column(C1)
+      IMVEC.obrowser.set_model(LS0)
+
+
+   def loadFromFile(self,sws_file):
+
+      return True
+
+
+   def saveToFile(self,sws_file):
+
+      for obj in objectsList:
+
+         print obj.getName()
+         
+      
+   def on_closebtn_clicked(self,widget):
+      
+ 
+      self.notebook.remove_page(self.notebook.page_num(widget))
+ 
+  
+   def receiveCallback(self, widget, context, x, y, selection, targetType,time):
+
+
+      print "DROPPED:", context.get_source_widget().get_name()
+
+     
+      if (context.get_source_widget().get_name() == "synapp_btn"):
+
+         self.nbsynapp+=1
+         newobj = synapp("Application%d" % (self.nbsynapp) )
+         newitem = synappItem(self.root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Application%d" % (self.nbsynapp))
+
+         self.refresh_objects_list()
+      
+
+      elif (context.get_source_widget().get_name() == "syntest_btn"):
+
+         self.nbsyntest+=1
+         newobj = syntest("Test%d" % (self.nbsyntest) )
+         newitem = testItem(self.root)
+         self.container.append(linker(newobj,newitem))
+         
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Test%d" % (self.nbsyntest))
+         self.refresh_objects_list()
+
+
+
+      elif (context.get_source_widget().get_name() == "synserv_btn"):
+         
+         self.nbservices+=1
+         newobj = synserv("Service%d" % (self.nbservices) )
+         newitem = servItem(self.root)
+         self.container.append(linker(newobj,newitem))
+         
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Service%d" % (self.nbservices))
+         self.refresh_objects_list()
+         
+
+      elif (context.get_source_widget().get_name() == "synject_btn"):
+
+         self.nbinjectors+=1
+         newobj = synjector("Injector%d" % (self.nbinjectors))
+         newitem = injectorItem(self.root)
+         self.container.append(linker(newobj,newitem))         
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Injector%d" % (self.nbinjectors))
+        
+         self.refresh_objects_list()
+
+
+      elif (context.get_source_widget().get_name() == "syncom_btn"):
+
+         self.nbcomments+=1
+         newobj = syncom("Comment%d" % (self.nbcomments),"This is a comment box")
+         newitem = commentItem(self.root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+
+         self.refresh_objects_list()     
+
+      elif (context.get_source_widget().get_name() == "synmux_btn"):
+
+         self.nbmuxers+=1
+         newobj = synmux("Muxer%d" % (self.nbmuxers))
+         newitem = muxItem(self.root)         
+         self.container.append(linker(newobj,newitem))
+         
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Muxer%d" % (self.nbmuxers))
+         self.refresh_objects_list() 
+
+      elif (context.get_source_widget().get_name() == "syndemux_btn"):
+
+         self.nbdemuxers+=1
+         newobj = syndemux("Demuxer%d" % (self.nbdemuxers))
+         newitem = demuxItem(self.root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Demuxer%d" % (self.nbdemuxers))
+
+         self.refresh_objects_list()
+
+      elif (context.get_source_widget().get_name() == "syntimer_btn"):
+
+         self.nbtimers+=1
+         newobj = syntimer("Timer%d" % (self.nbtimers))
+         newitem = timerItem(self.root)
+         self.container.append(linker(newobj,newitem))         
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Timer%d" % (self.nbtimers))
+
+         self.refresh_objects_list()
+
+
+      elif (context.get_source_widget().get_name() == "synfilter_btn"):
+
+         self.nbfilters+=1
+         newobj = synfilter("Filter%d" % (self.nbfilters))
+         newitem = filterItem(self.root)
+         self.container.append(linker(newobj,newitem))         
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Filter%d" % (self.nbfilters))
+
+         self.refresh_objects_list()
+
+
+      elif (context.get_source_widget().get_name() == "synmon_btn"):
+
+         self.nbmonitors+=1
+         newobj = synmonitor("Monitor%d" % (self.nbmonitors))
+         newitem = monitorItem(self.root)
+         self.container.append(linker(newobj,newitem))         
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         #newitem.setText("Monitor%d" % (self.nbfilters))
+
+         self.refresh_objects_list()
+
+       
+   def zoomOut(self):
+      
+      if (self.zoom == 0.5): 
+         self.zoom = 0.25
+      elif (self.zoom == 1):
+         self.zoom = 0.5
+      elif (self.zoom > 1):
+         self.zoom-=1
+
+      self.applyZoom()
+
+   def zoomIn(self):
+      
+      if (self.zoom < 1): 
+         self.zoom = 1
+      elif (self.zoom < 4):
+         self.zoom+=1
+      self.applyZoom()  
+
+   def setZoom(self,zoom):
+      self.zoom = zoom
+     
+   def getZoom(self):
+
+      return self.zoom
+
+   def applyZoom(self):
+      
+      nwidth = int(self.root.get_property("width") * self.zoom)
+      nheight = int(self.root.get_property("height") * self.zoom)
+      
+      #print "ROOT_W: %d\nROOT_H: %d\nW_INT: %d\nH_INT: %d" % (self.root.get_property("width"),self.root.get_property("height"),nwidth,nheight)
+
+      self.root.set_simple_transform(0,0,self.zoom,0)
+      self.canvas.set_size_request(nwidth,nheight)
+      self.canvas.set_bounds(0, 0,nwidth,nheight)
+
+    
+   def getContainer(self):
+
+      return self.container  
+
+   def getActiveM(self):
+      return self.activeMember
+
+   def getPrevM(self):
+      return self.prevMember 
+   
+   def setActiveM(self,activeMember):
+      
+      if self.activeMember != None:
+         self.prevMember = self.activeMember
+      self.activeMember = activeMember
+      
+
+   def setPrevM(self,prevMember):
+      self.prevMember = prevMember
+
+
+
+   def __init__(self,name,notebook):
+      
+      document.nbinst+=1
+
+      IMVEC.docList.append(self)
+
+      self.name = name
+      
+      #define a new empty objects container
+      self.container = container()
+
+      self.activeMember = None
+      self.prevMember = None
+
+
+      self.saved = False
+      self.modified = False
+      self.notebook = notebook      
+
+      self.nbsynapp = 0
+      self.nbsyntest = 0
+      self.nbmux = 0
+      self.nbcomments = 0
+      self.nbmuxers = 0
+      self.nbdemuxers = 0
+      self.nbinjectors = 0
+      self.nbtimers = 0
+      self.nbfilters=0
+      self.nbmonitors = 0
+      self.nbservices = 0
+      self.zoom = 1
+      
+      
+
+      self.head_hbox = gtk.HBox()
+      head_label = gtk.Label(str=self.name)
+      head_label.show()
+      self.close_btn = gtk.Button()
+
+      close_image = gtk.image_new_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
+      close_image.show()
+      
+
+      self.close_btn.connect("clicked",self.on_closebtn_clicked)
+      self.close_btn.add(close_image)
+      self.close_btn.show()
+      self.head_hbox.add(head_label)
+      self.head_hbox.add(self.close_btn)
+
+
+      scrolled_win = gtk.ScrolledWindow() 
+      view_port = gtk.Viewport()
+      
+      self.canvas = goocanvas.Canvas()
+
+      self.canvas.add_events(gtk.gdk.MOTION_NOTIFY | gtk.gdk.BUTTON_PRESS)
+      self.canvas.connect("motion_notify_event", motion_notify)
+      #self.canvas.connect('drag_motion', self.on_drag_motion)
+           
+      self.canvas.connect("drag_data_received", self.receiveCallback)      
+      self.canvas.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
+                             gtk.DEST_DEFAULT_HIGHLIGHT |
+                             gtk.DEST_DEFAULT_DROP,
+                             self.toButton, gtk.gdk.ACTION_COPY)
+
+    
+      self.canvas.set_size_request(1024, 1024)
+      self.canvas.set_bounds(0, 0, 1024, 1024)
+
+      self.root = self.canvas.get_root_item()
+      self.rect = goocanvas.Rect(parent=self.root,x=0, y=0, width=1024, height=1024,
+				stroke_color="black", fill_color="white",
+				line_width=0)
+
+      self.root.set_property("width",1024)
+      self.root.set_property("height",1024)
+
+
+      headerItem(self.root)
+
+   
+      #construct new page
+      scrolled_win.add(view_port)
+      view_port.add(self.canvas)
+      self.notebook.insert_page(scrolled_win,position=self.notebook.get_n_pages(),tab_label=self.head_hbox)
+      self.notebook.get_nth_page(self.notebook.get_n_pages()-1).show()
+      self.notebook.set_current_page(self.notebook.get_n_pages()-1)
+      view_port.show()
+      self.canvas.show()
+      
+
+   def getCanvas(self):
+
+      return self.canvas
+
+   def getRootItem(self):
+
+      return self.root
+
+
+   #def getObjectList(self):
+
+      #return self.objectList
+
+      
+   #def setObjectList(self,objectList):
+
+      #self.objectList = objectList
+
+
+   #def addObject(self,obj):
+
+      #self.objectList.append(obj)
+
+
+class splashWindow(object):
+
+
+   def start(self):
+
+      self.window.hide()
+      win1 = MainWindow()
+
+
+   def __init__(self):
+
+      builder = gtk.Builder()
+      builder.add_from_file("%s/ui/splash.xml" % (RES_PATH))
+
+      self.window = builder.get_object("window1")
+      self.image = builder.get_object("image1")
+
+      self.image.set_from_pixbuf(IMVEC.synapse_logo)
+
+      self.window.set_decorated(False)
+      self.window.show()
+      
+
+
+class aboutWindow(object):
+
+
+   def start(self):
+
+      self.window.hide()
+      win1 = MainWindow()
+
+   def getWindow(self):
+
+      return self.window   
+
+   def __init__(self):
+
+      builder = gtk.Builder()
+      builder.add_from_file("%s/ui/about.xml" % (RES_PATH))
+      self.window = builder.get_object("window1")
+   
+      
+class MainWindow(object):       
+
+   TARGET_TYPE_TEXT = 80
+   TARGET_TYPE_PIXMAP = 81
+   fromImage = [ ( "text/plain", 0, TARGET_TYPE_TEXT ),
+              ( "image/x-xpixmap", 0, TARGET_TYPE_PIXMAP ) ]
+   toButton = [ ( "text/plain", 0, TARGET_TYPE_TEXT ) ]
+   toCanvas = [ ( "image/x-xpixmap", 0, TARGET_TYPE_PIXMAP ) ]
+
+
+
+   def on_key_press(self,widget,event):
+
+      print event.keyval
+      #object deletion
+      if IMVEC.activeDoc.getActiveM() != None and event.keyval == 65535:
+         
+   
+         #delete links coming in and out the object
+         for mname, member in  IMVEC.activeDoc.getContainer().getMembers().items():
+            
+            if str(member.getSynObj().__class__) == "synapseObjects.synlink":
+             
+               if member.getSynObj().getInObj() == IMVEC.activeDoc.getActiveM().getSynObj():
+                  IMVEC.activeDoc.getContainer().delete(member)
+                  IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
+                  
+               elif member.getSynObj().getOutObj() == IMVEC.activeDoc.getActiveM().getSynObj():
+                  IMVEC.activeDoc.getContainer().delete(member)
+                  IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
+                  
+
+         #suppress all references to the object
+         IMVEC.activeDoc.getContainer().delete(IMVEC.activeDoc.getActiveM())
+         IMVEC.activeDoc.getRootItem().remove_child(IMVEC.activeDoc.getActiveM().getSynItem().getO())
+
+
+
+         IMVEC.activeDoc.getContainer().updatePeers()
+         IMVEC.activeDoc.refresh_objects_list()
+
+
+      elif event.keyval == 65307 and synapseCanvas.MAKE_LINE ==1:
+         synapseCanvas.MAKE_LINE=0
+         del synapseCanvas.NLPARAMETERS[:]
+         IMVEC.status_lbl.set_text("")
+         
+      
+
+
+   def on_zoomlvl_change(self,widget):
+  
+      zoom_percent = self.zoom_lvl.get_active_text()          
+      zoom_float = float(zoom_percent.rstrip('%')) / 100
+      #zoom_float = 
+      if (IMVEC.activeDoc != None):     
+
+         IMVEC.activeDoc.setZoom(zoom_float)
+         IMVEC.activeDoc.applyZoom()
+
+
+   
+   #Object browser cursor change callback
+   def on_obrowser_cursor_changed(self,widget):
+      selection = IMVEC.obrowser.get_selection()
+      model, selection_iter = selection.get_selected()
+
+      if (selection_iter):
+
+         objectName = model.get_value(selection_iter,1)
+         
+         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+
+            if objectName == obj.getName():
+               member = IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj)
+               member.getSynItem().on_mf_clicked(None,None,None)
+               member.getSynItem().objectSelectionChange(None,None,None)
+               
+
+
+   #Notebook page change callback
+   def on_nb_page_change(self,widget,page,page_num):
+      IMVEC.activeDoc = IMVEC.docList[page_num]
+      if (IMVEC.activeDoc.getActiveM() != None):
+         IMVEC.activeDoc.getActiveM().getSynObj().disconnectAll()
+         for child in IMVEC.oprop.get_nth_page(0).get_children():
+                  IMVEC.oprop.get_nth_page(0).remove(child)
+         IMVEC.oprop.get_nth_page(0).add(IMVEC.activeDoc.getActiveM().getSynObj().getPropWidget())
+      
+
+      IMVEC.activeDoc.refresh_objects_list()
+      
+
+
+   #dnd send callback
+   def sendCallback(self, widget, context, selection, targetType, eventTime):
+      print "SENT"
+      selection.set(selection.target, 8, "foo")
+       
+
+
+   def loadDoc(self,filename):
+   
+      fh = open(filename,"r")
+        
+      pickled_objects = pickle.load(fh)
+
+      docname = filename.split("/")[len(filename.split("/"))-1].rstrip(".sws")
+
+      IMVEC.activeDoc = document(docname,self.notebook)
+      root = IMVEC.activeDoc.getRootItem()
+
+      for pobj in pickled_objects:
+
+         newitem = None
+         print str(pobj.__class__)
+         canvasProperties = list(pobj.getCanvasProperties())
+
+         if str(pobj.__class__) == "synapseObjects.synapp":
+            newitem = synappItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.syntest":
+            newitem = testItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.syntimer":
+            newitem = timerItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.synjector":
+            newitem = injectorItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.syncom":
+            newitem = commentItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.synmonitor":
+            print "MONITOR ITEM ADDED"
+            newitem = monitorItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.synserv":
+            print "SERVICE ITEM ADDED"
+            newitem = servItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.syndemux":
+            print "DEMUX ITEM ADDED"
+            newitem = demuxItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.synmux":
+            print "FILTER ITEM ADDED"
+            newitem = muxItem(root)
+
+         elif str(pobj.__class__) == "synapseObjects.synfilter":
+            print "FILTER ITEM ADDED"
+            newitem = filterItem(root)
+
+         
+
+         
+
+
+         if (newitem != None):
+            newitem.getO().set_property("x",canvasProperties[0])
+            newitem.getO().set_property("y",canvasProperties[1])
+            newitem.getO().set_property("width",canvasProperties[2])
+            newitem.getO().set_property("height",canvasProperties[3])
+            newitem.setText(pobj.getName())
+            IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+            
+      #remaking loop to create links
+      for pobj in pickled_objects:
+  
+         if str(pobj.__class__) == "synapseObjects.synlink":
+            
+            outitem = IMVEC.activeDoc.getContainer().getMemberFromSynObj(  pobj.getOutObj() ).getSynItem()
+            initem =  IMVEC.activeDoc.getContainer().getMemberFromSynObj(  pobj.getInObj()  ).getSynItem() 
+            inp = initem.getInput(pobj.getInputNum())
+            outp = outitem.getOutput(pobj.getOutputNum())
+            newitem = linkItem(root,outitem,outp,initem,inp)
+            newitem.update()            
+            IMVEC.linkList.append(newitem)
+            IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+      IMVEC.activeDoc.refresh_objects_list()
+
+
+   #button clicked callback
+   def on_button_clicked(self,widget):
+
+      if widget == self.stop_btn:
+  
+
+         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+               obj.kill()
+               if (str(obj.__class__) == "synapseObjects.synmonitor"):
+                  IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
+               print "stopping thread for object", obj, "started"
+         IMVEC.running = False
+
+
+
+      if widget == self.play_btn:
+   
+         if (IMVEC.running == False):
+
+            for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+               if (str(obj.__class__) == "dummy"):
+                  obj.run()
+                  print "starting APP", obj
+               else:
+                  th0 = thwrapper()
+                  th0.setMethod(obj.run)
+                  th0.start()
+                  print "thread for object", obj, "started"
+            IMVEC.running = True    
+             
+
+      if widget == self.zoomin_btn:
+         IMVEC.activeDoc.zoomIn()
+         return 0
+      if widget == self.zoomout_btn:
+         IMVEC.activeDoc.zoomOut()
+         return 0
+      if widget == self.newdoc_btn:
+         document.nbnewinst+=1
+         #IMVEC.docList.append(document("new-workflow-%d" % document.nbnewinst,self.notebook))
+         document("new-workflow-%d" % document.nbnewinst,self.notebook)
+         IMVEC.activeDoc = IMVEC.docList[len(IMVEC.docList)-1]
+
+      if widget == self.synapp_btn:
+         return True      
+
+
+      if widget == self.loaddoc_btn:
+
+         loadfile = ""
+
+         dialog = gtk.FileChooserDialog(title="Choose a Workflow file to load", parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK), backend=None)
+
+         filter = gtk.FileFilter()
+         filter.set_name("Synapse Workflow Scheme")
+         filter.add_pattern("*.sws")
+         dialog.add_filter(filter)
+
+         response = dialog.run()
+         if response == gtk.RESPONSE_OK:
+            loadfile = dialog.get_filename()
+            dialog.destroy()
+            self.loadDoc(loadfile)
+         elif response == gtk.RESPONSE_CANCEL:
+            dialog.destroy()
+
+      
+      if widget == self.savedoc_btn:
+
+          dialog = gtk.FileChooserDialog(title="Save as...", parent=None, action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK), backend=None)
+
+          response = dialog.run()
+          if response == gtk.RESPONSE_OK:
+            savefile = dialog.get_filename()
+            dialog.destroy()
+            fh = open(savefile,"w+")
+            pickled_objects = list()    
+
+            for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+               
+               member.updateSynObjCanvasProperties()
+               pickled_objects.append(member.getSynObj())
+            pickle.dump(pickled_objects,fh)
+
+
+   #Fix boundaries on horizontal panes.
+   def on_hpaned_resize(self,widget,allocation):
+
+      if (widget == self.hpaned2):
+
+         if (self.hpaned2.get_position() < 160):
+            self.hpaned2.set_position(160)
+
+         if (self.hpaned2.get_position() > 300):
+            self.hpaned2.set_position(300)
+
+      if (widget == self.hpaned1):
+
+         if (self.hpaned1.get_position() < self.window.get_size()[0] - 300):
+            self.hpaned1.set_position(self.window.get_size()[0] - 300)
+
+
+
+   def __init__(self):
+        
+      global LS0
+
+      builder = gtk.Builder()
+      builder2 = gtk.Builder()      
+
+      builder.add_from_file("%s/ui/main.xml" % (RES_PATH))
+      
+      self.window = builder.get_object("window1")
+      self.hpaned1 = builder.get_object("hpaned1")
+      self.hpaned2 = builder.get_object("hpaned2")
+      self.vpaned1 = builder.get_object("vpaned1")
+
+      self.zoom_lvl = builder.get_object("zoom_lvl")
+
+      self.newdoc_btn = builder.get_object("newdoc_btn")
+      self.loaddoc_btn = builder.get_object("loaddoc_btn")
+      self.savedoc_btn = builder.get_object("savedoc_btn")
+
+      self.play_btn = builder.get_object("play_btn")
+      self.stop_btn = builder.get_object("stop_btn")
+
+      self.synapp_btn = builder.get_object("synapp_btn")
+      self.synapp_img = builder.get_object("synapp_img")
+      self.synapp_img.set_from_pixbuf(IMVEC.appPixbuf)
+
+      self.syntest_btn = builder.get_object("syntest_btn")      
+      self.syntest_img = builder.get_object("syntest_img")
+      self.syntest_img.set_from_pixbuf(IMVEC.testPixbuf)
+
+      self.syncom_btn = builder.get_object("syncom_btn")
+      self.syncom_img = builder.get_object("syncom_img")
+      self.syncom_img.set_from_pixbuf(IMVEC.commentPixbuf)      
+
+      self.synmux_btn = builder.get_object("synmux_btn")
+      self.synmux_img = builder.get_object("synmux_img")
+      self.synmux_img.set_from_pixbuf(IMVEC.muxPixbuf)
+
+      self.syndemux_btn = builder.get_object("syndemux_btn")
+      self.syndemux_img = builder.get_object("syndemux_img")
+      self.syndemux_img.set_from_pixbuf(IMVEC.demuxPixbuf)
+      
+      self.syntimer_btn = builder.get_object("syntimer_btn")     
+      self.syntimer_img = builder.get_object("syntimer_img")
+      self.syntimer_img.set_from_pixbuf(IMVEC.timerPixbuf)
+
+      self.synmon_btn = builder.get_object("synmon_btn")
+      self.synmon_img = builder.get_object("synmon_img")
+      self.synmon_img.set_from_pixbuf(IMVEC.monitorPixbuf)
+
+      self.synfilter_btn = builder.get_object("synfilter_btn")
+      self.synfilter_img = builder.get_object("synfilter_img")
+      self.synfilter_img.set_from_pixbuf(IMVEC.filterPixbuf)
+
+      self.synserv_btn = builder.get_object("synserv_btn")
+      self.synserv_img = builder.get_object("synserv_img")
+      self.synserv_img.set_from_pixbuf(IMVEC.servPixbuf)
+
+      self.synject_btn = builder.get_object("synject_btn")
+      self.synject_img = builder.get_object("synject_img")
+      self.synject_img.set_from_pixbuf(IMVEC.injectorPixbuf)
+
+
+      self.zoomin_btn = builder.get_object("zoomin_btn")
+      self.zoomout_btn = builder.get_object("zoomout_btn")
+
+      self.obrowser = builder.get_object("obrowser")     
+
+      self.status_lbl = builder.get_object("status_lbl")
+      IMVEC.status_lbl = self.status_lbl
+
+      ls = gtk.ListStore(str)
+
+      self.zoom_lvl.set_model(ls)
+      cellr = gtk.CellRendererText()
+      self.zoom_lvl.pack_start(cellr)
+      self.zoom_lvl.add_attribute(cellr, 'text', 0)
+      
+      self.zoom_lvl.append_text("25%")
+      self.zoom_lvl.append_text("50%")
+      self.zoom_lvl.append_text("100%")
+      self.zoom_lvl.append_text("200%")
+      self.zoom_lvl.append_text("400%")      
+
+
+      self.zoom_lvl.set_active(2)
+
+      self.zoom_lvl.connect("changed",self.on_zoomlvl_change)
+
+
+      IMVEC.obrowser = self.obrowser  
+      IMVEC.obrowser.set_model(LS0)
+      
+      self.obrowser.connect("cursor-changed",self.on_obrowser_cursor_changed)
+      
+
+      self.window.resize(1024,768)
+      
+ 
+      self.window.connect("destroy", lambda w: gtk.main_quit())
+
+      self.hpaned1.connect("size-allocate",self.on_hpaned_resize)
+      self.hpaned2.connect("size-allocate",self.on_hpaned_resize)
+
+
+      self.newdoc_btn.connect("clicked",self.on_button_clicked)
+      self.synapp_btn.connect("clicked",self.on_button_clicked)
+      self.loaddoc_btn.connect("clicked",self.on_button_clicked)
+      self.savedoc_btn.connect("clicked",self.on_button_clicked)
+      self.play_btn.connect("clicked",self.on_button_clicked)
+      self.stop_btn.connect("clicked",self.on_button_clicked)
+
+
+      self.zoomin_btn.connect("clicked",self.on_button_clicked)
+      self.zoomout_btn.connect("clicked",self.on_button_clicked)
+
+
+      self.synapp_btn.connect("drag_data_get", self.sendCallback)
+      self.synapp_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+      self.syntest_btn.connect("drag_data_get", self.sendCallback)
+      self.syntest_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+      self.synfilter_btn.connect("drag_data_get", self.sendCallback)
+      self.synfilter_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+      self.syncom_btn.connect("drag_data_get", self.sendCallback)
+      self.syncom_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+      self.synmux_btn.connect("drag_data_get", self.sendCallback)
+      self.synmux_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+      self.syndemux_btn.connect("drag_data_get", self.sendCallback)
+      self.syndemux_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+      self.syntimer_btn.connect("drag_data_get", self.sendCallback)
+      self.syntimer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+      self.synserv_btn.connect("drag_data_get", self.sendCallback)
+      self.synserv_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+      self.synject_btn.connect("drag_data_get", self.sendCallback)
+      self.synject_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+      self.synmon_btn.connect("drag_data_get", self.sendCallback)
+      self.synmon_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
+
+      self.synapp_btn.set_name("synapp_btn")
+      self.syntest_btn.set_name("syntest_btn")
+      self.syncom_btn.set_name("syncom_btn")
+      self.synmux_btn.set_name("synmux_btn")
+      self.syndemux_btn.set_name("syndemux_btn")
+
+      self.syntimer_btn.set_name("syntimer_btn")
+      self.synmon_btn.set_name("synmon_btn")
+      self.synfilter_btn.set_name("synfilter_btn")
+      self.synserv_btn.set_name("synserv_btn")
+      self.synject_btn.set_name("synject_btn")
+
+
+      self.hpaned1.set_position(800)
+      self.vpaned1.set_position(250)
+
+        
+      self.notebook = builder.get_object("notebook1")
+      self.notebook.remove_page(1)
+      self.notebook.remove_page(1)
+      self.notebook.remove_page(0)
+      self.notebook.connect("switch-page",self.on_nb_page_change)
+
+
+      self.oprop = builder.get_object("oprop")
+      self.oprop.remove_page(1)
+      IMVEC.oprop = self.oprop 
+      
+      document.nbnewinst+=1
+      #IMVEC.docList.append(document("new-workflow-%d" % document.nbnewinst,self.notebook))
+      document("new-workflow-%d" % document.nbnewinst,self.notebook)
+      IMVEC.activeDoc = IMVEC.docList[len(IMVEC.docList)-1]
+
+
+      self.window.connect("key-press-event",self.on_key_press)
+
+      self.window.show()
+      
+
+if __name__ == "__main__":
+   
+
+   #gtk.rc_parse('/usr/share/themes/Murrina-Charcoal/gtk-2.0/gtkrc')
+
+   os.chdir(RES_PATH)
+
+   win0 = splashWindow()
+
+   win1 = aboutWindow()
+
+   IMVEC.aboutWindow = win1.getWindow()
+
+   gobject.timeout_add(2000, win0.start)
+
+   os.chdir(os.path.expanduser("~"))
+       
+   gtk.gdk.threads_init()
+   gtk.main()
+

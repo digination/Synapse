@@ -1,0 +1,12 @@
+Implement threads handling + kill on stop : 90%
+Implement synserv/synmux/syntest/syndemux/synfilter run components
+Finish to implement Building blocks GTK classes
+Implement saving and loading : 90%
+Change building blocks colors
+Implement multi select,clipboard and undu/redo
+Make embedded documentation
+Implement document properties
+Implement shortcurs+menus
+Implement about box
+Implement display buffer
+Implement Terminals
