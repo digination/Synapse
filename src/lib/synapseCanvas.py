@@ -238,12 +238,12 @@ class synappItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=180, height=50,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=134, height=50,
 				stroke_color="#cccccc", fill_color="#152233",tooltip="Application",
 				line_width=4)
 
       self.pixbuf = IMVEC.appPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=75,y=10,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=52,y=10,pixbuf=self.pixbuf)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
@@ -262,7 +262,7 @@ class synappItem(synItem):
       self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.outputs[0].set_property("x",180)
+      self.outputs[0].set_property("x",134)
       self.outputs[0].set_property("y",10)
 
 
@@ -271,7 +271,7 @@ class synappItem(synItem):
       self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#ff3200", line_width=1))
 
-      self.outputs[1].set_property("x",180)
+      self.outputs[1].set_property("x",134)
       self.outputs[1].set_property("y",25)
 
 
@@ -297,13 +297,13 @@ class servItem(synItem):
       self.root = parent_canvas
       self.o = goocanvas.Group(parent=self.root)
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, radius_x=10,radius_y=10,width=180, height=50,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, radius_x=10,radius_y=10,width=134, height=50,
 				stroke_color="#cccccc", fill_color="#ff9932",
 				line_width=4)
 
 
       self.pixbuf = IMVEC.servPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=75,y=10,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=52,y=10,pixbuf=self.pixbuf)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
@@ -316,7 +316,7 @@ class servItem(synItem):
       self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.outputs[0].set_property("x",180)
+      self.outputs[0].set_property("x",134)
       self.outputs[0].set_property("y",10)
 
       
@@ -341,13 +341,13 @@ class filterItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=100, height=50,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=80, height=50,
 				stroke_color="#cccccc", fill_color="#42215d",
 				line_width=4,radius_x=10,radius_y=10)
 
 
       self.pixbuf = IMVEC.filterPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=35,y=10,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
@@ -357,11 +357,11 @@ class filterItem(synItem):
       self.inputs[0].set_property("y",10)
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.outputs[0].set_property("x",100)
-      self.outputs[0].set_property("y",10)
+      self.outputs[0].set_property("x",80)
+      self.outputs[0].set_property("y",17)
 
       
       self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
@@ -504,7 +504,7 @@ class muxItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=50, height=205,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=50, height=134,
 				stroke_color="#cccccc", fill_color="#028ba3",
 				line_width=4,radius_x=10,radius_y=10)
 
@@ -513,44 +513,44 @@ class muxItem(synItem):
       #self.icon = None
       
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[0].set_property("x",0)
       self.inputs[0].set_property("y",10)
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[1].set_property("x",0)
-      self.inputs[1].set_property("y",41)
+      self.inputs[1].set_property("y",31)
 
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[2].set_property("x",0)
-      self.inputs[2].set_property("y",72)
+      self.inputs[2].set_property("y",52)
 
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[3].set_property("x",0)
-      self.inputs[3].set_property("y",103)
+      self.inputs[3].set_property("y",73)
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[4].set_property("x",0)
-      self.inputs[4].set_property("y",134)
+      self.inputs[4].set_property("y",94)
 
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[5].set_property("x",0)
-      self.inputs[5].set_property("y",165)
+      self.inputs[5].set_property("y",115)
      
 
 
@@ -558,7 +558,7 @@ class muxItem(synItem):
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[0].set_property("x",51)
-      self.outputs[0].set_property("y",80)
+      self.outputs[0].set_property("y",45)
 
 
 
@@ -580,7 +580,7 @@ class demuxItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=50, height=205,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=50, height=134,
 				stroke_color="#cccccc", fill_color="#660033",
 				line_width=4,radius_x=10,radius_y=10)
 
@@ -589,51 +589,51 @@ class demuxItem(synItem):
 
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[0].set_property("x",50)
       self.outputs[0].set_property("y",10)
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[1].set_property("x",50)
-      self.outputs[1].set_property("y",41)
+      self.outputs[1].set_property("y",31)
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[2].set_property("x",50)
-      self.outputs[2].set_property("y",72)
+      self.outputs[2].set_property("y",52)
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[3].set_property("x",50)
-      self.outputs[3].set_property("y",103)
+      self.outputs[3].set_property("y",73)
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[4].set_property("x",50)
-      self.outputs[4].set_property("y",134)
+      self.outputs[4].set_property("y",94)
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.outputs[5].set_property("x",50)
-      self.outputs[5].set_property("y",165)
+      self.outputs[5].set_property("y",115)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 23 L 0 45 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[0].set_property("x",0)
-      self.inputs[0].set_property("y",80)
+      self.inputs[0].set_property("y",45)
 
 
 

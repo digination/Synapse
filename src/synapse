@@ -747,6 +747,25 @@ class MainWindow(object):
    #button clicked callback
    def on_button_clicked(self,widget):
 
+
+      if widget == self.b2f_btn:
+
+         if ( IMVEC.activeDoc.getActiveM() != None):
+            IMVEC.activeDoc.getActiveM().getSynItem().getO().raise_(None)
+
+      if widget == self.s2b_btn:
+
+         if ( IMVEC.activeDoc.getActiveM() != None):
+
+            for member in IMVEC.activeDoc.getContainer().getSynItems():
+
+               if  IMVEC.activeDoc.getActiveM().getSynItem() != member:
+                  member.getO().raise_(None)
+      
+      
+
+
+
       if widget == self.stop_btn:
   
 
@@ -883,6 +902,9 @@ class MainWindow(object):
       self.play_btn = builder.get_object("play_btn")
       self.stop_btn = builder.get_object("stop_btn")
 
+      self.b2f_btn = builder.get_object("b2f_btn")
+      self.s2b_btn = builder.get_object("s2b_btn")
+
       self.synapp_btn = builder.get_object("synapp_btn")
       self.synapp_img = builder.get_object("synapp_img")
       self.synapp_img.set_from_pixbuf(IMVEC.appPixbuf)
@@ -993,6 +1015,8 @@ class MainWindow(object):
       self.savedoc_btn.connect("clicked",self.on_button_clicked)
       self.play_btn.connect("clicked",self.on_button_clicked)
       self.stop_btn.connect("clicked",self.on_button_clicked)
+      self.b2f_btn.connect("clicked",self.on_button_clicked)
+      self.s2b_btn.connect("clicked",self.on_button_clicked)
 
 
       self.zoomin_btn.connect("clicked",self.on_button_clicked)

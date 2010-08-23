@@ -404,6 +404,46 @@
                     <property name="position">16</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkButton" id="s2b_btn">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip-text" translatable="yes">Sends block to back</property>
+                    <property name="relief">none</property>
+                    <child>
+                      <object class="GtkImage" id="image14">
+                        <property name="visible">True</property>
+                        <property name="icon_name">view-sort-ascending</property>
+                        <property name="icon-size">3</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">17</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="b2f_btn">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip-text" translatable="yes">Brings block to front</property>
+                    <property name="relief">none</property>
+                    <child>
+                      <object class="GtkImage" id="image15">
+                        <property name="visible">True</property>
+                        <property name="icon_name">view-sort-descending</property>
+                        <property name="icon-size">3</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">18</property>
+                  </packing>
+                </child>
               </object>
             </child>
           </object>
