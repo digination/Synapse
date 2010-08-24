@@ -350,7 +350,77 @@ class document(object):
       self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices) = tuple(nbinsts)
 
 
+   def onResize(self,widget):
+
+      if widget == documentGTK.iwidth:
+
+         try:
+            if int(documentGTK.iwidth.get_text()) >= 500:
+
+               self.width = int(documentGTK.iwidth.get_text())        
+         except:
+            pass
+
+      elif widget == documentGTK.iheight:
+
+         try:
+       
+            if int(documentGTK.iheight.get_text()) >= 500:
+
+               self.height = int(documentGTK.iheight.get_text())
+         except:
+            pass
+         
+      self.canvas.set_size_request(self.width,self.height)
+      self.canvas.set_bounds(0, 0,self.width,self.height)
+      self.rect.set_property("width",self.width)
+      self.rect.set_property("height",self.height)
+
+      self.root.set_property("width",self.width)
+      self.root.set_property("height",self.height)
+
+      IMVEC.activeDoc.getHeader().getSynItem().redim()
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a Document Color')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+        self.rect.set_property("fill_color",ncolor)
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
+   def getPropWidget(self):
+
+      documentGTK.iwidth.set_text(str(self.width))
+      documentGTK.iheight.set_text(str(self.height))
+
+      documentGTK.chdict['icolorBtn'] = documentGTK.icolorBtn.connect("clicked",self.onColorChange)
+      documentGTK.chdict['iwidth'] = documentGTK.iwidth.connect("changed",self.onResize)
+      documentGTK.chdict['iheight'] = documentGTK.iheight.connect("changed",self.onResize)
+
+      return documentGTK.o
+
+   def disconnectAll(self):
+
+      return None
+
+   def on_bg_clicked(self,item,target,event):
+
+      for child in IMVEC.oprop.get_nth_page(0).get_children():
+         IMVEC.oprop.get_nth_page(0).remove(child)
+      IMVEC.oprop.get_nth_page(0).add(self.getPropWidget())
+
+
       
+
    def __init__(self,name,notebook):
       
       document.nbinst+=1
@@ -358,6 +428,11 @@ class document(object):
       IMVEC.docList.append(self)
 
       self.name = name
+
+      self.color = "#FFFFFF"
+      self.width = 1024
+      self.height = 1024
+
       
       #define a new empty objects container
       self.container = container()
@@ -419,17 +494,22 @@ class document(object):
                              gtk.DEST_DEFAULT_DROP,
                              self.toButton, gtk.gdk.ACTION_COPY)
 
+
+
+
     
-      self.canvas.set_size_request(1024, 1024)
-      self.canvas.set_bounds(0, 0, 1024, 1024)
+      self.canvas.set_size_request(self.width,self.height)
+      self.canvas.set_bounds(0, 0,self.width, self.height)
 
       self.root = self.canvas.get_root_item()
-      self.rect = goocanvas.Rect(parent=self.root,x=0, y=0, width=1024, height=1024,
+      self.rect = goocanvas.Rect(parent=self.root,x=0, y=0, width=self.width, height=self.height,
 				stroke_color="black", fill_color="white",
 				line_width=0)
 
-      self.root.set_property("width",1024)
-      self.root.set_property("height",1024)
+      self.rect.connect("button-press-event",self.on_bg_clicked)
+
+      self.root.set_property("width",self.width)
+      self.root.set_property("height",self.height)
 
 
       synheader0 = synheader(title="Your Title Here",author=getpass.getuser(),date=str(datetime.datetime.now()),descr="Your Description Here")

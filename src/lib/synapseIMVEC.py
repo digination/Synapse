@@ -58,6 +58,8 @@ class IMVEC:
    filterPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/filterItem.png" % (RES_PATH),16,16)
    monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
 
+   resizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/resize.png" % (RES_PATH),16,16)
+
 
    monitorMaximizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monMax.xpm" % (RES_PATH),16,16)
    monitorHidePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monHide.xpm" % (RES_PATH),16,16)

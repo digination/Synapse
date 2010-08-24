@@ -1,5 +1,50 @@
 import gtk
 
+
+
+class documentGTK:
+
+   o = gtk.HBox()
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+
+   
+   lwidth = gtk.Label(str="Width (px)")
+   lheight = gtk.Label(str="Height (px)")
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
+   iwidth = gtk.Entry()
+   iheight = gtk.Entry()
+
+
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lwidth,False,True,10)
+   gtkPVbox1.pack_start(lheight,False,True,10)
+
+   gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(iwidth,False,True,5)
+   gtkPVbox2.pack_start(iheight,False,True,5)
+
+
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      child2.show()
+
+   o.add(gtkPVbox1)
+   o.add(gtkPVbox2)
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()
+
+   
 class synheaderGTK:
 
    o = gtk.HBox()
@@ -17,7 +62,7 @@ class synheaderGTK:
    idescr = gtk.TextView(buffer=idescrBuffer)
    idescr.set_size_request(300,200)
 
-
+  
 
    gtkPVbox1.pack_start(ltitle,False,True,10)
    gtkPVbox1.pack_start(lauthor,False,True,10)
@@ -60,6 +105,15 @@ class synappGTK:
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
+
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
+
+   
    iname = gtk.Entry()
    lcmd = gtk.Label(str="command")
    icmd = gtk.Entry()
@@ -78,10 +132,13 @@ class synappGTK:
    iwoi.set_active(0)
 
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lcmd,False,True,10)
    gtkPVbox1.pack_start(lwoi,False,True,10)
+   
 
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(icmd,False,True,5)
    gtkPVbox2.pack_start(iwoi,False,True,5)
 
@@ -93,8 +150,8 @@ class synappGTK:
       child1.show()
       child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
       child.show()
@@ -291,9 +348,25 @@ class syncomGTK:
    gtkPVbox1 = gtk.VBox()
    ltext = gtk.Label(str="Comment")
    
+   colorbox = gtk.HBox()
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
+   colorbox.pack_start(icolorBtn,False,True,5)
+   colorbox.pack_start(icolor,False,True,5)
+   icolor.show()
+   icolorBtn.show()
+   
+
+
+
    itextBuffer = gtk.TextBuffer()
    itext = gtk.TextView(buffer=itextBuffer)
    
+   gtkPVbox1.pack_start(colorbox,False,True,10)
    gtkPVbox1.pack_start(ltext,False,True,10)
    gtkPVbox1.pack_start(itext,True,True,10)
 

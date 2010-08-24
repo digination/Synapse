@@ -178,6 +178,10 @@ class synItem():
 
       self.ltext.set_property("text",text)
 
+   def getLtext(self):
+  
+      return self.ltext
+
 
    def connectAll(self):
 
@@ -899,6 +903,18 @@ class monitorItem(synItem):
 class headerItem():
 
 
+   def redim(self):
+
+     self.mf.set_property("width",self.root.get_property("width"))
+
+     self.sepLine1.set_property("data","M 0 0 L %d 0" % (self.root.get_property("width")))
+     self.sepLine2.set_property("data","M 0 0 L %d 0" % (self.root.get_property("width")))
+
+     if self.h_extended:
+        self.sepLine1.set_property("y",25)
+        self.sepLine2.set_property("y",65)
+
+      
    def objectSelectionChange(self,item, target_item, event):
 
       for child in IMVEC.oprop.get_nth_page(0).get_children():
@@ -929,6 +945,8 @@ class headerItem():
 
       if self.mf.get_property("height") == 120:
 
+         self.h_extended = False
+
          self.sepLine1.set_property("y",-25)
          self.sepLine2.set_property("y",-65)
          self.mf.set_property("height",2)
@@ -936,6 +954,11 @@ class headerItem():
          self.arrow.set_property("data","M 0 0 L 20 0 L 10 8 L 0 0 z")
          self.arrow.set_property("x",5)
          self.arrow.set_property("y",122)
+
+         self.titleLabel.set_property('fill_color_rgba',0xffffff00)
+         self.authorLabel.set_property('fill_color_rgba',0xffffff00)
+         self.dateLabel.set_property('fill_color_rgba',0xffffff00)
+         self.descrLabel.set_property('fill_color_rgba',0xffffff00)
 
          #lower the whole canvas of 118px
          if IMVEC.activeDoc != None:
@@ -946,6 +969,8 @@ class headerItem():
 
       else:
 
+         self.h_extended = True
+
          self.mf.set_property("height",120)
          self.showbtn.set_property("y",0)
          self.sepLine1.set_property("y",25)
@@ -954,6 +979,12 @@ class headerItem():
          
          self.arrow.set_property("x",5)
          self.arrow.set_property("y",122)
+
+         self.titleLabel.set_property('fill_color_rgba',0xffffffff)
+         self.authorLabel.set_property('fill_color_rgba',0xffffffff)
+         self.dateLabel.set_property('fill_color_rgba',0xffffffff)
+         self.descrLabel.set_property('fill_color_rgba',0xffffffff)
+
 
          #lower the whole canvas of 118px
          if IMVEC.activeDoc != None:
@@ -995,6 +1026,7 @@ class headerItem():
       self.root = parent_canvas
       self.o = goocanvas.Group(parent=self.root)
 
+     
       self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,width=self.root.get_property("width"), height=120, stroke_color="#8BA2BD", fill_color_rgba=0x8BA2BDAA,line_width=0)
 
 
@@ -1056,6 +1088,7 @@ class headerItem():
 
 
 
+
 class commentItem(synItem):
 
 
@@ -1090,7 +1123,7 @@ class commentItem(synItem):
 				stroke_color="#cccccc", fill_color_rgba=0x333333aa,
 				line_width=0)
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 10" , text="this is a comment box", x=7, y=3,
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 10" , text="this is a comment box", x=10, y=10,
 						width=200,
 						fill_color="white")
 
@@ -1098,7 +1131,10 @@ class commentItem(synItem):
 
       self.icon = None
 
-      self.extender = goocanvas.Path(parent = self.o, data="M 185 100 L 200 85 L 200 100 L 185 100 z", stroke_color="black", fill_color="#cc99ff", line_width=1)
+
+      self.extender = goocanvas.Image(parent = self.o,x=185,y=85,pixbuf=IMVEC.resizePixbuf) 
+
+      #goocanvas.Path(parent = self.o, data="M 185 100 L 200 85 L 200 100 L 185 100 z", stroke_color="black", fill_color="#cc99ff", line_width=1)
       
       self.extender.set_property("x",self.extender.get_property("x")+5)
       self.extender.set_property("y",self.extender.get_property("y")+5)
