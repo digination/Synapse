@@ -138,7 +138,9 @@ class linker(object):
          y = self.synItem.getO().get_property("y")      
          width = self.synItem.getO().get_property("width")
          height = self.synItem.getO().get_property("height")
-         canvasProperties = (x,y,width,height)
+         mfwidth = self.synItem.getMF().get_property("width")
+         mfheight = self.synItem.getMF().get_property("height")
+         canvasProperties = (x,y,width,height,mfwidth,mfheight)
 
       else:
          data = self.synItem.getO().get_property("data")
@@ -279,6 +281,7 @@ class synheader(synobj):
       self.author = author
       self.date = date
       self.descr = descr
+      self.color="DEFAULT"
    
     
    def onITextBufferChanged(self,textbuff):
@@ -378,6 +381,7 @@ class synfilter(synobj):
       self.name = name
       self.filterType = filter_type
       self.data = data
+      self.color="DEFAULT"
  
       self.alive = False
       self.mInput = False
@@ -392,6 +396,28 @@ class synfilter(synobj):
 
    def getData(self):
       return self.data
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        synfilterGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
 
 
    def on_widget_changed(self,widget):
@@ -413,6 +439,7 @@ class synfilter(synobj):
    def disconnectAll(self):
    
       synfilterGTK.iname.disconnect(synfilterGTK.chdict['iname'])
+      synfilterGTK.icolorBtn.disconnect(synfilterGTK.chdict['icolorBtn'])
       synfilterGTK.ift.disconnect(synfilterGTK.chdict['ift'])
       synfilterGTK.idataBuffer.disconnect(synfilterGTK.chdict['idata']) 
 
@@ -421,6 +448,7 @@ class synfilter(synobj):
    def getPropWidget(self):
   
       synfilterGTK.iname.set_text(self.name)
+      synfilterGTK.icolor.set_text(self.color)
       synfilterGTK.idataBuffer.set_text(self.data)
       
       if (self.filterType == "Simple Grep"):
@@ -433,6 +461,7 @@ class synfilter(synobj):
          synfilterGTK.ift.set_active(3)        
 
       synfilterGTK.chdict['iname'] = synfilterGTK.iname.connect("changed",self.on_widget_changed)
+      synfilterGTK.chdict['icolorBtn'] = synfilterGTK.icolorBtn.connect("clicked",self.onColorChange)
       synfilterGTK.chdict['ift'] = synfilterGTK.ift.connect("changed",self.on_widget_changed)
       synfilterGTK.chdict['idata'] = synfilterGTK.idataBuffer.connect("changed",self.on_widget_changed)
     
@@ -475,6 +504,7 @@ class syntimer(synobj):
       self.name = name
       self.interval = interval
       self.loop = loop
+      self.color="DEFAULT"
 
       self.ibuff = ""
       self.obuff = ""
@@ -488,6 +518,27 @@ class syntimer(synobj):
    def getLoop(self):
       return self.loop
 
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        syntimerGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
 
 
    def on_widget_changed(self,widget):
@@ -510,17 +561,15 @@ class syntimer(synobj):
    def disconnectAll(self):
 
       syntimerGTK.iname.disconnect(syntimerGTK.chdict['iname'])
+      syntimerGTK.icolorBtn.disconnect(syntimerGTK.chdict['icolorBtn'])
       syntimerGTK.iinterval.disconnect(syntimerGTK.chdict['iinterval'])      
       syntimerGTK.iloop.disconnect(syntimerGTK.chdict['iloop'])    
 
    def getPropWidget(self):
 
-      syntimerGTK.chdict['iname'] = syntimerGTK.iname.connect("changed",self.on_widget_changed)
-      syntimerGTK.chdict['iinterval'] = syntimerGTK.iinterval.connect("changed",self.on_widget_changed)      
-      syntimerGTK.chdict['iloop'] = syntimerGTK.iloop.connect("changed",self.on_widget_changed)  
-
 
       syntimerGTK.iname.set_text(self.name)
+      syntimerGTK.icolor.set_text(self.color)
       syntimerGTK.iinterval.set_text(str(self.interval))
 
       if self.loop == True:
@@ -528,6 +577,14 @@ class syntimer(synobj):
       else:
          syntimerGTK.iloop.set_active(0)
 
+
+      syntimerGTK.chdict['iname'] = syntimerGTK.iname.connect("changed",self.on_widget_changed)
+      syntimerGTK.chdict['icolorBtn'] = syntimerGTK.icolorBtn.connect("clicked",self.onColorChange)
+      syntimerGTK.chdict['iinterval'] = syntimerGTK.iinterval.connect("changed",self.on_widget_changed)      
+      syntimerGTK.chdict['iloop'] = syntimerGTK.iloop.connect("changed",self.on_widget_changed)  
+
+
+      
       return syntimerGTK.o
 
 
@@ -538,6 +595,7 @@ class synjector(synobj):
    def __init__(self,name,injectType="string",data="",linesPerBlock=1,loop=False,fileName=""):
 
       self.name = name
+      self.color="DEFAULT"
       self.injectType = injectType
       self.data = data
       self.fileName = fileName    
@@ -582,6 +640,28 @@ class synjector(synobj):
 
 
 
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        synjectorGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
    def onTextChange(self,widget):
       if widget == synjectorGTK.iname:
          self.name = synjectorGTK.iname.get_text()
@@ -589,10 +669,13 @@ class synjector(synobj):
 
    def disconnectAll(self):
       synjectorGTK.iname.disconnect(synjectorGTK.chdict['iname'])
+      synjectorGTK.icolorBtn.disconnect(synjectorGTK.chdict['icolorBtn'])
 
    def getPropWidget(self):
       synjectorGTK.iname.set_text(self.name)
+      synjectorGTK.icolor.set_text(self.color)
       synjectorGTK.chdict['iname'] = synjectorGTK.iname.connect("changed",self.onTextChange)
+      synjectorGTK.chdict['icolorBtn'] = synjectorGTK.icolorBtn.connect("clicked",self.onColorChange)
       return synjectorGTK.o
 
 
@@ -611,6 +694,7 @@ class syntest(synobj):
       syntest.nbinst+=1
 
       self.name = name
+      self.color="DEFAULT"
       self.testType = testType
       
       self.peers = list()
@@ -638,6 +722,7 @@ class synlink(synobj):
    def __init__(self,name,outObj,inObj):
 
       self.name = name
+      
       self.bidir = False
       self.outObj = outObj
       self.inObj =  inObj
@@ -701,7 +786,7 @@ class syncom(synobj):
 
       self.text = text
       self.name = name
-
+      self.color="DEFAULT"
    def getText(self):
 
       return self.text
@@ -723,7 +808,8 @@ class syncom(synobj):
         IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
         #IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
 
-        syncomGTK.icolor.set_text(ncolor.to_string())
+        self.color = ncolor.to_string()
+        syncomGTK.icolor.set_text(self.color)
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
@@ -740,6 +826,7 @@ class syncom(synobj):
    def getPropWidget(self):
 
       syncomGTK.itextBuffer.set_text(self.text)
+      syncomGTK.icolor.set_text(self.color)
       syncomGTK.chdict['iTextBuff'] = syncomGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
       syncomGTK.chdict['icolorBtn'] = syncomGTK.icolorBtn.connect("clicked",self.onColorChange)
 
@@ -799,6 +886,7 @@ class synmux(synobj):
 
       synmux.nbinst+=1
       self.name = name
+      self.color="DEFAULT"
       self.data = data
       self.timeout = timeout
       
@@ -828,13 +916,37 @@ class synmux(synobj):
          self.data = synmuxGTK.idataBuffer.get_text()
 
 
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        synmuxGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
    def getPropWidget(self):
     
       synmuxGTK.iname.set_text(self.name)
+      synmuxGTK.icolor.set_text(self.color)
       synmuxGTK.itimeout.set_text(str(self.timeout))
       synmuxGTK.idataBuffer.set_text(self.data)
       
       synmuxGTK.chdict['iname'] = synmuxGTK.iname.connect("changed",self.on_widget_changed)
+      synmuxGTK.chdict['icolorBtn'] = synmuxGTK.icolorBtn.connect("clicked",self.onColorChange)
       synmuxGTK.chdict['itimeout'] = synmuxGTK.itimeout.connect("changed",self.on_widget_changed)
       synmuxGTK.chdict['idata'] = synmuxGTK.idataBuffer.connect("changed",self.on_widget_changed)
 
@@ -842,6 +954,7 @@ class synmux(synobj):
 
    def disconnectAll(self):
       synmuxGTK.iname.disconnect( synmuxGTK.chdict['iname'])
+      synmuxGTK.iname.disconnect( synmuxGTK.chdict['icolorBtn'])
       synmuxGTK.itimeout.disconnect(synmuxGTK.chdict['itimeout'])
       synmuxGTK.idataBuffer.disconnect(synmuxGTK.chdict['idata'])
          
@@ -906,6 +1019,7 @@ class syndemux(synobj):
 
       syndemux.nbinst+=1
       self.name = name
+      self.color="DEFAULT"
       self.separator = separator
    
       self.obuffs = list()
@@ -921,6 +1035,28 @@ class syndemux(synobj):
       return self.separator
  
 
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        syndemuxGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
    def on_widget_changed(self,widget):
     
       if (widget == syndemuxGTK.iname):
@@ -931,14 +1067,17 @@ class syndemux(synobj):
      
    def disconnectAll(self):
       syndemuxGTK.iname.disconnect( syndemuxGTK.chdict['iname'])
+      syndemuxGTK.iname.disconnect( syndemuxGTK.chdict['icolorBtn'])
       syndemuxGTK.iseparator.disconnect(syndemuxGTK.chdict['iseparator'])
 
    def getPropWidget(self):
 
       syndemuxGTK.iname.set_text(self.name)
+      syndemuxGTK.icolor.set_text(self.color)
       syndemuxGTK.iseparator.set_text(self.separator)
 
       syndemuxGTK.chdict['iname'] = syndemuxGTK.iname.connect("changed",self.on_widget_changed)
+      syndemuxGTK.chdict['icolorBtn'] = syndemuxGTK.icolorBtn.connect("clicked",self.onColorChange)
       syndemuxGTK.chdict['iseparator'] = syndemuxGTK.iseparator.connect("changed",self.on_widget_changed)
 
       return syndemuxGTK.o
@@ -986,6 +1125,7 @@ class synmonitor(synobj):
    def __init__(self,name):
       synmonitor.nbinst += 1
       self.name = name
+      self.color="DEFAULT"
       
       self.ibuff = ""
       self.obuff = ""
@@ -1101,6 +1241,7 @@ class synapp(synobj):
       synapp.nbinst+=1
 
       self.name = name
+      self.color="DEFAULT"
       self.cmd = cmd
       self.keepalive = keepalive
       self.peers = list()
@@ -1162,7 +1303,10 @@ class synapp(synobj):
         IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
         IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
 
-        synappGTK.icolor.set_text(ncolor.to_string())
+        self.color = ncolor.to_string()
+        synappGTK.icolor.set_text(self.color)
+
+        
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
@@ -1179,6 +1323,8 @@ class synapp(synobj):
 
       synappGTK.iname.set_text(self.name)
       synappGTK.icmd.set_text(self.cmd)
+      synappGTK.icolor.set_text(self.color)
+      
 
       synappGTK.chdict['iname'] = synappGTK.iname.connect("changed",self.onTextChange)
       synappGTK.chdict['icmd'] = synappGTK.icmd.connect("changed",self.onTextChange)
@@ -1241,6 +1387,7 @@ class synserv(synobj):
       synserv.nbinst+=1
 
       self.name = name
+      self.color="DEFAULT"
       self.connectInfos = connectInfos
       self.keepalive = keepalive
       self.autoreco = True
@@ -1274,6 +1421,29 @@ class synserv(synobj):
       return self.keepalive
 
 
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
+
+        self.color = ncolor.to_string()
+        synservGTK.icolor.set_text(self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
    def onTextChange(self,widget):
       print "ONTEXTCHANGE:", widget
 
@@ -1300,6 +1470,7 @@ class synserv(synobj):
    def disconnectAll(self):
 
          synservGTK.iname.disconnect(synservGTK.chdict['iname'])
+         synservGTK.icolorBtn.disconnect(synservGTK.chdict['icolorBtn'])
          synservGTK.ici.disconnect(synservGTK.chdict['ici'])
          synservGTK.iproto.disconnect(synservGTK.chdict['iproto'])      
          synservGTK.iar.disconnect(synservGTK.chdict['iar']) 
@@ -1308,6 +1479,7 @@ class synserv(synobj):
    def getPropWidget(self):
 
       synservGTK.iname.set_text(self.name)
+      synservGTK.icolor.set_text(self.color)
       synservGTK.ici.set_text(self.connectInfos)
 
 
@@ -1331,6 +1503,7 @@ class synserv(synobj):
 
 
       synservGTK.chdict['iname'] = synservGTK.iname.connect("changed",self.onTextChange)
+      synservGTK.chdict['icolorBtn'] = synservGTK.icolorBtn.connect("clicked",self.onColorChange)
       synservGTK.chdict['ici'] = synservGTK.ici.connect("changed",self.onTextChange)
       synservGTK.chdict['iproto'] = synservGTK.iproto.connect("changed",self.onTextChange)      
       synservGTK.chdict['iar'] = synservGTK.iar.connect("changed",self.onTextChange) 

@@ -75,6 +75,18 @@ class document(object):
       self.header.getSynItem().setWorkflowDescr(self.header.getSynObj().getDescr())
 
 
+   def updateDocProperties(self,docprops):
+
+      self.color = docprops[0]
+      self.width = docprops[1]
+      self.height = docprops[2]
+
+      self.onResize(None)
+
+      if self.color != "DEFAULT":
+         self.rect.set_property("fill_color",self.color)
+
+      
    def setHeadLabel(self,text):
 
       self.head_label.set_text(text)
@@ -89,6 +101,7 @@ class document(object):
       LS0.clear()
       for obj in IMVEC.activeDoc.getContainer().getSynObjects():
   
+         # Dirty, replace by switch
          if (str(obj.__class__) == "synapseObjects.synapp"):         
             pixbuf = IMVEC.appPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syntest"):
@@ -299,6 +312,17 @@ class document(object):
          self.zoom+=1
       self.applyZoom()  
 
+
+   def getColor(self):
+      return self.color
+
+   def getWidth(self):
+      return self.width
+
+   def getHeight(self):
+      return self.height
+
+
    def setZoom(self,zoom):
       self.zoom = zoom
      
@@ -394,6 +418,8 @@ class document(object):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
         self.rect.set_property("fill_color",ncolor)
+        self.color = ncolor.to_string()
+        documentGTK.icolor.set_text(self.color)
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
@@ -403,10 +429,14 @@ class document(object):
 
       documentGTK.iwidth.set_text(str(self.width))
       documentGTK.iheight.set_text(str(self.height))
+      documentGTK.icolor.set_text(self.color)
+
 
       documentGTK.chdict['icolorBtn'] = documentGTK.icolorBtn.connect("clicked",self.onColorChange)
       documentGTK.chdict['iwidth'] = documentGTK.iwidth.connect("changed",self.onResize)
       documentGTK.chdict['iheight'] = documentGTK.iheight.connect("changed",self.onResize)
+
+
 
       return documentGTK.o
 
@@ -431,7 +461,7 @@ class document(object):
 
       self.name = name
 
-      self.color = "#FFFFFF"
+      self.color = "DEFAULT"
       self.width = 1024
       self.height = 1024
 
@@ -722,12 +752,18 @@ class MainWindow(object):
       IMVEC.activeDoc = document(docname,self.notebook)
       root = IMVEC.activeDoc.getRootItem()
 
+      docprops = pickled_objects[0] 
+      del pickled_objects[0]
+
       nh = pickled_objects[0]   
       del pickled_objects[0]
       
       IMVEC.activeDoc.getHeader().setSynObj(nh)
       IMVEC.activeDoc.updateHeaderInfos()
-     
+
+      IMVEC.activeDoc.updateDocProperties(docprops)
+      
+
       
       nbsynapp = 0
       nbsyntest = 0
@@ -765,11 +801,30 @@ class MainWindow(object):
 
          elif str(pobj.__class__) == "synapseObjects.syncom":
             newitem = commentItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+            newitem.setText(pobj.getText())
+
             nbcomments +=1
 
          elif str(pobj.__class__) == "synapseObjects.synmonitor":
             print "MONITOR ITEM ADDED"
             newitem = monitorItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getWinBorder().set_property("width",canvasProperties[4])
+
+            (hidebtn,maxbtn) = newitem.getButtons()
+            hidebtn.set_property("x", canvasProperties[4] -40 )
+            maxbtn.set_property("x",  canvasProperties[4] -20 )
+
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+
             nbmonitors +=1
 
          elif str(pobj.__class__) == "synapseObjects.synserv":
@@ -798,8 +853,20 @@ class MainWindow(object):
             newitem.getO().set_property("y",canvasProperties[1])
             newitem.getO().set_property("width",canvasProperties[2])
             newitem.getO().set_property("height",canvasProperties[3])
-            newitem.setText(pobj.getName())
+            
+            if str(pobj.__class__) != "synapseObjects.syncom" and str(pobj.__class__) != "synapseObjects.synmonitor":
+               newitem.setText(pobj.getName())
+
+
+            if pobj.getColor() != "DEFAULT":
+               newitem.getMF().set_property("fill_color",pobj.getColor())
+               if str(pobj.__class__) != "synapseObjects.syncom":
+                  newitem.getLtext().set_property("fill_color",pobj.getColor())
+                  
+
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+
+         
 
            
             
@@ -921,20 +988,23 @@ class MainWindow(object):
             savefile = dialog.get_filename()
             dialog.destroy()
 
-            try:
-               fh = open(savefile,"w+")
-               pickled_objects = list()    
+            #try:
+            fh = open(savefile,"w+")
+            pickled_objects = list()    
 
-               pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
+            
+            pickled_objects.append((IMVEC.activeDoc.getColor(),IMVEC.activeDoc.getWidth(),IMVEC.activeDoc.getHeight()))
 
-               for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+            pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
+
+            for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
                
                   member.updateSynObjCanvasProperties()
                   pickled_objects.append(member.getSynObj())
-               pickle.dump(pickled_objects,fh)
+            pickle.dump(pickled_objects,fh)
 
-            except:
-               return
+            #except:
+               #return
 
             savedName = savefile.split("/").pop().rstrip('.sws')
             IMVEC.activeDoc.setSavedName(savedName)

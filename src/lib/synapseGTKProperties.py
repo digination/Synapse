@@ -169,6 +169,12 @@ class synservGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
    lci = gtk.Label(str="Host:Port")
    ici = gtk.Entry()
    
@@ -201,11 +207,13 @@ class synservGTK:
 
 
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lci,False,True,10)
    gtkPVbox1.pack_start(lproto,False,True,10)  
    gtkPVbox1.pack_start(lar,False,True,10)  
  
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(ici,False,True,5)
    gtkPVbox2.pack_start(iproto,False,True,5)   
    gtkPVbox2.pack_start(iar,False,True,5)   
@@ -215,9 +223,9 @@ class synservGTK:
    for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
       child1.show()
       child2.show()
-
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+  
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
       child.show()
@@ -233,14 +241,22 @@ class syndemuxGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
    ltimeout = gtk.Label(str="timeout(ms)")
    lseparator = gtk.Label(str="Separator")
    iseparator = gtk.Entry()
       
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lseparator,False,True,10)
   
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iseparator,False,True,5)
 
   
@@ -250,8 +266,8 @@ class syndemuxGTK:
       child1.show()
       child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
       child.show()
@@ -270,15 +286,22 @@ class synmuxGTK:
    itimeout = gtk.Entry()
    ldata = gtk.Label(str="Data")
    
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
    idataBuffer = gtk.TextBuffer()
    idata = gtk.TextView(buffer=idataBuffer)
 
    idata.set_size_request(300,200)
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(ltimeout,False,True,10)
    gtkPVbox1.pack_start(ldata,False,True,10)
   
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(itimeout,False,True,5)
    gtkPVbox2.pack_start(idata,False,True,5)
   
@@ -289,8 +312,8 @@ class synmuxGTK:
       child1.show()
       child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
       child.show()
@@ -332,8 +355,8 @@ class syntestGTK:
       child1.show()
       child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
 
@@ -394,6 +417,13 @@ class synjectorGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
+
    lit = gtk.Label(str="Injector Type")
    iit = gtk.ComboBox()
 
@@ -437,6 +467,7 @@ class synjectorGTK:
 
    
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lit,False,True,10) 
    gtkPVbox1.pack_start(lloop,False,True,10)   
    gtkPVbox1.pack_start(lstring,False,True,10)
@@ -444,6 +475,7 @@ class synjectorGTK:
    
 
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iit,False,True,5)
    gtkPVbox2.pack_start(iloop,False,True,5)
    gtkPVbox2.pack_start(istring,False,True,5)
@@ -459,8 +491,8 @@ class synjectorGTK:
    lstring.hide()
    istring.hide()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
 
    for child in o.get_children():
@@ -498,8 +530,8 @@ class synlinkGTK:
       child1.show()
       child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
 
@@ -517,6 +549,12 @@ class synfilterGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
    lft = gtk.Label(str="Filter Type")
    ift = gtk.ComboBox()
 
@@ -540,10 +578,12 @@ class synfilterGTK:
    
 
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lft,False,True,10)
    gtkPVbox1.pack_start(ldata,False,True,10)   
 
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(ift,False,True,5)
    gtkPVbox2.pack_start(idata,False,True,5)
 
@@ -554,8 +594,8 @@ class synfilterGTK:
       if (child2 != None):
          child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
 
@@ -572,6 +612,12 @@ class syntimerGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
    linterval = gtk.Label(str="interval (ms)")
    iinterval = gtk.Entry()
    iinterval.set_text("1000")
@@ -591,10 +637,12 @@ class syntimerGTK:
    iloop.set_active(0)
 
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(linterval,False,True,10)
    gtkPVbox1.pack_start(lloop,False,True,10)   
 
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iinterval,False,True,5)
    gtkPVbox2.pack_start(iloop,False,True,5)
 
@@ -605,8 +653,8 @@ class syntimerGTK:
       if (child2 != None):
          child2.show()
 
-   o.add(gtkPVbox1)
-   o.add(gtkPVbox2)
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
 
    for child in o.get_children():
 
