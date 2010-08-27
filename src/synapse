@@ -5,9 +5,10 @@ pygtk.require("2.0")
 import gtk
 import os
 import time
+import datetime
 import gobject
 import goocanvas
-
+import getpass
 
 import sys
 sys.path.append("/usr/lib/synapse")
@@ -16,6 +17,7 @@ import synapseCanvas
 from synapseCanvas import *
 from synapseCanvas import motion_notify
 from synapseIMVEC import *
+from synapsePkg import *
 import pickle
 
 
@@ -61,7 +63,20 @@ class document(object):
    nbinst = 0
    nbnewinst = 0
 
-   
+
+
+   def updateHeaderInfos(self):
+
+      self.header.getSynItem().setWorkflowAuthor(self.header.getSynObj().getAuthor())
+      self.header.getSynItem().setWorkflowTitle(self.header.getSynObj().getTitle())
+      self.header.getSynItem().setWorkflowCreationDate(self.header.getSynObj().getDate())
+      self.header.getSynItem().setWorkflowDescr(self.header.getSynObj().getDescr())
+
+
+   def setHeadLabel(self,text):
+
+      self.head_label.set_text(text)
+
    def refresh_objects_list(self):
 
       global LS0
@@ -322,7 +337,20 @@ class document(object):
       self.prevMember = prevMember
 
 
+   def setSavedName(self,savedName):
+      self.savedName = savedName
+   def setPath(self,path):
+      self.path = path
 
+
+
+   def setnbInsts(self,nbinsts):
+
+      (self.nbsynapp,self.nbsyntest,self.nbcomments,self.nbmuxers,self.nbdemuxers,self.nbinjectors,
+      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices) = tuple(nbinsts)
+
+
+      
    def __init__(self,name,notebook):
       
       document.nbinst+=1
@@ -340,6 +368,9 @@ class document(object):
 
       self.saved = False
       self.modified = False
+      self.savedName = ""
+      self.path = ""
+
       self.notebook = notebook      
 
       self.nbsynapp = 0
@@ -358,8 +389,8 @@ class document(object):
       
 
       self.head_hbox = gtk.HBox()
-      head_label = gtk.Label(str=self.name)
-      head_label.show()
+      self.head_label = gtk.Label(str=self.name)
+      self.head_label.show()
       self.close_btn = gtk.Button()
 
       close_image = gtk.image_new_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
@@ -369,7 +400,7 @@ class document(object):
       self.close_btn.connect("clicked",self.on_closebtn_clicked)
       self.close_btn.add(close_image)
       self.close_btn.show()
-      self.head_hbox.add(head_label)
+      self.head_hbox.add(self.head_label)
       self.head_hbox.add(self.close_btn)
 
 
@@ -401,9 +432,19 @@ class document(object):
       self.root.set_property("height",1024)
 
 
-      headerItem(self.root)
+      synheader0 = synheader(title="Your Title Here",author=getpass.getuser(),date=str(datetime.datetime.now()),descr="Your Description Here")
+      headItem0 = headerItem(self.root)
+      headItem0.setWorkflowAuthor(synheader0.getAuthor())
+      headItem0.setWorkflowTitle(synheader0.getTitle())
+      headItem0.setWorkflowCreationDate(synheader0.getDate())
+      headItem0.setWorkflowDescr(synheader0.getDescr())
+     
+      
 
-   
+
+      self.header = linker(synheader0,headItem0)
+
+         
       #construct new page
       scrolled_win.add(view_port)
       view_port.add(self.canvas)
@@ -414,6 +455,12 @@ class document(object):
       self.canvas.show()
       
 
+   def getHeader(self):
+      return self.header
+
+   def setHeader(self,header):
+      self.header = header
+      
    def getCanvas(self):
 
       return self.canvas
@@ -593,6 +640,25 @@ class MainWindow(object):
       IMVEC.activeDoc = document(docname,self.notebook)
       root = IMVEC.activeDoc.getRootItem()
 
+      nh = pickled_objects[0]   
+      del pickled_objects[0]
+      
+      IMVEC.activeDoc.getHeader().setSynObj(nh)
+      IMVEC.activeDoc.updateHeaderInfos()
+     
+      
+      nbsynapp = 0
+      nbsyntest = 0
+      nbcomments = 0
+      nbmuxers = 0
+      nbdemuxers = 0
+      nbinjectors = 0
+      nbtimers = 0
+      nbfilters = 0
+      nbmonitors = 0
+      nbservices = 0
+
+      
       for pobj in pickled_objects:
 
          newitem = None
@@ -601,43 +667,49 @@ class MainWindow(object):
 
          if str(pobj.__class__) == "synapseObjects.synapp":
             newitem = synappItem(root)
-
+            nbsynapp += 1
+     
          elif str(pobj.__class__) == "synapseObjects.syntest":
             newitem = testItem(root)
-
+            nbsyntest += 1
+     
          elif str(pobj.__class__) == "synapseObjects.syntimer":
             newitem = timerItem(root)
-
+            nbtimers +=1
+  
          elif str(pobj.__class__) == "synapseObjects.synjector":
             newitem = injectorItem(root)
+            nbinjectors +=1
 
          elif str(pobj.__class__) == "synapseObjects.syncom":
             newitem = commentItem(root)
+            nbcomments +=1
 
          elif str(pobj.__class__) == "synapseObjects.synmonitor":
             print "MONITOR ITEM ADDED"
             newitem = monitorItem(root)
+            nbmonitors +=1
 
          elif str(pobj.__class__) == "synapseObjects.synserv":
             print "SERVICE ITEM ADDED"
             newitem = servItem(root)
+            nbservices +=1
 
          elif str(pobj.__class__) == "synapseObjects.syndemux":
             print "DEMUX ITEM ADDED"
             newitem = demuxItem(root)
-
+            nbdemuxers +=1
          elif str(pobj.__class__) == "synapseObjects.synmux":
-            print "FILTER ITEM ADDED"
+            print "MUX ITEM ADDED"
             newitem = muxItem(root)
-
+            nbmuxers +=1
+     
          elif str(pobj.__class__) == "synapseObjects.synfilter":
             print "FILTER ITEM ADDED"
             newitem = filterItem(root)
+            nbfilters +=1
 
          
-
-         
-
 
          if (newitem != None):
             newitem.getO().set_property("x",canvasProperties[0])
@@ -646,6 +718,8 @@ class MainWindow(object):
             newitem.getO().set_property("height",canvasProperties[3])
             newitem.setText(pobj.getName())
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+
+           
             
       #remaking loop to create links
       for pobj in pickled_objects:
@@ -661,6 +735,13 @@ class MainWindow(object):
             IMVEC.linkList.append(newitem)
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
       IMVEC.activeDoc.refresh_objects_list()
+
+      nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
+      nbtimers,nbfilters,nbmonitors,nbservices)
+      IMVEC.activeDoc.setnbInsts(nbinsts)
+
+      
+
 
 
    #button clicked callback
@@ -738,14 +819,27 @@ class MainWindow(object):
           if response == gtk.RESPONSE_OK:
             savefile = dialog.get_filename()
             dialog.destroy()
-            fh = open(savefile,"w+")
-            pickled_objects = list()    
 
-            for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+            try:
+               fh = open(savefile,"w+")
+               pickled_objects = list()    
+
+               pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
+
+               for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
                
-               member.updateSynObjCanvasProperties()
-               pickled_objects.append(member.getSynObj())
-            pickle.dump(pickled_objects,fh)
+                  member.updateSynObjCanvasProperties()
+                  pickled_objects.append(member.getSynObj())
+               pickle.dump(pickled_objects,fh)
+
+            except:
+               return
+
+            savedName = savefile.split("/").pop().rstrip('.sws')
+            IMVEC.activeDoc.setSavedName(savedName)
+            IMVEC.activeDoc.setHeadLabel(savedName)
+
+            
 
 
    #Fix boundaries on horizontal panes.
@@ -834,6 +928,27 @@ class MainWindow(object):
       self.zoomout_btn = builder.get_object("zoomout_btn")
 
       self.obrowser = builder.get_object("obrowser")     
+      
+      pkgMgr = pkgManager()
+      IMVEC.pkgMgr = pkgMgr
+      self.libtree = builder.get_object("libtree")
+      IMVEC.libtree = self.libtree
+      IMVEC.libtree.set_model(IMVEC.pkgMgr.getTreeStore())
+      IMVEC.libtree.set_headers_visible(False)
+      
+      
+      tvcell0 = gtk.CellRendererPixbuf()
+      tvcell1 = gtk.CellRendererText()
+      
+      tvcolumn0 = gtk.TreeViewColumn('Img', tvcell0,pixbuf=0)
+      tvcolumn1 = gtk.TreeViewColumn('Lib', tvcell1,text=1)
+      
+      tvcolumn0.set_cell_data_func(tvcell0,IMVEC.pkgMgr.setColumnPixbuf,data=None)
+      tvcolumn1.set_cell_data_func(tvcell1,IMVEC.pkgMgr.setColumnStr,data=None)
+      
+
+      IMVEC.libtree.append_column(tvcolumn0)
+      IMVEC.libtree.append_column(tvcolumn1)
 
       self.status_lbl = builder.get_object("status_lbl")
       IMVEC.status_lbl = self.status_lbl
@@ -990,3 +1105,13 @@ if __name__ == "__main__":
    gtk.gdk.threads_init()
    gtk.main()
 
+
+
+
+
+
+
+
+
+
+#####################

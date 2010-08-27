@@ -13,16 +13,25 @@ class synheaderGTK:
    idate = gtk.Entry()
    ldescr = gtk.Label(str="Description")
    
+   idescrBuffer = gtk.TextBuffer()
+   idescr = gtk.TextView(buffer=idescrBuffer)
+   idescr.set_size_request(300,200)
+
+
 
    gtkPVbox1.pack_start(ltitle,False,True,10)
-   gtkPVbox1.pack_start(ldate,False,True,10)
    gtkPVbox1.pack_start(lauthor,False,True,10)
    gtkPVbox1.pack_start(ldate,False,True,10)
+   gtkPVbox1.pack_start(ldescr,False,True,10)
+
 
    gtkPVbox2.pack_start(ititle,False,True,5)
-   gtkPVbox2.pack_start(idate,False,True,5)
    gtkPVbox2.pack_start(iauthor,False,True,5)
    gtkPVbox2.pack_start(idate,False,True,5)
+   gtkPVbox2.pack_start(idescr,False,True,5)
+
+   
+
 
 
    chdict = dict()
@@ -306,6 +315,8 @@ class synjectorGTK:
 
 
    o = gtk.HBox()
+   
+  
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
@@ -313,6 +324,19 @@ class synjectorGTK:
    lit = gtk.Label(str="Injector Type")
    iit = gtk.ComboBox()
 
+
+   lstring = gtk.Label(str="String")
+   istring = gtk.Entry()
+   
+   lstringList = gtk.Label(str="String List")
+   idataBuffer = gtk.TextBuffer()
+   istringList = gtk.TextView(buffer=idataBuffer)
+   istringList.set_size_request(300,200)  
+
+   llpm = gtk.Label(str="Lines per message")
+   ilpm = gtk.Entry()
+   
+   
    ls0 = gtk.ListStore(str)
    iit.set_model(ls0)
    cellr0 = gtk.CellRendererText()
@@ -340,12 +364,17 @@ class synjectorGTK:
 
    
    gtkPVbox1.pack_start(lname,False,True,10)
-   gtkPVbox1.pack_start(lit,False,True,10)
+   gtkPVbox1.pack_start(lit,False,True,10) 
    gtkPVbox1.pack_start(lloop,False,True,10)   
+   gtkPVbox1.pack_start(lstring,False,True,10)
+   gtkPVbox1.pack_start(lstringList,False,True,10)
+   
 
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(iit,False,True,5)
    gtkPVbox2.pack_start(iloop,False,True,5)
+   gtkPVbox2.pack_start(istring,False,True,5)
+   gtkPVbox2.pack_start(istringList,False,True,5)
 
    chdict = dict()
 
@@ -353,8 +382,13 @@ class synjectorGTK:
       child1.show()
       child2.show()
 
+
+   lstring.hide()
+   istring.hide()
+
    o.add(gtkPVbox1)
    o.add(gtkPVbox2)
+
 
    for child in o.get_children():
 
@@ -419,7 +453,7 @@ class synfilterGTK:
    ift.pack_start(cellr0)
    ift.add_attribute(cellr0, 'text', 0)
 
-   
+   ift.append_text("Simple Grep")
    ift.append_text("PCRE Grep")
    ift.append_text("Sed Expression")
    ift.append_text("Awk Script")  

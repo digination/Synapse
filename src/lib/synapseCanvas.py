@@ -45,7 +45,14 @@ def motion_notify(widget, event):
 
          if str(RESIZED_OBJECT.__class__) == "synapseCanvas.monitorItem":
             RESIZED_OBJECT.updateInputs()
+            RESIZED_OBJECT.getWinBorder().set_property("width", RESIZED_OBJECT.getMF().get_property("width")  )
              
+            (hidebtn,maxbtn) = RESIZED_OBJECT.getButtons()
+            hidebtn.set_property("x", RESIZED_OBJECT.getMF().get_property("width") -40 )
+            maxbtn.set_property("x",  RESIZED_OBJECT.getMF().get_property("width") -20 )
+
+
+
 
       elif MOVED_OBJECT != None:
          MOVED_OBJECT.set_property("x",int(event.x)-COORDS_OFFSET[0])
@@ -712,6 +719,48 @@ class monitorItem(synItem):
       global RESIZED_OBJECT
       RESIZED_OBJECT = self
 
+
+   def on_hide_click(self,item,target_item,event):
+      if self.mf.get_property("height") > 16:
+         self.mf.set_property("height",16)
+
+         #self.extender.set_property("x",self.mf.get_property("width")-10)
+         #self.extender.set_property("y",self.mf.get_property("height")-10)
+         self.extender.set_property("fill_color_rgba",0xcccccc00)
+
+
+      else:
+         self.mf.set_property("height",200)
+
+         self.extender.set_property("x",self.mf.get_property("width")-10)
+         self.extender.set_property("y",self.mf.get_property("height")-10)
+         self.extender.set_property("fill_color_rgba",0xccccccff)
+
+         
+
+
+   def on_maximize_click(self,item,target_item,event):
+
+
+      if self.mf.get_property("height") != self.root.get_property("height"):
+   
+         self.o.set_property("x",0)
+         self.o.set_property("y",0)
+         self.mf.set_property("height",self.root.get_property("height"))
+         self.mf.set_property("width",self.root.get_property("width"))
+         self.winborder.set_property("width",self.root.get_property("width"))
+
+         self.updateInputs()
+            
+         self.hideBtn.set_property("x", self.mf.get_property("width") -40 )
+         self.maxBtn.set_property("x",  self.mf.get_property("width") -20 )
+         self.extender.set_property("x",self.mf.get_property("width")-10)
+         self.extender.set_property("y",self.mf.get_property("height")-10)
+         
+
+
+
+
    def on_extend_release(self,item,target_item,event):
       global RESIZED_OBJECT
       RESIZED_OBJECT = None
@@ -721,14 +770,14 @@ class monitorItem(synItem):
 
       print "MF_X_COORD:", self.mf.get_property("x")
 
-      self.inputs[0].set_property("y",(self.mf.get_property("height")-30)/2 )
-      self.inputs[0].set_property("x",self.mf.get_property("x")-1)
+      #self.inputs[0].set_property("y",(self.mf.get_property("height")-30)/2 )
+      #self.inputs[0].set_property("x",self.mf.get_property("x")-1)
        
-      self.inputs[1].set_property("y",(self.mf.get_property("height")-30)/2 )
-      self.inputs[1].set_property("x",self.mf.get_property("width")-4)
-      self.inputs[2].set_property("x",(self.mf.get_property("width")-30)/2 )
-      self.inputs[3].set_property("x",(self.mf.get_property("width")-30)/2 )
-      self.inputs[3].set_property("y",self.mf.get_property("height")-4)
+      #self.inputs[1].set_property("y",(self.mf.get_property("height")-30)/2 )
+      #self.inputs[1].set_property("x",self.mf.get_property("width")-4)
+      #self.inputs[2].set_property("x",(self.mf.get_property("width")-30)/2 )
+      #self.inputs[2].set_property("x",(self.mf.get_property("width")-30)/2 )
+      #self.inputs[2].set_property("y",self.mf.get_property("height")-4)
    
       for link in IMVEC.linkList:
          link.update()
@@ -737,9 +786,18 @@ class monitorItem(synItem):
    def getExtender(self):
       return self.extender
 
+   def getWinBorder(self):
+      return self.winborder
+
+   def getButtons(self):
+      return (self.hideBtn,self.maxBtn)
+
+
    def setComment(self,text):
 
       self.ltext.set_property("text",text)
+
+
 
    def __init__(self,parent_canvas):
 
@@ -753,53 +811,68 @@ class monitorItem(synItem):
       self.outputs = list()
 
      
-      self.mf = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=15, radius_y=15,width=200, height=100,
-				stroke_color="#cccccc", fill_color_rgba=0x000000aa,
+      
+      self.mf = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=0, radius_y=0,width=300, height=200,
+				stroke_color="#cccccc", fill_color_rgba=0x000000da,
 				line_width=0)
+
+
+      #Previous border color: 0x30303090
+      self.winborder = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=0, radius_y=0,width=300, height=16,
+				stroke_color="#ffffff", fill_color_rgba=0xddddddff,
+				line_width=0) 
+
+
+
+      self.hideBtn = goocanvas.Image(parent = self.o,x=260,y=5,pixbuf=IMVEC.monitorHidePixbuf)
+      self.maxBtn = goocanvas.Image(parent = self.o,x=280,y=5,pixbuf=IMVEC.monitorMaximizePixbuf) 
+
 
 
       print "MF_X_COORD:", self.mf.get_property("x")
 
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
-                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 8 L 0 16 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=0))
 
-      self.inputs[0].set_property("x",4)
-      self.inputs[0].set_property("y",40)
+      self.inputs[0].set_property("x",5)
+      self.inputs[0].set_property("y",5)
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 15 L 10 0 L 10 30 L 0 15 z",
-                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+      #self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 15 L 10 0 L 10 30 L 0 15 z",
+                                      #stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.inputs[1].set_property("x",196)
-      self.inputs[1].set_property("y",40)
+      #self.inputs[1].set_property("x",196)
+      #self.inputs[1].set_property("y",40)
 
 
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 30 0 L 15 10 L 0 0 z",
-                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+      #self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 30 0 L 15 10 L 0 0 z",
+                                      #stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.inputs[2].set_property("x",90)
-      self.inputs[2].set_property("y",4)
+      #self.inputs[2].set_property("x",90)
+      #self.inputs[2].set_property("y",4)
 
 
       
-      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 10 L 15 0 L 30 10 L 0 10 z",
-                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+      #self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 10 L 15 0 L 30 10 L 0 10 z",
+                                      #stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.inputs[3].set_property("x",90)
-      self.inputs[3].set_property("y",96)
-
-
+      #self.inputs[2].set_property("x",90)
+      #self.inputs[2].set_property("y",96)
 
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="", x=12, y=12,
-						width=200,
+
+
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="", x=12, y=20,
+						width=300,
 						fill_color="white")
+
+      self.ltext.set_property("width",300)
 
 
 
       self.icon = None
 
-      self.extender = goocanvas.Path(parent = self.o, data="M 190 105 L 205 90 L 205 105 L 190 105 z", stroke_color="black", fill_color="#cc99ff", line_width=1)
+      self.extender = goocanvas.Path(parent = self.o, data="M 290 205 L 305 190 L 305 205 L 290 205 z", stroke_color="black", fill_color="#cccccc", line_width=0)
 
      
 
@@ -807,14 +880,94 @@ class monitorItem(synItem):
       self.ltext.connect("button-press-event",self.on_mf_clicked)
       self.ltext.connect("button-press-event",self.objectSelectionChange)
       self.ltext.connect("button-release-event",self.on_mf_released)
+
+      self.winborder.connect("button-press-event",self.on_mf_clicked)
+      self.winborder.connect("button-press-event",self.objectSelectionChange)
+      self.winborder.connect("button-release-event",self.on_mf_released)
+
  
       self.extender.connect("button-press-event",self.on_extend_click)
       self.extender.connect("button-release-event",self.on_extend_release)
+      
+      self.hideBtn.connect("button-press-event",self.on_hide_click)
+      self.maxBtn.connect("button-press-event",self.on_maximize_click)
+
       
 
 
 
 class headerItem():
+
+
+   def objectSelectionChange(self,item, target_item, event):
+
+      for child in IMVEC.oprop.get_nth_page(0).get_children():
+         IMVEC.oprop.get_nth_page(0).remove(child)
+      IMVEC.oprop.get_nth_page(0).add(IMVEC.activeDoc.getHeader().getSynObj().getPropWidget())
+
+
+   def on_mf_clicked(self,item,target_item,event):
+      
+      IMVEC.activeDoc.setActiveM(IMVEC.activeDoc.getHeader())
+      
+      if (IMVEC.activeDoc.getPrevM() != None):
+         
+         if (str(IMVEC.activeDoc.getPrevM().getSynItem().__class__) != "synapseCanvas.linkItem") : 
+            IMVEC.activeDoc.getPrevM().getSynItem().getMF().set_property("stroke_color","#cccccc")
+         else:
+            if IMVEC.activeDoc.getPrevM().getSynObj().getBidir() == False: 
+               IMVEC.activeDoc.getPrevM().getSynItem().getMF().set_property("stroke_color","black")
+            else:
+               IMVEC.activeDoc.getPrevM().getSynItem().getMF().set_property("stroke_color","#00cbff")
+
+         IMVEC.activeDoc.getPrevM().getSynObj().disconnectAll()
+
+
+
+
+   def on_showbtn_clicked(self,item,target_item,event):
+
+      if self.mf.get_property("height") == 120:
+
+         self.sepLine1.set_property("y",-25)
+         self.sepLine2.set_property("y",-65)
+         self.mf.set_property("height",2)
+         self.showbtn.set_property("y",-118)
+         self.arrow.set_property("data","M 0 0 L 20 0 L 10 8 L 0 0 z")
+         self.arrow.set_property("x",5)
+         self.arrow.set_property("y",122)
+
+         #lower the whole canvas of 118px
+         if IMVEC.activeDoc != None:
+            for item in IMVEC.activeDoc.getContainer().getSynItems():
+               print item
+               item.getO().set_property("y",item.getO().get_property("y")-118)
+          
+
+      else:
+
+         self.mf.set_property("height",120)
+         self.showbtn.set_property("y",0)
+         self.sepLine1.set_property("y",25)
+         self.sepLine2.set_property("y",65)
+         self.arrow.set_property("data","M 0 8 L 10 0 L 20 8 L 0 8 z")
+         
+         self.arrow.set_property("x",5)
+         self.arrow.set_property("y",122)
+
+         #lower the whole canvas of 118px
+         if IMVEC.activeDoc != None:
+            for item in IMVEC.activeDoc.getContainer().getSynItems():
+               print item
+               item.getO().set_property("y",item.getO().get_property("y")+118)
+
+
+
+
+   def getMF(self):
+
+      return self.mf
+
 
    def resize(self):
       return None
@@ -825,17 +978,17 @@ class headerItem():
    def show(self):
       return None
 
-   def setWorkflowTitle(self):
-      return None
+   def setWorkflowTitle(self,title):
+      self.titleLabel.set_property("text",title)
    
-   def setWorkflowAuthor(self):
-      return None
+   def setWorkflowAuthor(self,author):
+      self.authorLabel.set_property("text","Author:\t" + author)
    
-   def setWorkflowCreationDate(self):
-      return None
+   def setWorkflowCreationDate(self,date):
+      self.dateLabel.set_property("text","Date:\t" + date)
 
-   def setBehaviourSummary(self):
-      return None
+   def setWorkflowDescr(self,descr):
+      self.descrLabel.set_property("text",descr)
 
    def __init__(self,parent_canvas):
 
@@ -845,9 +998,21 @@ class headerItem():
       self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,width=self.root.get_property("width"), height=120, stroke_color="#8BA2BD", fill_color_rgba=0x8BA2BDAA,line_width=0)
 
 
+      self.showbtn = goocanvas.Group(parent=self.root)
+
+      self.showbtnf = goocanvas.Rect(parent = self.showbtn, x=0, y=120,width=30, height=12, stroke_color="#8BA2BD", fill_color_rgba=0x8BA2BDAA,line_width=0)
+
+
+      self.arrow = goocanvas.Path(parent = self.showbtn,data="M 0 0 L 20 0 L 10 8 L 0 0 z" ,stroke_color="#333333", fill_color_rgba=0xccccccAA,line_width=1)
+      self.arrow.set_property("x",5)
+      self.arrow.set_property("y",122)
+
+     
       self.titleLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Workflow Ittle", x=7, y=3,
 						width=200,
 						fill_color="white")
+
+      self.titleLabel.set_property("width",self.root.get_property("width"))
 
 
       self.sepLine1 = goocanvas.Path(parent = self.o, data="M 0 0 L %d 0" % (self.root.get_property("width")),fill_color="white",line_width=1)
@@ -858,14 +1023,14 @@ class headerItem():
 
 
 
-      self.authorLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Author:\ttoor", x=7, y=29,
-						width=200,
-						fill_color="white")
+      self.authorLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Author:\ttoor", x=7, y=29, fill_color="white")
+
+      self.authorLabel.set_property("width",self.root.get_property("width"))
 
 
-      self.dateLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Date:\t01/01/2010", x=7, y=42,
-						width=200,
-						fill_color="white")
+      self.dateLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Date:\t01/01/2010", x=7, y=42,fill_color="white")
+
+      self.dateLabel.set_property("width",self.root.get_property("width"))
 
 
       self.sepLine2 = goocanvas.Path(parent = self.o, data="M 0 0 L %d 0" % (self.root.get_property("width")),fill_color="white",line_width=1)
@@ -874,9 +1039,20 @@ class headerItem():
       self.sepLine2.set_property("y",63)
 
 
-      self.descrLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Short Description", x=7, y=68,
-						width=200,
-						fill_color="white")
+      self.descrLabel = goocanvas.Text(parent = self.o, font="Sans 10" , text="Short Description", x=7, y=68, fill_color="white")
+
+
+      self.descrLabel.set_property("width",self.root.get_property("width"))
+
+
+
+      self.showbtn.connect("button-press-event",self.on_showbtn_clicked)
+
+      self.mf.connect("button-press-event",self.on_mf_clicked)
+      self.mf.connect("button-press-event",self.objectSelectionChange)
+
+      self.on_showbtn_clicked(self,None,None)
+
 
 
 

@@ -4,9 +4,14 @@ Finish to implement Building blocks GTK classes
 Implement saving and loading : 90%
 Change building blocks colors
 Implement multi select,clipboard and undu/redo
-Make embedded documentation
 Implement document properties
 Implement shortcurs+menus
 Implement about box
 Implement display buffer
+
+
+
+v.02:
+Implemen reports
 Implement Terminals
+Embeeded Documentation

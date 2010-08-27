@@ -17,6 +17,7 @@ import os
 import time
 import copy
 import socket
+import pexpect
 
 
 #class to embbed and manipulate synlinker objects
@@ -80,7 +81,7 @@ class container:
    def getSynItems(self):
 
       itemList = list()
-      for mname,member,foo in self.members:
+      for mname,member in self.members.items():
          itemList.append(member.getSynItem())
       return itemList
 
@@ -183,8 +184,15 @@ class synobj:
 
       for peer in self.peers:
 
-         print "SENDING MESSAGE \"%s\" TO %s" % (self.obuff,peer.getName())
-         peer.setIbuff(self.obuff)
+         (input_num, peerobj) = tuple(peer)         
+
+         if (peerobj.mInput == True):
+            print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+            peerobj.setIbuff(input_num,self.obuff)
+  
+         else:
+            print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+            peerobj.setIbuff(str(input_num) + ":" +self.obuff)
 
       self.ibuff = ""
 
@@ -236,9 +244,72 @@ class synobj:
          if str(obj.__class__) == "synapseObjects.synlink":
             if obj.getOutObj() == self and obj.getOutputNum() == 0:
                print "UPDATING LINK FOR ", self
-               self.peers.append(obj.getInObj())
+               self.peers.append([obj.getInputNum(),obj.getInObj()])
                
 
+
+
+class synheader(synobj):
+
+
+   def getDate(self):
+
+      return self.date
+
+   def getAuthor(self):
+      return self.author
+
+   def getTitle(self):
+      return self.title
+
+   def getDescr(self):
+      return self.descr
+
+
+   def __init__(self,title="Workflow title",author="",date="",descr="your description here"):
+
+
+      self.title = title
+      self.author = author
+      self.date = date
+      self.descr = descr
+   
+    
+   def onITextBufferChanged(self,textbuff):
+      self.descr = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
+      IMVEC.activeDoc.getHeader().getSynItem().setWorkflowDescr(self.descr)
+
+   def on_widget_changed(self,widget):
+
+      if (widget == synheaderGTK.iauthor):
+         self.author = widget.get_text() 
+         IMVEC.activeDoc.getHeader().getSynItem().setWorkflowAuthor(widget.get_text())
+      elif (widget == synheaderGTK.ititle):
+         self.title = widget.get_text()
+         IMVEC.activeDoc.getHeader().getSynItem().setWorkflowTitle(widget.get_text())
+    
+   def disconnectAll(self):
+   
+      synheaderGTK.iauthor.disconnect(synheaderGTK.chdict['iauthor'])
+      synheaderGTK.ititle.disconnect(synheaderGTK.chdict['ititle'])
+      synheaderGTK.idate.disconnect(synheaderGTK.chdict['idate']) 
+      synheaderGTK.idescrBuffer.disconnect(synheaderGTK.chdict['idescrBuff'])  
+
+
+   def getPropWidget(self):
+  
+      synheaderGTK.iauthor.set_text(self.author)
+      synheaderGTK.ititle.set_text(self.title)
+      synheaderGTK.idate.set_text(self.date)
+      synheaderGTK.idescrBuffer.set_text(self.descr)
+      
+      synheaderGTK.chdict['iauthor'] = synheaderGTK.iauthor.connect("changed",self.on_widget_changed)
+      synheaderGTK.chdict['ititle'] = synheaderGTK.ititle.connect("changed",self.on_widget_changed)
+      synheaderGTK.chdict['idate'] = synheaderGTK.idate.connect("changed",self.on_widget_changed)
+      synheaderGTK.chdict['idescrBuff'] = synheaderGTK.idescrBuffer.connect("changed",self.onITextBufferChanged)    
+
+
+      return synheaderGTK.o
 
 
 
@@ -247,7 +318,9 @@ class synfilter(synobj):
 
    def run(self):
 
-      if (self.filterType == "PCRE Grep"):
+      if (self.filterType == "Simple Grep"):
+         filterCmd = "grep --line-buffered " + self.data
+      elif (self.filterType == "PCRE Grep"):
          filterCmd = "pcregrep " + self.data
       elif (self.filterType == "Sed Expression"):
          filterCmd = "sed -u " + self.data
@@ -257,6 +330,8 @@ class synfilter(synobj):
       self.alive = True
 
       print "FILTERCMD:",filterCmd
+
+     
 
       proc = Popen(filterCmd, shell=True, stdout=PIPE,stdin=PIPE,bufsize=4096)
       fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
@@ -277,7 +352,8 @@ class synfilter(synobj):
             
          if (self.ibuff != ""):
             print "WRITING IBUFF TO FILTER"
-            proc.stdin.write(self.ibuff)
+            (input_num,sep,content) = self.ibuff.partition(":")
+            proc.stdin.write(content)
             proc.stdin.flush()
             proc.stdout.flush()
             #proc.stdin.close()
@@ -291,13 +367,14 @@ class synfilter(synobj):
          print "return code:", proc.returncode  
      
 
-   def __init__(self,name,filter_type="PCRE Grep",data=""):
+   def __init__(self,name,filter_type="Simple Grep",data=""):
 
       self.name = name
       self.filterType = filter_type
       self.data = data
  
       self.alive = False
+      self.mInput = False
       self.ibuff = ""
       self.obuff = ""
 
@@ -340,13 +417,14 @@ class synfilter(synobj):
       synfilterGTK.iname.set_text(self.name)
       synfilterGTK.idataBuffer.set_text(self.data)
       
-
-      if (self.filterType == "PCRE Grep"):
+      if (self.filterType == "Simple Grep"):
          synfilterGTK.ift.set_active(0)
-      elif (self.filterType == "Sed Expression"):
+      elif (self.filterType == "PCRE Grep"):
          synfilterGTK.ift.set_active(1)
+      elif (self.filterType == "Sed Expression"):
+         synfilterGTK.ift.set_active(2)
       elif (self.filterType == "Awk Script"):
-         synfilterGTK.ift.set_active(2)        
+         synfilterGTK.ift.set_active(3)        
 
       synfilterGTK.chdict['iname'] = synfilterGTK.iname.connect("changed",self.on_widget_changed)
       synfilterGTK.chdict['ift'] = synfilterGTK.ift.connect("changed",self.on_widget_changed)
@@ -372,17 +450,17 @@ class syntimer(synobj):
             self.broadcast() 
 
          if (self.ibuff != ""):
-     
-            print "%s IBUFF: %s" % (self.name,self.ibuff) 
+            (input_num,sep,content) = self.ibuff.partition(":")
+            print "%s IBUFF: %s" % (self.name,content) 
             #time.sleep(float(int(self.interval)/1000))
 
             if (self.loop == False): 
                buff_repeat = ""      
             else:
-               buff_repeat = copy.copy(self.ibuff)
+               buff_repeat = copy.copy(content)
                print "KEEPING BUFFER FOR FURTHER USAGE"
            
-            self.obuff = self.ibuff
+            self.obuff = content
             self.broadcast()
 
           
@@ -394,6 +472,7 @@ class syntimer(synobj):
 
       self.ibuff = ""
       self.obuff = ""
+      self.mInput = False
 
       self.peers= list()
 
@@ -649,13 +728,60 @@ class synmux(synobj):
 
    nbinst = 0
 
+
+   def setIbuff(self,input_num,ibuff):
+      self.buffs[input_num] = ibuff
+
+   def run(self):
+
+      self.alive = True
+
+      self.buffs = ["","","","","",""]
+
+      
+      while(self.alive):
+        
+         data_copy = self.data
+         ctime = 0
+         ready = 0
+
+         for i in range (0,len(self.buffs)):
+               if (self.buffs[i] != ""):
+                  ready +=1
+         while ( ready > 0 and ( (self.timeout == 0 and ready <6) or (ctime <= self.timeout or ready <6 ) ) ):
+            ctime+=1
+            #ready = 0     
+            for i in range (0,len(self.buffs)):
+               if (self.buffs[i] != ""):
+                  ready +=1
+            time.sleep(0.001)
+
+         for i in range (0,len(self.buffs)):
+            data_copy = data_copy.replace("[[SI%d]]"% (i),self.buffs[i].rstrip('\n'))
+         
+         if ready > 0:
+            print "BROADCASTING"
+            self.obuff = data_copy
+            self.broadcast()
+            self.obuff = ""
+            self.buffs = ["","","","","",""]
+            
+
+
+
    def __init__(self,name,data="[[SI0]] [[SI1]] [[SI2]] [[SI3]] [[SI4]] [[SI5]]",timeout=2000):
 
       synmux.nbinst+=1
       self.name = name
       self.data = data
       self.timeout = timeout
-
+      
+      self.ibuff = ""
+      self.obuff = ""
+      self.alive = False
+      self.mInput = True
+      self.peers=list()
+      
 
    def getData(self):
       return self.data
@@ -760,6 +886,7 @@ class syndemux(synobj):
       self.opeers = list()      
 
       self.ibuff = ""
+      self.mInput = False
       self.alive = False
 
 
@@ -805,12 +932,27 @@ class synmonitor(synobj):
      
       self.alive = True
       xref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem()
-     
+      self.fullContent = ""
+      self.displayBuff = ""     
+
       while(self.alive == True):
          if (self.ibuff != ""):
+            (input_num,sep,content) = self.ibuff.partition(":")
+            self.fullContent += content
+            self.displayBuff = ""
+            fclist = self.fullContent.split("\n")
+            if len(fclist)-self.displayBuffSize < 0:
+              init_var = 0
+            else:
+               init_var = len(fclist)-self.displayBuffSize
+
+            for i in range (init_var,len(fclist)):
+               self.displayBuff+= fclist[i] + "\n"
+               
             #ici mettre la gestion de la taille de buffer suivant taille de monitor item
             gtk.gdk.threads_enter()
-            xref.setText(self.ibuff)
+            
+            xref.setText(self.displayBuff)
             gtk.gdk.threads_leave()
             self.ibuff = ""
 
@@ -822,8 +964,11 @@ class synmonitor(synobj):
       self.ibuff = ""
       self.obuff = ""
 
+      self.fullContent = ""
       self.displayBuff = ""
-      self.displayBuffSize = 0
+      self.displayBuffSize = 10
+      self.alive = False
+      self.mInput = False
 
    def disconnectAll(self):
       return 0
@@ -847,17 +992,19 @@ class synapp(synobj):
          if str(obj.__class__) == "synapseObjects.synlink":
             if obj.getOutObj() == self and obj.getOutputNum() == 0:
                print "UPDATING LINK FOR ", self
-               self.peers.append(obj.getInObj())
+               self.peers.append([obj.getInputNum(),obj.getInObj()])
             elif obj.getOutObj() == self and obj.getOutputNum() == 1:
                print "UPDATING LINK FOR ", self
-               self.peersSTDERR.append(obj.getInObj())
+               self.peersSTDERR.append([obj.getInputNum(),obj.getInObj()])
 
    def bcastSTDERR(self):
 
       for peer in self.peersSTDERR:
 
-         print "SENDING ERR MESSAGE \"%s\" TO %s" % (self.obuff2,peer.getName())
-         peer.setIbuff(self.obuff2)
+         (input_num, peerobj) = tuple(peer)  
+
+         print "SENDING ERR MESSAGE \"%s\" TO %s" % (self.obuff2,peerobj.getName())
+         peerobj.setIbuff(self.obuff2)
 
       #self.ibuff = ""
 
@@ -865,44 +1012,63 @@ class synapp(synobj):
           
       self.alive = True
   
-      proc = Popen(self.cmd, shell=True, stdout=PIPE,stdin=PIPE,stderr=PIPE,bufsize=4096)
-      fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
-      fcntl(proc.stdin,F_SETFL,fcntl(proc.stdin,F_GETFL) | os.O_NONBLOCK)            
-      fcntl(proc.stderr,F_SETFL,fcntl(proc.stderr,F_GETFL) | os.O_NONBLOCK) 
+
+      proc = pexpect.spawn(self.cmd)
+
+
+      #proc = Popen(self.cmd, shell=True, stdout=PIPE,stdin=PIPE,stderr=PIPE,bufsize=4096)
+      #fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
+      #fcntl(proc.stdin,F_SETFL,fcntl(proc.stdin,F_GETFL) | os.O_NONBLOCK)            
+      #fcntl(proc.stderr,F_SETFL,fcntl(proc.stderr,F_GETFL) | os.O_NONBLOCK) 
  
       line = ""
       lineErr = ""
-      while(proc.returncode == None and self.alive):
-         
-         proc.poll()
+      while(self.alive):
 
-         (rr,wr,er) = select.select([proc.stdout],[proc.stdin],[proc.stderr],0)
-         for fd in rr:    
-            line = fd.read()
-            if (line != ""):
-               self.obuff = line 
-               self.broadcast() 
-            
+         self.obuff = ""
          try:
-            lineErr = proc.stderr.read()
-            if (lineErr != ""):
-               self.obuff2 = lineErr 
-               self.bcastSTDERR()
+            self.obuff = proc.read_nonblocking(size=4096,timeout=1)
          except:
-             pass
+            pass
+
+         if (self.obuff != ""):            
+            self.broadcast()
+         
+         #proc.poll()
+
+         #(rr,wr,er) = select.select([proc.stdout],[proc.stdin],[proc.stderr],0)
+         #for fd in rr:    
+            #line = fd.read()
+            #if (line != ""):
+               #self.obuff = line 
+               #self.broadcast() 
+            
+         #try:
+            #lineErr = proc.stderr.read()
+            #if (lineErr != ""):
+               #self.obuff2 = lineErr 
+               #self.bcastSTDERR()
+         #except:
+             #pass
+
+
+
 
          if (self.ibuff != ""):
+            (input_num,sep,content) = self.ibuff.partition(":")
             print "WRTIING TO %s STDIN" % (self.name)
-            proc.stdin.write(self.ibuff)
-            proc.stdin.flush()
-            self.ibuff = ""
+            proc.send(content)
+            #proc.sendeof()
+            #proc.stdin.write(content)
+            #proc.stdin.flush()
+            #self.ibuff = ""
             
       try:
-         proc.kill()
+         #proc.kill()
+         pass
       except:
          print "subprocess already closed",self   
          print "return code:", proc.returncode
-     
 
    def __init__(self,name,cmd="",keepalive=True):
 
@@ -914,10 +1080,13 @@ class synapp(synobj):
       self.peers = list()
       self.peersSTDERR = list()
       
+      self.alive = False
+      self.mInput = False
       self.ibuff = ""
       self.obuff = ""
 
       self.alive = False
+      self.mInput = False
 
    def getPeersSTDERR(self):
 
@@ -1016,7 +1185,8 @@ class synserv(synobj):
                self.broadcast() 
       
          if (self.ibuff != "" ):
-            sockfd.send(self.ibuff)
+            (input_num,sep,content) = self.ibuff.partition(":")
+            sockfd.send(content)
          
 
    def __init__(self,name,proto="Tcp",connectInfos="",keepalive=True):
@@ -1035,6 +1205,7 @@ class synserv(synobj):
       self.obuff = ""
 
       self.alive = False
+      self.mInput = False
 
       
 

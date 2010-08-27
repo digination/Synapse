@@ -705,7 +705,7 @@ Drag'n'drop it to the drawing area.</property>
                                 <property name="visible">True</property>
                                 <property name="resize_mode">queue</property>
                                 <child>
-                                  <widget class="GtkTreeView" id="treeview3">
+                                  <widget class="GtkTreeView" id="libtree">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>

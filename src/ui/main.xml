@@ -689,7 +689,7 @@ Drag'n'drop it to the drawing area.</property>
                                 <property name="visible">True</property>
                                 <property name="resize_mode">queue</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeview3">
+                                  <object class="GtkTreeView" id="libtree">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
