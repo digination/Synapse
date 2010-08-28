@@ -27,6 +27,8 @@ import threading
 
 #Global variables definition
 
+### 
+
 RES_PATH = "/usr/share/synapse"
 GOO_COORD= list()
 TARGET_TYPE_PIXMAP = 81
