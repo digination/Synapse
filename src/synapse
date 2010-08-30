@@ -935,7 +935,7 @@ class MainWindow(object):
                if (str(obj.__class__) == "dummy"):
                   obj.run()
                   print "starting APP", obj
-               else:
+               elif (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == False):
                   th0 = thwrapper()
                   th0.setMethod(obj.run)
                   th0.start()

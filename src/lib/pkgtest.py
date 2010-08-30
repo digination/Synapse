@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-from synapsePkg import *
+import os
+from synapseUtils import *
 
-pkgman = pkgManager()
+
+print resclaleColorSel("#00aa00aa00aa");
 
 

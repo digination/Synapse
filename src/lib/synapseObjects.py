@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import gtk
-import glib
+#import glib
 import goocanvas
 
 import sys
 sys.path.append("/usr/lib/synapse")
 from synapseIMVEC import *
 from synapseGTKProperties import *
+from synapseUtils import *
 
 from subprocess import Popen, PIPE
 from fcntl import fcntl , F_GETFL, F_SETFL
@@ -230,6 +231,13 @@ class synobj:
    def setColor(self,color):
       self.color = color
 
+   def getWOI(self):
+
+      return self.WOI
+
+   def setWOI(self,WOI):
+      self.WOI = WOI
+
 
    ## functions for canvas data keeping for pickle/unpickle
    def getCanvasProperties(self):
@@ -408,11 +416,11 @@ class synfilter(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         synfilterGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
         
         colorseldlg.destroy()
@@ -528,12 +536,14 @@ class syntimer(synobj):
    	
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
-       
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+      
+        self.color = resclaleColorSel(ncolor.to_string())
         syntimerGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+
 
         
         colorseldlg.destroy()
@@ -650,11 +660,11 @@ class synjector(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         synjectorGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
         
         colorseldlg.destroy()
@@ -805,11 +815,13 @@ class syncom(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        #IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
 
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         syncomGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+
+        
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
@@ -926,11 +938,11 @@ class synmux(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         synmuxGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
         
         colorseldlg.destroy()
@@ -1046,12 +1058,11 @@ class syndemux(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         syndemuxGTK.icolor.set_text(self.color)
 
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
         
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
@@ -1125,6 +1136,7 @@ class synmonitor(synobj):
    def __init__(self,name):
       synmonitor.nbinst += 1
       self.name = name
+      self.WOI = True
       self.color="DEFAULT"
       
       self.ibuff = ""
@@ -1240,6 +1252,7 @@ class synapp(synobj):
 
       synapp.nbinst+=1
 
+      self.WOI = True
       self.name = name
       self.color="DEFAULT"
       self.cmd = cmd
@@ -1300,11 +1313,11 @@ class synapp(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         synappGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
         
         colorseldlg.destroy()
@@ -1432,11 +1445,11 @@ class synserv(synobj):
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
        
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",ncolor)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",ncolor)
-
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         synservGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
         
         colorseldlg.destroy()
