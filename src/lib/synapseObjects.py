@@ -160,6 +160,10 @@ class synobj:
 
       del self
 
+   def isRunning(self):
+
+      return self.alive
+
    def kill(self):
       self.alive = False
 
@@ -486,6 +490,8 @@ class syntimer(synobj):
 
       while(self.alive == True):
          time.sleep(float(int(self.interval)/1000))
+       
+         if not self.alive: break
          
          if (buff_repeat != ""):
             print "BCASTING ", buff_repeat            
@@ -512,7 +518,9 @@ class syntimer(synobj):
       self.name = name
       self.interval = interval
       self.loop = loop
+      self.WOI = False
       self.color="DEFAULT"
+      self.alive = False
 
       self.ibuff = ""
       self.obuff = ""
@@ -605,6 +613,7 @@ class synjector(synobj):
    def __init__(self,name,injectType="string",data="",linesPerBlock=1,loop=False,fileName=""):
 
       self.name = name
+      self.WOI = False
       self.color="DEFAULT"
       self.injectType = injectType
       self.data = data
@@ -898,6 +907,7 @@ class synmux(synobj):
 
       synmux.nbinst+=1
       self.name = name
+      self.WOI = False
       self.color="DEFAULT"
       self.data = data
       self.timeout = timeout
@@ -1136,7 +1146,7 @@ class synmonitor(synobj):
    def __init__(self,name):
       synmonitor.nbinst += 1
       self.name = name
-      self.WOI = True
+      self.WOI = False
       self.color="DEFAULT"
       
       self.ibuff = ""
@@ -1303,6 +1313,13 @@ class synapp(synobj):
       elif (widget == synappGTK.icmd):
          self.cmd = synappGTK.icmd.get_text()
 
+      elif (widget == synappGTK.iwoi):
+         if synappGTK.iwoi.get_active_text() == "True":
+            self.WOI = True
+         else:
+            self.WOI = False
+
+
    def onColorChange(self,widget):
 
       colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
@@ -1330,6 +1347,7 @@ class synapp(synobj):
 
          synappGTK.iname.disconnect(synappGTK.chdict['iname'])
          synappGTK.icmd.disconnect(synappGTK.chdict['icmd'])
+         synappGTK.iwoi.disconnect(synappGTK.chdict['iwoi'])
          synappGTK.icolorBtn.disconnect(synappGTK.chdict['icolorBtn'])
 
    def getPropWidget(self):
@@ -1337,10 +1355,17 @@ class synapp(synobj):
       synappGTK.iname.set_text(self.name)
       synappGTK.icmd.set_text(self.cmd)
       synappGTK.icolor.set_text(self.color)
+
+      if self.WOI == True:
+         synappGTK.iwoi.set_active(0)
+      else:
+         synappGTK.iwoi.set_active(1)
+
       
 
       synappGTK.chdict['iname'] = synappGTK.iname.connect("changed",self.onTextChange)
       synappGTK.chdict['icmd'] = synappGTK.icmd.connect("changed",self.onTextChange)
+      synappGTK.chdict['iwoi'] = synappGTK.iwoi.connect("changed",self.onTextChange)
       synappGTK.chdict['icolorBtn'] = synappGTK.icolorBtn.connect("clicked",self.onColorChange)
 
       return synappGTK.o
@@ -1523,3 +1548,35 @@ class synserv(synobj):
 
 
       return synservGTK.o
+
+
+
+
+class synReport(synobj):
+
+   def getOutputFile(self):
+
+      return self.output_file
+
+   def setOutputFile(self):
+
+      return self.output_file
+
+   def __init__(name):
+
+      self.name = name
+      self.output_file = ""
+      self.alive = False
+      self.WOI = True
+
+   def run(self):
+ 
+      self.alive = True
+      
+      while (self.alive):
+
+         print "foo"
+
+
+
+

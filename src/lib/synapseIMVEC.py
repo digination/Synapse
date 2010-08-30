@@ -46,6 +46,9 @@ class IMVEC:
    commentPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/commentItem.png" % (RES_PATH),32,32)
    filterPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/filterItem.png" % (RES_PATH),32,32)
    monitorPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),32,32)
+   containerPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),32,32)
+   reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
+
 
    appPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/synappItem.png" % (RES_PATH),16,16)
    servPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/servItem.png" % (RES_PATH),16,16)
@@ -57,6 +60,9 @@ class IMVEC:
    commentPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/commentItem.png" % (RES_PATH),16,16)
    filterPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/filterItem.png" % (RES_PATH),16,16)
    monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
+   containerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),16,16)
+   reportPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),16,16)
+   
 
    resizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/resize.png" % (RES_PATH),16,16)
 

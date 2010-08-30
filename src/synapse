@@ -431,12 +431,12 @@ class document(object):
       documentGTK.iheight.set_text(str(self.height))
       documentGTK.icolor.set_text(self.color)
 
+      #connect just once
+      if len(documentGTK.chdict) == 0: 
 
-      documentGTK.chdict['icolorBtn'] = documentGTK.icolorBtn.connect("clicked",self.onColorChange)
-      documentGTK.chdict['iwidth'] = documentGTK.iwidth.connect("changed",self.onResize)
-      documentGTK.chdict['iheight'] = documentGTK.iheight.connect("changed",self.onResize)
-
-
+         documentGTK.chdict['icolorBtn'] = documentGTK.icolorBtn.connect("clicked",self.onColorChange)
+         documentGTK.chdict['iwidth'] = documentGTK.iwidth.connect("changed",self.onResize)
+         documentGTK.chdict['iheight'] = documentGTK.iheight.connect("changed",self.onResize)
 
       return documentGTK.o
 
@@ -891,6 +891,23 @@ class MainWindow(object):
 
       
 
+   def woiWatchThread(self):
+
+      while(self.woiWatchAlive):
+
+         for obj in self.woiObjects:
+
+            if obj.getIbuff() != "" and not obj.isRunning() :
+
+               th0 = thwrapper()
+               th0.setMethod(obj.run)
+               th0.start()
+               print "thread for object", obj, "started"
+               
+         time.sleep(0.001)
+      
+
+
 
 
    #button clicked callback
@@ -917,31 +934,57 @@ class MainWindow(object):
 
       if widget == self.stop_btn:
   
+         try:
+            if self.woiWatchAlive:
+               print "stopping watch thread"
+               self.woiWatchAlive = False
+         except:
+            pass
+
 
          for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-               obj.kill()
+            if (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink"):
+               if (obj.isRunning()):
+                  print "stopping thread for object", obj
+                  obj.kill()
                if (str(obj.__class__) == "synapseObjects.synmonitor"):
                   IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
-               print "stopping thread for object", obj, "started"
+         
          IMVEC.running = False
 
 
 
       if widget == self.play_btn:
    
+         self.woiObjects = list()
+
          if (IMVEC.running == False):
 
             for obj in IMVEC.activeDoc.getContainer().getSynObjects():
                if (str(obj.__class__) == "dummy"):
                   obj.run()
                   print "starting APP", obj
-               elif (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == False):
+               elif (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == False):
                   th0 = thwrapper()
                   th0.setMethod(obj.run)
                   th0.start()
                   print "thread for object", obj, "started"
+               elif (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == True):
+                  self.woiObjects.append(obj)
+
+            if len(self.woiObjects) != 0:
+               th1 = thwrapper()
+               th1.setMethod(self.woiWatchThread)
+               self.woiWatchAlive = True
+               th1.start()
+               print "thread for WOI Watcher started"
+ 
+               
+
             IMVEC.running = True    
-             
+                         
+
+
 
       if widget == self.zoomin_btn:
          IMVEC.activeDoc.zoomIn()
@@ -1096,6 +1139,24 @@ class MainWindow(object):
       self.synject_btn = builder.get_object("synject_btn")
       self.synject_img = builder.get_object("synject_img")
       self.synject_img.set_from_pixbuf(IMVEC.injectorPixbuf)
+
+      self.syncontainer_btn = builder.get_object("syncontainer_btn")
+      self.syncontainer_img = builder.get_object("syncontainer_img")
+      self.syncontainer_img.set_from_pixbuf(IMVEC.containerPixbuf)
+
+
+      self.synreport_btn = builder.get_object("synreport_btn")
+      self.synreport_img = builder.get_object("synreport_img")
+      self.synreport_img.set_from_pixbuf(IMVEC.reportPixbuf)
+
+      try:
+
+         from reportlab.pdfgen import canvas
+         from reportlab.lib.units import inch
+
+      except:
+         print "reportlab not found, disabling PDF reporting..."
+         self.synreport_btn.hide()
 
 
       self.zoomin_btn = builder.get_object("zoomin_btn")

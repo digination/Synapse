@@ -599,6 +599,27 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="position">4</property>
                                       </packing>
                                     </child>
+                                    <child>
+                                      <widget class="GtkButton" id="syncontainer_btn">
+                                        <property name="height_request">46</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip" translatable="yes">Adds a Container to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <widget class="GtkImage" id="syncontainer_img">
+                                            <property name="visible">True</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">5</property>
+                                      </packing>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="position">0</property>
@@ -701,6 +722,26 @@ Drag'n'drop it to the drawing area.</property>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="position">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="synreport_btn">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip" translatable="yes">Adds a Report item to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <widget class="GtkImage" id="synreport_img">
+                                            <property name="visible">True</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">5</property>
                                       </packing>
                                     </child>
                                   </widget>

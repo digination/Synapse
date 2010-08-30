@@ -665,6 +665,39 @@ class syntimerGTK:
 
 class synmonitorGTK:
 
-   o = gtk.Label(str="None")
+   o = gtk.HBox()
+
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+
+   lwoi = gtk.Label(str= "Wake on Input")
+   iwoi = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   iwoi.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   iwoi.pack_start(cellr0)
+   iwoi.add_attribute(cellr0, 'text', 0)
+
+   iwoi.append_text("True")
+   iwoi.append_text("False")
+   iwoi.set_active(0)
+
+   gtkPVbox1.pack_start(lwoi,False,True,10)
+   gtkPVbox2.pack_start(iwoi,False,True,5)
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      if (child2 != None):
+         child2.show()
+
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
+
+   for child in o.get_children():
+
+      child.show()
+
+   o.show()
 
 
