@@ -49,6 +49,8 @@ class IMVEC:
    containerPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),32,32)
    reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
 
+   exportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export.png" % (RES_PATH),32,32)
+
 
    appPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/synappItem.png" % (RES_PATH),16,16)
    servPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/servItem.png" % (RES_PATH),16,16)
@@ -66,7 +68,6 @@ class IMVEC:
 
    resizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/resize.png" % (RES_PATH),16,16)
 
-
    monitorMaximizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monMax.xpm" % (RES_PATH),16,16)
    monitorHidePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monHide.xpm" % (RES_PATH),16,16)
 
@@ -74,4 +75,9 @@ class IMVEC:
    linkPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/linkItem.png" % (RES_PATH),16,16)
 
    synapse_logo = gtk.gdk.pixbuf_new_from_file("%s/images/synapse.png" % (RES_PATH))
+
+   extendCursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
+   
+
+
 

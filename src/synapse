@@ -10,6 +10,7 @@ import gobject
 import goocanvas
 import getpass
 
+
 import sys
 sys.path.append("/usr/lib/synapse")
 from synapseObjects import *
@@ -18,6 +19,7 @@ from synapseCanvas import *
 from synapseCanvas import motion_notify
 from synapseIMVEC import *
 from synapsePkg import *
+from synapseUtils import *
 import pickle
 
 
@@ -126,6 +128,9 @@ class document(object):
             pixbuf = IMVEC.linkPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synserv"):
             pixbuf = IMVEC.servPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.syncontainer"):
+            pixbuf = IMVEC.containerPixbuf_s
+
 
          iter = LS0.append()
          LS0.set(iter,0,pixbuf,1,obj.getName())
@@ -292,6 +297,20 @@ class document(object):
 
          self.refresh_objects_list()
 
+
+      elif (context.get_source_widget().get_name() == "syncontainer_btn"):
+
+         self.nbcontainers+=1
+         newobj = syncontainer("Container%d" % (self.nbcontainers))
+         newitem = containerItem(self.root)
+         self.container.append(linker(newobj,newitem))         
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Container%d" % (self.nbcontainers))
+
+         self.refresh_objects_list()
+
        
    def zoomOut(self):
       
@@ -342,6 +361,14 @@ class document(object):
       self.canvas.set_bounds(0, 0,nwidth,nheight)
 
     
+   def getCR(self):
+
+      return self.cairo_context
+
+   def getSyncontainersList(self):
+
+      return self.syncontainersList
+
    def getContainer(self):
 
       return self.container  
@@ -417,9 +444,9 @@ class document(object):
    	
       if response == gtk.RESPONSE_OK:
         ncolor = colorsel.get_current_color()
-        self.rect.set_property("fill_color",ncolor)
-        self.color = ncolor.to_string()
+        self.color = resclaleColorSel(ncolor.to_string())
         documentGTK.icolor.set_text(self.color)
+        self.rect.set_property("fill_color",self.color)
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
@@ -469,6 +496,9 @@ class document(object):
       #define a new empty objects container
       self.container = container()
 
+      self.syncontainersList = list()
+
+
       self.activeMember = None
       self.prevMember = None
 
@@ -491,7 +521,9 @@ class document(object):
       self.nbfilters=0
       self.nbmonitors = 0
       self.nbservices = 0
+      self.nbcontainers = 0
       self.zoom = 1
+      
       
       
 
@@ -515,6 +547,7 @@ class document(object):
       view_port = gtk.Viewport()
       
       self.canvas = goocanvas.Canvas()
+  
 
       self.canvas.add_events(gtk.gdk.MOTION_NOTIFY | gtk.gdk.BUTTON_PRESS)
       self.canvas.connect("motion_notify_event", motion_notify)
@@ -532,6 +565,8 @@ class document(object):
     
       self.canvas.set_size_request(self.width,self.height)
       self.canvas.set_bounds(0, 0,self.width, self.height)
+
+      self.cairo_context = None
 
       self.root = self.canvas.get_root_item()
       self.rect = goocanvas.Rect(parent=self.root,x=0, y=0, width=self.width, height=self.height,
@@ -580,6 +615,21 @@ class document(object):
    def getRootItem(self):
 
       return self.root
+
+
+   #def changeCursor(self,cursor):
+
+      #self.canvas.window.set_cursor(cursor)
+   
+
+   def getItemsAt(self,x,y):
+
+      print x
+
+      #self.canvas.create_cairo_context()
+
+      #return self.rect.get_items_at(x,y,,False,False)
+
 
 
    #def getObjectList(self):
@@ -1281,6 +1331,11 @@ class MainWindow(object):
       self.synmon_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
 
+      self.syncontainer_btn.connect("drag_data_get", self.sendCallback)
+      self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
 
 
       self.synapp_btn.set_name("synapp_btn")
@@ -1294,6 +1349,8 @@ class MainWindow(object):
       self.synfilter_btn.set_name("synfilter_btn")
       self.synserv_btn.set_name("synserv_btn")
       self.synject_btn.set_name("synject_btn")
+
+      self.syncontainer_btn.set_name("syncontainer_btn")
 
 
       self.hpaned1.set_position(800)

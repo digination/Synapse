@@ -51,10 +51,17 @@ def motion_notify(widget, event):
             hidebtn.set_property("x", RESIZED_OBJECT.getMF().get_property("width") -40 )
             maxbtn.set_property("x",  RESIZED_OBJECT.getMF().get_property("width") -20 )
 
+         elif str(RESIZED_OBJECT.__class__) == "synapseCanvas.containerItem":
+            RESIZED_OBJECT.replaceIcon()
+
 
 
 
       elif MOVED_OBJECT != None:
+
+
+         print IMVEC.activeDoc.getItemsAt(int(event.x),int(event.y))
+
          MOVED_OBJECT.set_property("x",int(event.x)-COORDS_OFFSET[0])
          MOVED_OBJECT.set_property("y",int(event.y)-COORDS_OFFSET[1])
 
@@ -81,6 +88,30 @@ def compute_bary(item):
    coords = (x,y)
 
    return coords
+
+
+def compute_bary_internal(item):
+
+   coords = tuple()
+
+   item_width = item.get_property("width")
+
+   item_height = item.get_property("height")
+
+   item_x = item.get_property("x")
+
+   item_y = item.get_property("y")
+
+   x = item_x + ( item_width / 2 )
+
+   y = item_y + (item_height / 2 )
+
+   coords = (x,y)
+
+   return coords
+
+
+
 
 
 class synItem():
@@ -770,6 +801,16 @@ class monitorItem(synItem):
       RESIZED_OBJECT = None
 
 
+   def on_extend_enter(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.extendCursor)
+
+
+   def on_extend_leave(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(None)
+
+
    def updateInputs(self):
 
       print "MF_X_COORD:", self.mf.get_property("x")
@@ -892,7 +933,12 @@ class monitorItem(synItem):
  
       self.extender.connect("button-press-event",self.on_extend_click)
       self.extender.connect("button-release-event",self.on_extend_release)
-      
+
+
+      self.extender.connect("enter-notify-event",self.on_extend_enter)
+      self.extender.connect("leave-notify-event",self.on_extend_leave)      
+
+
       self.hideBtn.connect("button-press-event",self.on_hide_click)
       self.maxBtn.connect("button-press-event",self.on_maximize_click)
 
@@ -1101,6 +1147,17 @@ class commentItem(synItem):
       RESIZED_OBJECT = None
 
 
+   def on_extend_enter(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.extendCursor)
+
+
+   def on_extend_leave(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(None)
+
+
+
    def getExtender(self):
       return self.extender
 
@@ -1144,7 +1201,114 @@ class commentItem(synItem):
       self.ltext.connect("button-press-event",self.objectSelectionChange)
       self.ltext.connect("button-release-event",self.on_mf_released)
  
-      self.extender.connect("button-press-event",self.on_extend_click)
+
+      self.extender.connect("enter-notify-event",self.on_extend_enter)
+      self.extender.connect("leave-notify-event",self.on_extend_leave)
+
+
+      self.extender.connect("button-press-event",self.on_extend_click)      
+      self.extender.connect("button-release-event",self.on_extend_release)
+
+
+    
+class containerItem(synItem):
+
+
+   def replaceIcon(self):
+
+      (mfbary_x,mfbary_y) = compute_bary_internal(self.mf)
+
+      self.icon.set_property("x",mfbary_x-16)
+      self.icon.set_property("y",mfbary_y-16)
+
+   def on_extend_click(self,item,target_item,event):
+      global RESIZED_OBJECT
+      RESIZED_OBJECT = self
+
+   def on_extend_release(self,item,target_item,event):
+      global RESIZED_OBJECT
+      RESIZED_OBJECT = None
+
+
+
+   def on_extend_enter(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.extendCursor)
+
+
+   def on_extend_leave(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(None)
+
+
+   def getExtender(self):
+      return self.extender
+
+   def setText(self,text):
+
+      self.ltext.set_property("text",text)
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+
+      self.pixbuf = IMVEC.containerPixbuf
+      self.exportPixbuf = IMVEC.exportPixbuf
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+      self.inputs = list()
+      self.outputs = list()
+
+     
+      self.mf = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=15, radius_y=15,width=300, height=200,
+				stroke_color="#000000", fill_color_rgba=0x151515dd,
+				line_width=2)
+
+
+      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=15, radius_y=15, width=150, height=35,
+				stroke_color="#cccccc", fill_color_rgba=0xcccccccc,
+				line_width=0)
       
+
+      self.icon = goocanvas.Image(parent = self.o,x=0,y=0,pixbuf=self.pixbuf)
+      self.replaceIcon()
+     
+
+     
+      self.exporticon = goocanvas.Image(parent = self.o,x=10,y=7,pixbuf=self.exportPixbuf)
+
+
+
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="foobar", x=50, y=17,
+						width=200,
+						fill_color="back")
+
+
+
+
+
+
+      self.extender = goocanvas.Image(parent = self.o,x=285,y=185,pixbuf=IMVEC.resizePixbuf) 
+
+      #goocanvas.Path(parent = self.o, data="M 185 100 L 200 85 L 200 100 L 185 100 z", stroke_color="black", fill_color="#cc99ff", line_width=1)
+      
+      self.extender.set_property("x",self.extender.get_property("x")+6)
+      self.extender.set_property("y",self.extender.get_property("y")+6)
+   
+      self.connectAll()
+      self.ltext.connect("button-press-event",self.on_mf_clicked)
+      self.ltext.connect("button-press-event",self.objectSelectionChange)
+      self.ltext.connect("button-release-event",self.on_mf_released)
+ 
+
+
+      self.extender.connect("enter-notify-event",self.on_extend_enter)
+      self.extender.connect("leave-notify-event",self.on_extend_leave)
+
+     
+      self.extender.connect("button-press-event",self.on_extend_click)
       self.extender.connect("button-release-event",self.on_extend_release)
 

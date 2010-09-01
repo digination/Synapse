@@ -1580,3 +1580,23 @@ class synReport(synobj):
 
 
 
+class syncontainer(synobj):
+
+
+   def disconnectAll(self):
+      return
+
+   def getPropWidget(self):
+
+      return
+
+
+   def __init__(self,name):
+
+      self.name = name
+      self.alive = False
+      self.WOI = True
+
+   def run(self):
+ 
+     return
