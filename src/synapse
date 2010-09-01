@@ -303,7 +303,9 @@ class document(object):
          self.nbcontainers+=1
          newobj = syncontainer("Container%d" % (self.nbcontainers))
          newitem = containerItem(self.root)
-         self.container.append(linker(newobj,newitem))         
+         self.container.append(linker(newobj,newitem))
+         self.syncontainersList.append(linker(newobj,newitem))
+        
 
          newitem.getO().set_property("x",x)
          newitem.getO().set_property("y",y)
@@ -622,13 +624,13 @@ class document(object):
       #self.canvas.window.set_cursor(cursor)
    
 
-   def getItemsAt(self,x,y):
+   #def getItemsAt(self,x,y):
 
-      print x
+      #print x
 
-      #self.canvas.create_cairo_context()
+      #self.cairo_context = self.canvas.create_cairo_context()
 
-      #return self.rect.get_items_at(x,y,,False,False)
+      #return self.rect.get_items_at(x,y,self.cairo_context,False,False)
 
 
 

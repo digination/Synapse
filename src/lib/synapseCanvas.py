@@ -59,8 +59,18 @@ def motion_notify(widget, event):
 
       elif MOVED_OBJECT != None:
 
+         for syn_c in IMVEC.activeDoc.getSyncontainersList():
 
-         print IMVEC.activeDoc.getItemsAt(int(event.x),int(event.y))
+            sync_width = syn_c.getSynItem().getMF().get_property("width")
+            sync_height = syn_c.getSynItem().getMF().get_property("height")
+            sync_x = syn_c.getSynItem().getO().get_property("x") -20
+            sync_y = syn_c.getSynItem().getO().get_property("y") -20
+
+            if syn_c.getSynItem().getO() != MOVED_OBJECT:
+               if (int(event.x)-COORDS_OFFSET[0] < sync_x + sync_width  and int(event.x)-COORDS_OFFSET[0] > sync_x and int(event.y)-COORDS_OFFSET[1] < sync_y + sync_height and int(event.y)-COORDS_OFFSET[1] > sync_y):
+                  #print "BLOCK ADDED TO CONTAINER", syn_c
+                  MOVED_OBJECT.set_property("parent",syn_c.getSynItem().getO())
+
 
          MOVED_OBJECT.set_property("x",int(event.x)-COORDS_OFFSET[0])
          MOVED_OBJECT.set_property("y",int(event.y)-COORDS_OFFSET[1])
@@ -77,9 +87,9 @@ def compute_bary(item):
 
    item_height = item.get_property("height")
 
-   item_x = item.get_parent().get_property("x") +  item.get_property("x")
+   item_x = item.get_parent().get_parent().get_property("x") + item.get_parent().get_property("x") +  item.get_property("x")
 
-   item_y = item.get_parent().get_property("y") +  item.get_property("y")
+   item_y = item.get_parent().get_parent().get_property("y") + item.get_parent().get_property("y") +  item.get_property("y")
 
    x = item_x + ( item_width / 2 )
 
@@ -1268,7 +1278,7 @@ class containerItem(synItem):
 				line_width=2)
 
 
-      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=15, radius_y=15, width=150, height=35,
+      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=150, height=35,
 				stroke_color="#cccccc", fill_color_rgba=0xcccccccc,
 				line_width=0)
       
