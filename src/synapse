@@ -725,9 +725,10 @@ class MainWindow(object):
                   
 
          #suppress all references to the object
+         IMVEC.activeDoc.getActiveM().getSynItem().getO().remove()
          IMVEC.activeDoc.getContainer().delete(IMVEC.activeDoc.getActiveM())
-         IMVEC.activeDoc.getRootItem().remove_child(IMVEC.activeDoc.getActiveM().getSynItem().getO())
-
+         #IMVEC.activeDoc.getRootItem().remove_child(IMVEC.activeDoc.getActiveM().getSynItem().getO())
+         
 
 
          IMVEC.activeDoc.getContainer().updatePeers()
@@ -995,7 +996,9 @@ class MainWindow(object):
 
 
          for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-            if (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink"):
+            if (str(obj.__class__) != "synapseObjects.syncom") \
+            and (str(obj.__class__) != "synapseObjects.synlink") \
+            and (str(obj.__class__) != "synapseObjects.syncontainer"):
                if (obj.isRunning()):
                   print "stopping thread for object", obj
                   obj.kill()
@@ -1011,17 +1014,25 @@ class MainWindow(object):
          self.woiObjects = list()
 
          if (IMVEC.running == False):
+         #define a boolean executable attr for synObjects to avoid repeted and ...
+
 
             for obj in IMVEC.activeDoc.getContainer().getSynObjects():
                if (str(obj.__class__) == "dummy"):
                   obj.run()
                   print "starting APP", obj
-               elif (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == False):
+               elif (str(obj.__class__) != "synapseObjects.syncom") \
+               and (str(obj.__class__) != "synapseObjects.synlink") \
+               and (str(obj.__class__) != "synapseObjects.syncontainer") \
+               and (obj.getWOI() == False):
                   th0 = thwrapper()
                   th0.setMethod(obj.run)
                   th0.start()
                   print "thread for object", obj, "started"
-               elif (str(obj.__class__) != "synapseObjects.syncom") and (str(obj.__class__) != "synapseObjects.synlink") and (obj.getWOI() == True):
+               elif (str(obj.__class__) != "synapseObjects.syncom") \
+               and (str(obj.__class__) != "synapseObjects.synlink") \
+               and (str(obj.__class__) != "synapseObjects.syncontainer") \
+               and (obj.getWOI() == True):
                   self.woiObjects.append(obj)
 
             if len(self.woiObjects) != 0:

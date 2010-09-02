@@ -4,6 +4,8 @@ import sys
 sys.path.append("/usr/lib/synapse")
 from synapseObjects import *
 from synapseIMVEC import *
+from synapseUtils import *
+
 
 import gtk
 
@@ -17,6 +19,7 @@ IMVEC.linkList = list()
 MOVED_OBJECT=None
 ACTIVE_OBJECT=None
 RESIZED_OBJECT = None
+PRE_CONTAINER = None
 COORDS_OFFSET = list()
 
 COORDS = list()
@@ -31,15 +34,20 @@ def motion_notify(widget, event):
       global MOVED_OBJECT
       global RESIZED_OBJECT
       global COORDS_OFFSET
+      global PRE_CONTAINER
 
 
       MOUSE_COORDS = [int(event.x),int(event.y)]
       
       if RESIZED_OBJECT != None:
-         RESIZED_OBJECT.getO().set_property("width",int(event.x) +40 - RESIZED_OBJECT.getO().get_property("x") )
-         RESIZED_OBJECT.getO().set_property("height",int(event.y)+40 - RESIZED_OBJECT.getO().get_property("y") )
-         RESIZED_OBJECT.getMF().set_property("height",int(event.y) - RESIZED_OBJECT.getO().get_property("y") )
-         RESIZED_OBJECT.getMF().set_property("width",int(event.x) - RESIZED_OBJECT.getO().get_property("x") )
+
+         (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),RESIZED_OBJECT.getO(),0,0)
+         
+      
+         RESIZED_OBJECT.getO().set_property("width",int(event.x) +40 - abs_coord_x )
+         RESIZED_OBJECT.getO().set_property("height",int(event.y)+40 - abs_coord_y )
+         RESIZED_OBJECT.getMF().set_property("height",int(event.y) - abs_coord_y )
+         RESIZED_OBJECT.getMF().set_property("width",int(event.x) - abs_coord_x )
          RESIZED_OBJECT.getExtender().set_property("x",RESIZED_OBJECT.getMF().get_property("width")-10)
          RESIZED_OBJECT.getExtender().set_property("y",RESIZED_OBJECT.getMF().get_property("height")-10)
 
@@ -59,6 +67,7 @@ def motion_notify(widget, event):
 
       elif MOVED_OBJECT != None:
 
+        
          for syn_c in IMVEC.activeDoc.getSyncontainersList():
 
             sync_width = syn_c.getSynItem().getMF().get_property("width")
@@ -69,7 +78,15 @@ def motion_notify(widget, event):
             if syn_c.getSynItem().getO() != MOVED_OBJECT:
                if (int(event.x)-COORDS_OFFSET[0] < sync_x + sync_width  and int(event.x)-COORDS_OFFSET[0] > sync_x and int(event.y)-COORDS_OFFSET[1] < sync_y + sync_height and int(event.y)-COORDS_OFFSET[1] > sync_y):
                   #print "BLOCK ADDED TO CONTAINER", syn_c
-                  MOVED_OBJECT.set_property("parent",syn_c.getSynItem().getO())
+        
+                  IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.plusCursor)          
+                  PRE_CONTAINER = syn_c.getSynItem().getO()
+               else:
+                  PRE_CONTAINER = None
+                  IMVEC.activeDoc.getCanvas().window.set_cursor(None)
+               
+        
+
 
 
          MOVED_OBJECT.set_property("x",int(event.x)-COORDS_OFFSET[0])
@@ -87,15 +104,22 @@ def compute_bary(item):
 
    item_height = item.get_property("height")
 
-   item_x = item.get_parent().get_parent().get_property("x") + item.get_parent().get_property("x") +  item.get_property("x")
+   (nx,ny) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),item,0,0)
 
-   item_y = item.get_parent().get_parent().get_property("y") + item.get_parent().get_property("y") +  item.get_property("y")
 
-   x = item_x + ( item_width / 2 )
+   #item_x =  +  item.get_property("x")
 
-   y = item_y + (item_height / 2 )
+   #item_y = item.get_parent().get_parent().get_property("y") + item.get_parent().get_property("y") +  item.get_property("y")
+
+   x = nx + ( item_width / 2 )
+
+   y = ny + (item_height / 2 )
 
    coords = (x,y)
+
+
+   #print "[nx,ny] : [%d,%d]" % (nx,ny)
+   #print "[x,y] : [%d,%d]" % (x,y)
 
    return coords
 
@@ -127,8 +151,8 @@ def compute_bary_internal(item):
 class synItem():
 
 
-   def objectSelectionChange(self,item, target_item, event):
 
+   def objectSelectionChange(self,item, target_item, event):
 
       global ACTIVE_OBJECT
 
@@ -141,7 +165,17 @@ class synItem():
 
    def on_mf_released(self,item,target_item,event):
       global MOVED_OBJECT
+      global PRE_CONTAINER
+
+      if PRE_CONTAINER != None and MOVED_OBJECT.get_parent() != PRE_CONTAINER:
+         MOVED_OBJECT.set_property("parent",PRE_CONTAINER)
+         MOVED_OBJECT.set_property("x",MOVED_OBJECT.get_property("x")- PRE_CONTAINER.get_property("x"))
+         MOVED_OBJECT.set_property("y",MOVED_OBJECT.get_property("y")- PRE_CONTAINER.get_property("y"))
+
+
       MOVED_OBJECT = None
+      PRE_CONTAINER = None
+      IMVEC.activeDoc.getCanvas().window.set_cursor(None)
 
    def on_mf_clicked(self,item,target_item,event):
       
@@ -169,6 +203,10 @@ class synItem():
       if (item != None):
          MOVED_OBJECT = self.getO()
          ACTIVE_OBJECT = self
+
+         (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
+         #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
+
          COORDS_OFFSET = [ MOUSE_COORDS[0] - self.getO().get_property("x") ,  MOUSE_COORDS[1] - self.getO().get_property("y")]
 
    #stops link line

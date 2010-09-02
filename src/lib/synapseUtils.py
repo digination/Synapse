@@ -1,6 +1,27 @@
 import os
 
 
+
+
+
+def getAbsoluteCoords(ref,item,x,y):
+
+   if item == ref:
+      return (x,y)
+
+   x += item.get_property("x")
+   y += item.get_property("y")
+
+   if (item.get_parent() != None):
+
+      (x,y) = getAbsoluteCoords(ref,item.get_property("parent"),x,y)    
+   
+   return (x,y)
+
+
+
+
+
 def resclaleColorSel(color):
 
       if len(color) <= 7:

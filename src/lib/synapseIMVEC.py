@@ -77,6 +77,8 @@ class IMVEC:
    synapse_logo = gtk.gdk.pixbuf_new_from_file("%s/images/synapse.png" % (RES_PATH))
 
    extendCursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
+   plusCursor = gtk.gdk.Cursor(gtk.gdk.PLUS)
+   
    
 
 
