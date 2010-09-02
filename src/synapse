@@ -313,6 +313,21 @@ class document(object):
 
          self.refresh_objects_list()
 
+
+      elif (context.get_source_widget().get_name() == "synreport_btn"):
+
+         self.nbreports+=1
+         newobj = synreport("Report%d" % (self.nbreports))
+         newitem = reportItem(self.root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Report%d" % (self.nbreports))
+
+         self.refresh_objects_list()
+
+
        
    def zoomOut(self):
       
@@ -524,6 +539,7 @@ class document(object):
       self.nbmonitors = 0
       self.nbservices = 0
       self.nbcontainers = 0
+      self.nbreports = 0
       self.zoom = 1
       
       
@@ -1348,7 +1364,9 @@ class MainWindow(object):
       self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
 
-
+      self.synreport_btn.connect("drag_data_get", self.sendCallback)
+      self.synreport_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
 
 
       self.synapp_btn.set_name("synapp_btn")
@@ -1364,7 +1382,7 @@ class MainWindow(object):
       self.synject_btn.set_name("synject_btn")
 
       self.syncontainer_btn.set_name("syncontainer_btn")
-
+      self.synreport_btn.set_name("synreport_btn")
 
       self.hpaned1.set_position(800)
       self.vpaned1.set_position(250)

@@ -20,6 +20,15 @@ import copy
 import socket
 import pexpect
 
+try:
+   from reportlab.pdfgen import canvas
+   from reportlab.lib.units import inch
+except:
+
+   pass
+
+
+
 
 #class to embbed and manipulate synlinker objects
 class container:
@@ -1536,10 +1545,6 @@ class synserv(synobj):
 
 
 
-
-
-
-
       synservGTK.chdict['iname'] = synservGTK.iname.connect("changed",self.onTextChange)
       synservGTK.chdict['icolorBtn'] = synservGTK.icolorBtn.connect("clicked",self.onColorChange)
       synservGTK.chdict['ici'] = synservGTK.ici.connect("changed",self.onTextChange)
@@ -1552,7 +1557,7 @@ class synserv(synobj):
 
 
 
-class synReport(synobj):
+class synreport(synobj):
 
    def getOutputFile(self):
 
@@ -1562,20 +1567,68 @@ class synReport(synobj):
 
       return self.output_file
 
-   def __init__(name):
+   def disconnectAll(self):
+
+      return
+      
+   def getPropWidget(self):
+
+      return gtk.HBox()
+
+
+   def __init__(self,name):
 
       self.name = name
-      self.output_file = ""
+      self.output_file = "foo.pdf"
       self.alive = False
-      self.WOI = True
+      self.WOI = False
+      self.mInput = False
+
+      self.textFont = "Helvetica"
+      self.textFontSize = 10
+
+      self.ibuff = ""
+      self.obuff = None
+
+   def kill(self):
+
+      self.writeToPDF()
+      self.alive = False
+
+
+   def writeToPDF(self):
+
+      try:
+
+         print "writing %s to report" % (self.pdfContent)
+
+         my_canvas = canvas.Canvas(self.output_file)
+         my_canvas.setFont(self.textFont,self.textFontSize)
+         my_canvas.drawRightString(5.0 * inch, 8.0 * inch,self.pdfContent)
+         my_canvas.save()
+         self.pdfContent = ""
+
+      except:
+
+         print "reportlab API not present, aborting report writing"
+
 
    def run(self):
  
       self.alive = True
-      
+      self.pdfContent = ""      
+
       while (self.alive):
 
-         print "foo"
+          if (self.ibuff != ""):
+            (input_num,sep,content) = self.ibuff.partition(":")
+            print "%s IBUFF: %s" % (self.name,content)
+            self.pdfContent+= content
+            self.ibuff = ""
+
+
+    
+         
 
 
 
@@ -1583,20 +1636,48 @@ class synReport(synobj):
 class syncontainer(synobj):
 
 
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        syncontainerGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+
+   def onTextChange(self,widget):
+
+      if (widget == syncontainerGTK.iname):
+         self.name = syncontainerGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(syncontainerGTK.iname.get_text())
+
+
    def disconnectAll(self):
-      return
+
+      syncontainerGTK.iname.disconnect(syncontainerGTK.chdict['iname'])
+      syncontainerGTK.icolorBtn.disconnect(syncontainerGTK.chdict['icolorBtn'])
 
    def getPropWidget(self):
 
-      return
+      syncontainerGTK.iname.set_text(self.name)
+      syncontainerGTK.icolor.set_text(self.color)
+
+      syncontainerGTK.chdict['iname'] = syncontainerGTK.iname.connect("changed",self.onTextChange)
+      syncontainerGTK.chdict['icolorBtn'] = syncontainerGTK.icolorBtn.connect("clicked",self.onColorChange)
+
+      return syncontainerGTK.o
+
 
 
    def __init__(self,name):
 
       self.name = name
-      self.alive = False
-      self.WOI = True
-
-   def run(self):
- 
-     return
+      self.color = "DEFAULT"

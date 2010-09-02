@@ -1,14 +1,14 @@
-Implement Wake on input feature
+Implement Wake on input feature (70% done)
 Implement syntest component
 Finish to implement synmux,syndemux,synfilter components
 Finish to implement Building blocks GTK classes
-Implement saving and loading : 90%
+Implement saving and loading ( 95% done )
 Implement multi select,clipboard and undu/redo
 Implement shortcurs+menus
 Implement about box
 Implement display buffer
 Implement building blocks z-index
-
-v.02:
-Implement reports
+Implement reports ( 50% done)
 Embeeded Documentation
+
+

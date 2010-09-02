@@ -701,3 +701,39 @@ class synmonitorGTK:
    o.show()
 
 
+
+class syncontainerGTK:
+
+   o = gtk.HBox()
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+   lname = gtk.Label(str="Name")
+
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+   
+   iname = gtk.Entry()
+
+   gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+  
+   gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
+ 
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      child2.show()
+
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()
+

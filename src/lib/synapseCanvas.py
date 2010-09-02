@@ -1057,8 +1057,8 @@ class headerItem():
          #lower the whole canvas of 118px
          if IMVEC.activeDoc != None:
             for item in IMVEC.activeDoc.getContainer().getSynItems():
-               print item
-               item.getO().set_property("y",item.getO().get_property("y")-118)
+               if item.getO().get_parent() == IMVEC.activeDoc.getRootItem():
+                  item.getO().set_property("y",item.getO().get_property("y")-118)
           
 
       else:
@@ -1083,8 +1083,8 @@ class headerItem():
          #lower the whole canvas of 118px
          if IMVEC.activeDoc != None:
             for item in IMVEC.activeDoc.getContainer().getSynItems():
-               print item
-               item.getO().set_property("y",item.getO().get_property("y")+118)
+               if item.getO().get_parent() == IMVEC.activeDoc.getRootItem():
+                  item.getO().set_property("y",item.getO().get_property("y")+118)
 
 
 
@@ -1313,7 +1313,7 @@ class containerItem(synItem):
      
       self.mf = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=15, radius_y=15,width=300, height=200,
 				stroke_color="#000000", fill_color_rgba=0x151515dd,
-				line_width=2)
+				line_width=4)
 
 
       self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=150, height=35,
@@ -1359,4 +1359,38 @@ class containerItem(synItem):
      
       self.extender.connect("button-press-event",self.on_extend_click)
       self.extender.connect("button-release-event",self.on_extend_release)
+
+
+
+class reportItem(synItem):
+
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
+				stroke_color="#cccccc", fill_color="#dadada",
+				line_width=4)
+
+      self.pixbuf = IMVEC.reportPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+
+    
+
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.inputs[0].set_property("x",0)
+      self.inputs[0].set_property("y",10)
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#dadada")
+
+      self.connectAll()
 
