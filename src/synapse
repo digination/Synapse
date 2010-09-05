@@ -130,6 +130,8 @@ class document(object):
             pixbuf = IMVEC.servPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syncontainer"):
             pixbuf = IMVEC.containerPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synreport"):
+            pixbuf = IMVEC.reportPixbuf_s
 
 
          iter = LS0.append()
@@ -832,8 +834,7 @@ class MainWindow(object):
 
       IMVEC.activeDoc.updateDocProperties(docprops)
       
-
-      
+     
       nbsynapp = 0
       nbsyntest = 0
       nbcomments = 0
@@ -844,6 +845,8 @@ class MainWindow(object):
       nbfilters = 0
       nbmonitors = 0
       nbservices = 0
+      nbcontainers = 0
+      nbreports = 0
 
       
       for pobj in pickled_objects:
@@ -915,7 +918,10 @@ class MainWindow(object):
             newitem = filterItem(root)
             nbfilters +=1
 
-         
+         elif str(pobj.__class__) == "synapseObjects.synreport":
+            print "REPORT ITEM ADDED"
+            newitem = reportItem(root)
+            nbreports +=1
 
          if (newitem != None):
             newitem.getO().set_property("x",canvasProperties[0])
@@ -1109,7 +1115,7 @@ class MainWindow(object):
           if response == gtk.RESPONSE_OK:
             savefile = dialog.get_filename()
             dialog.destroy()
-
+          
             #try:
             fh = open(savefile,"w+")
             pickled_objects = list()    
@@ -1132,9 +1138,12 @@ class MainWindow(object):
             IMVEC.activeDoc.setSavedName(savedName)
             IMVEC.activeDoc.setHeadLabel(savedName)
 
+
+          elif response == gtk.RESPONSE_CANCEL:
+             dialog.destroy()
+             return
+
             
-
-
    #Fix boundaries on horizontal panes.
    def on_hpaned_resize(self,widget,allocation):
 

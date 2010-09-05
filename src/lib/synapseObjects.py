@@ -19,13 +19,16 @@ import time
 import copy
 import socket
 import pexpect
+from time import strftime
 
 try:
    from reportlab.pdfgen import canvas
    from reportlab.lib.units import inch
+   from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image
+   from reportlab.lib.styles import getSampleStyleSheet
 except:
-
-   pass
+   print "report API not loaded"
+   
 
 
 
@@ -207,8 +210,17 @@ class synobj:
             peerobj.setIbuff(input_num,self.obuff)
   
          else:
-            print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
-            peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+
+            if (peerobj.needSender == False):
+
+               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+
+            else:
+
+               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
+
 
       self.ibuff = ""
 
@@ -406,6 +418,7 @@ class synfilter(synobj):
  
       self.alive = False
       self.mInput = False
+      self.needSender = False
       self.ibuff = ""
       self.obuff = ""
 
@@ -534,6 +547,7 @@ class syntimer(synobj):
       self.ibuff = ""
       self.obuff = ""
       self.mInput = False
+      self.needSender = False
 
       self.peers= list()
 
@@ -572,6 +586,7 @@ class syntimer(synobj):
 
       if (widget == syntimerGTK.iname):
          self.name = widget.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
 
       elif (widget == syntimerGTK.iinterval):
          self.interval = widget.get_text()
@@ -717,31 +732,178 @@ class syntest(synobj):
 
    nbinst = 0
 
-   def __init__(self,name,testType="string_cmp"):
+
+   def updatePeers(self):
+    
+      del self.opeers[:]
+      
+      for i in range(0,2):
+
+         self.opeers.append(list())
+
+      for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+         
+         if str(obj.__class__) == "synapseObjects.synlink" and obj.getOutObj() == self:
+            
+            self.opeers[obj.getOutputNum()].append((obj.getInputNum(),obj.getInObj()))
+
+
+   def __init__(self,name,testType="Stream contains"):
 
       syntest.nbinst+=1
 
       self.name = name
       self.color="DEFAULT"
+      self.needSender = False
+      self.mInput = False
+      self.alive = False
+      self.WOI = False
       self.testType = testType
+      self.operand = ""
       
-      self.peers = list()
-      self.peersFalse = list()      
-   
+      self.ret = "Stream"
+
+      self.opeers = list()   
+      self.ibuff = ""
+      self.obuff = ""
+
+
+      self.ret_dict = { "Stream" : 0, "Operand" : 1 }
+
+
+      self.operation_dict = { 
+      "Stream equals" : ("content == self.operand",0),   
+      "Stream contains" : ("content.find(self.operand) >= 0",1),
+      "int(Stream) >=" : ("int(content) >= int(self.operand)",2),
+      "int(Stream) <=" : ("int(content) <= int(self.operand)",3),
+      "int(Stream) <" : ("int(content) < int(self.operand)",4),
+      "int(Stream) >" : ("int(content) > int(self.operand)",5)
+      }
+
+
+   def bcast(self,expr_tv):
+
+      if expr_tv:
+         peers = self.opeers[0]
+      else:
+         peers = self.opeers[1]
+
+      if self.ret == "Operand": self.obuff = self.operand
+
+      for peer in peers:
+            (input_num, peerobj) = tuple(peer)         
+
+            if (peerobj.mInput == True):
+               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               peerobj.setIbuff(input_num,self.obuff)
   
-   def setPeersFalse(self,pfalse):
+            else:
 
-      self.peersFalse = pfalse
+               if (peerobj.needSender == False):
 
-   def getPeersFalse(self):
-      return self.peersFalse
+                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+                  peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+
+               else:
+
+                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+                  peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
+
+
+
+   def run(self):
+ 
+      self.alive = True
+
+      while (self.alive):
+
+          if (self.ibuff != ""):
+
+            (input_num,sep,content) = self.ibuff.partition(":")
+            #print "%s IBUFF: %s" % (self.name,content)
+            self.obuff = content
+
+            exec "if %s :\n   self.bcast(True)\nelse:\n   self.bcast(False)" % ( self.operation_dict[self.testType][0] ) 
+            self.ibuff = ""
+
+
+                       
+
 
    def getTestType(self):
       return self.testType
 
+
+   def on_widget_changed(self,widget):
+    
+      if (widget == syntestGTK.iname):
+         self.name = widget.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+
+      elif (widget == syntestGTK.iop):
+         self.operand = widget.get_text()
+
+      elif (widget == syntestGTK.itt):
+
+         self.testType = syntestGTK.itt.get_active_text()
+
+      elif (widget == syntestGTK.iret):
+
+         self.ret = syntestGTK.iret.get_active_text()
+
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        syntestGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
+
+   def disconnectAll(self):
+
+      syntestGTK.iname.disconnect(syntestGTK.chdict['iname'])
+      syntestGTK.icolorBtn.disconnect(syntestGTK.chdict['icolorBtn'])
+      syntestGTK.iop.disconnect(syntestGTK.chdict['iop'])
+      syntestGTK.itt.disconnect(syntestGTK.chdict['itt'])
+      syntestGTK.iret.disconnect(syntestGTK.chdict['iret'])
+
    def getPropWidget(self):
 
+      syntestGTK.iname.set_text(self.name)
+      syntestGTK.icolor.set_text(self.color)
+      syntestGTK.iop.set_text(self.operand)
+      
+      syntestGTK.itt.set_active(self.operation_dict[self.testType][1])
+      syntestGTK.iret.set_active(self.ret_dict[self.ret])
+
+      
+      syntestGTK.chdict['iname'] = syntestGTK.iname.connect("changed",self.on_widget_changed)
+      syntestGTK.chdict['icolorBtn'] = syntestGTK.icolorBtn.connect("clicked",self.onColorChange)
+      syntestGTK.chdict['iop'] = syntestGTK.iop.connect("changed",self.on_widget_changed)
+      syntestGTK.chdict['itt'] = syntestGTK.itt.connect("changed",self.on_widget_changed)
+      syntestGTK.chdict['iret'] = syntestGTK.iret.connect("changed",self.on_widget_changed)
+
       return syntestGTK.o
+
+
+
 
 
 
@@ -900,7 +1062,7 @@ class synmux(synobj):
             time.sleep(0.001)
 
          for i in range (0,len(self.buffs)):
-            data_copy = data_copy.replace("[[SI%d]]"% (i),self.buffs[i].rstrip('\n'))
+            data_copy = data_copy.replace("[[SI%d]]"% (i),self.buffs[i].rstrip('\r').rstrip('\n')).replace("\\\n","\n").replace("\\\t","\t")
          
          if ready > 0:
             print "BROADCASTING"
@@ -909,8 +1071,6 @@ class synmux(synobj):
             self.obuff = ""
             self.buffs = ["","","","","",""]
             
-
-
 
    def __init__(self,name,data="[[SI0]] [[SI1]] [[SI2]] [[SI3]] [[SI4]] [[SI5]]",timeout=2000):
 
@@ -925,6 +1085,7 @@ class synmux(synobj):
       self.obuff = ""
       self.alive = False
       self.mInput = True
+      self.needSender = False
       self.peers=list()
       
 
@@ -941,10 +1102,12 @@ class synmux(synobj):
          self.name = widget.get_text()
       elif (widget == synmuxGTK.itimeout):
          #ICI METTRE CONTROL D'INT
-         self.timeout = widget.get_text()
+         self.timeout = int(widget.get_text())
       elif (widget == synmuxGTK.idataBuffer):
 
-         self.data = synmuxGTK.idataBuffer.get_text()
+         self.data = widget.get_text(widget.get_start_iter(),widget.get_end_iter())
+
+        
 
 
    def onColorChange(self,widget):
@@ -994,7 +1157,7 @@ class synmux(synobj):
 class syndemux(synobj):
 
    nbinst = 0
-  
+
 
    def updatePeers(self):
     
@@ -1008,7 +1171,7 @@ class syndemux(synobj):
          
          if str(obj.__class__) == "synapseObjects.synlink" and obj.getOutObj() == self:
             
-            self.opeers[obj.getOutputNum()].append(obj.getInObj())
+            self.opeers[obj.getOutputNum()].append((obj.getInputNum(),obj.getInObj()))
 
              
    def run(self):
@@ -1020,32 +1183,61 @@ class syndemux(synobj):
       while(self.alive == True):
       
          if (self.ibuff != ""):
+
+            (s0,s1,s2) = self.ibuff.partition(":")
+            self.ibuff = s2
+
             del self.obuffs[:]
             print "DEMUX IBUFF:",self.ibuff
             pbuff = copy.copy(self.ibuff)
+
             for i in range(0,5):
                (sep1,sep2,sep3) = pbuff.partition(self.separator)
-               print sep1
-               print "==="
-               print sep3
-               pbuff = sep3
                self.obuffs.append(sep1)
-            self.obuffs.append(sep3)
+               if sep2 == "" and sep3 == "":
+                  break
+               pbuff = sep3
 
+            if sep3 != "":
+               self.obuffs.append(sep3)
+            print self.obuffs
+            print self.opeers            
             self.bcast()
             self.ibuff = ""
              
 
    def bcast(self):
    
-      for i in range(0,6):
+      for i in range(0,len(self.obuffs)):
             
+         #adds a line feed for each demuxed part
+         if self.obuffs[i][len(self.obuffs[i])-1] != "\n":
+            self.obuffs[i] +="\n"
+
          for peer in self.opeers[i]:
-            if self.obuffs[i][len(self.obuffs[i])-1] != "\n":
-               self.obuffs[i] +="\n"
+
+            (input_num, peerobj) = tuple(peer)         
+
+            if (peerobj.mInput == True):
+               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+               peerobj.setIbuff(input_num,self.obuffs[i])
   
-            peer.setIbuff(self.obuffs[i])
-      
+            else:
+
+               if (peerobj.needSender == False):
+
+                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+                  peerobj.setIbuff(str(input_num) + ":" +self.obuffs[i])
+
+               else:
+
+                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+                  peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuffs[i])
+
+
+      print self.obuffs      
+
+
    def __init__(self,name,separator="\\n"):
 
       syndemux.nbinst+=1
@@ -1057,7 +1249,9 @@ class syndemux(synobj):
       self.opeers = list()      
 
       self.ibuff = ""
+      self.WOI = False
       self.mInput = False
+      self.needSender = False
       self.alive = False
 
 
@@ -1166,6 +1360,7 @@ class synmonitor(synobj):
       self.displayBuffSize = 10
       self.alive = False
       self.mInput = False
+      self.needSender = False
 
    def disconnectAll(self):
       return 0
@@ -1281,6 +1476,7 @@ class synapp(synobj):
       
       self.alive = False
       self.mInput = False
+      self.needSender = False
       self.ibuff = ""
       self.obuff = ""
 
@@ -1447,6 +1643,7 @@ class synserv(synobj):
 
       self.alive = False
       self.mInput = False
+      self.needSender = False
 
       
 
@@ -1559,6 +1756,7 @@ class synserv(synobj):
 
 class synreport(synobj):
 
+
    def getOutputFile(self):
 
       return self.output_file
@@ -1567,22 +1765,95 @@ class synreport(synobj):
 
       return self.output_file
 
-   def disconnectAll(self):
 
-      return
-      
+
+   def onTextChange(self,widget):
+
+      if (widget == synreportGTK.iname):
+         self.name = synreportGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+
+      elif (widget == synreportGTK.ifilename):
+         self.output_file = synreportGTK.ifilename.get_text()
+         
+
+ 
+   def onFileChange(self,widget):
+
+      dialog = gtk.FileChooserDialog(title="Save Report To...", parent=None, action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK), backend=None)
+
+      response = dialog.run()
+      if response == gtk.RESPONSE_OK:
+         savefile = dialog.get_filename()
+         dialog.destroy()
+         synreportGTK.ifilename.set_text(savefile)
+         self.output_file = savefile
+
+      elif response == gtk.RESPONSE_CANCEL:
+         dialog.destroy()
+         return
+
+
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synreportGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
    def getPropWidget(self):
 
-      return gtk.HBox()
+      synreportGTK.iname.set_text(self.name)
+      synreportGTK.ifilename.set_text(self.output_file)
+      synreportGTK.icolor.set_text(self.color)
+
+      synreportGTK.chdict['icolorBtn'] = synreportGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synreportGTK.chdict['ibrowse'] = synreportGTK.ibrowse.connect("clicked",self.onFileChange)      
+      synreportGTK.chdict['iname'] = synreportGTK.iname.connect("changed",self.onTextChange)
+      synreportGTK.chdict['ifilename'] = synreportGTK.ifilename.connect("changed",self.onTextChange)
+
+      return synreportGTK.o
+
+
+   def disconnectAll(self):
+
+      synreportGTK.icolorBtn.disconnect(synreportGTK.chdict['icolorBtn'])
+      synreportGTK.ibrowse.disconnect(synreportGTK.chdict['ibrowse'])
+      synreportGTK.iname.disconnect(synreportGTK.chdict['iname'])
+      synreportGTK.ifilename.disconnect(synreportGTK.chdict['ifilename'])
+      
 
 
    def __init__(self,name):
 
+
+      self.buffersDict = dict()
+      self.senders = list()
+
       self.name = name
-      self.output_file = "foo.pdf"
+      self.output_file = "synapse_report.pdf"
       self.alive = False
       self.WOI = False
       self.mInput = False
+      self.needSender = True
+      self.color = "DEFAULT"
 
       self.textFont = "Helvetica"
       self.textFontSize = 10
@@ -1598,21 +1869,42 @@ class synreport(synobj):
 
    def writeToPDF(self):
 
-      try:
+      #try:
 
          print "writing %s to report" % (self.pdfContent)
 
-         my_canvas = canvas.Canvas(self.output_file)
-         my_canvas.setFont(self.textFont,self.textFontSize)
-         my_canvas.drawRightString(5.0 * inch, 8.0 * inch,self.pdfContent)
-         my_canvas.save()
-         self.pdfContent = ""
+         pdf = SimpleDocTemplate(self.output_file)
+         styles = getSampleStyleSheet()
+         pdfcontent = list()
 
-      except:
-
-         print "reportlab API not present, aborting report writing"
+         date = strftime("Synapse Report -- generated on %Y-%m-%d %H:%M:%S")
 
 
+         headerImg = Image(IMVEC.RES_PATH + "/images/synapse_rs.png")
+         headerImg.drawWidth = .6 * headerImg.drawWidth
+         headerImg.drawHeight = .6 * headerImg.drawHeight
+
+         pdfcontent.append(headerImg)
+
+         self.senders.sort()
+
+         for sender in self.senders:
+
+            pdfcontent.append(Spacer(0,inch*.1))
+            pdfcontent.append(Paragraph(sender,styles['Heading1']))
+            pdfcontent.append(Spacer(0,inch*.1))
+            lines = self.buffersDict[sender].split("\n")
+
+            for line in lines:
+
+               pdfcontent.append(Paragraph(line,styles['Normal']))
+               #pdfcontent.append(Spacer(0,inch*.1))
+
+         pdfcontent.append(Spacer(0,inch*.4))
+         pdfcontent.append(Paragraph(date,styles['Normal']))
+         pdf.build(pdfcontent)
+
+ 
    def run(self):
  
       self.alive = True
@@ -1621,9 +1913,16 @@ class synreport(synobj):
       while (self.alive):
 
           if (self.ibuff != ""):
-            (input_num,sep,content) = self.ibuff.partition(":")
+            (sender,sep,content0) = self.ibuff.partition(":")
+            (input_num,sep,content) = content0.partition(":")
             print "%s IBUFF: %s" % (self.name,content)
-            self.pdfContent+= content
+
+            try:
+               self.buffersDict[sender] += content
+            except:
+               self.buffersDict[sender] = content 
+               self.senders.append(sender)
+               
             self.ibuff = ""
 
 

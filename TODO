@@ -1,6 +1,7 @@
 Implement Wake on input feature (70% done)
-Implement syntest component
-Finish to implement synmux,syndemux,synfilter components
+Implement syntest component: ( 95% done )
+Implement synjector BB
+Finish to implement synfilter component
 Finish to implement Building blocks GTK classes
 Implement saving and loading ( 95% done )
 Implement multi select,clipboard and undu/redo
@@ -8,8 +9,9 @@ Implement shortcurs+menus
 Implement about box
 Implement display buffer
 Implement building blocks z-index
-Implement reports ( 50% done)
 Embeeded Documentation
 implement propagation of stop signal
-
-
+add locks on input buffers while being processed by run() loop, and a broadcasts queue in case of locked var
+implement stdout/stderr discrimination on pexpect module
+add events for progress and status bars
+implement 2 new Building blocks: synlabel , synsplitter

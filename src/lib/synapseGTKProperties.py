@@ -331,23 +331,64 @@ class syntestGTK:
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+
+
    ltt = gtk.Label(str="test type")
-   itt = gtk.Entry()
-   lpeers = gtk.Label(str="Peers")
-   ipeers = gtk.Entry()
-   lpeersFalse = gtk.Label(str="Peers on False")
-   ipeersFalse = gtk.Entry()   
+   lop = gtk.Label(str="Operand")
+   lret = gtk.Label(str="Return")
+   
+   itt = gtk.ComboBox()
+   ls0 = gtk.ListStore(str)
+   itt.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   itt.pack_start(cellr0)
+   itt.add_attribute(cellr0, 'text', 0)
+
+
+   itt.append_text("Stream equals")
+   itt.append_text("Stream contains")
+   itt.append_text("int(Stream) <=")
+   itt.append_text("int(Stream) >=")
+   itt.append_text("int(Stream) <")
+   itt.append_text("int(Stream) >")
+
+   itt.set_active(0)
+
+
+   iret = gtk.ComboBox()
+   ls1 = gtk.ListStore(str)
+   iret.set_model(ls1)
+   cellr1 = gtk.CellRendererText()
+   iret.pack_start(cellr1)
+   iret.add_attribute(cellr1, 'text', 0)
+
+   iret.append_text("Stream")
+   iret.append_text("Operand")
+
+   iret.set_active(0)
+   
+
+
+   iop = gtk.Entry()
 
 
    gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(ltt,False,True,10)
-   gtkPVbox1.pack_start(lpeers,False,True,10)
-   gtkPVbox1.pack_start(lpeersFalse,False,True,10)
+   gtkPVbox1.pack_start(lop,False,True,10)
+   gtkPVbox1.pack_start(lret,False,True,10)
 
    gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(itt,False,True,5)
-   gtkPVbox2.pack_start(ipeers,False,True,5)
-   gtkPVbox2.pack_start(ipeersFalse,False,True,5)
+   gtkPVbox2.pack_start(iop,False,True,5)
+   gtkPVbox2.pack_start(iret,False,True,5)
+
 
    chdict = dict()
 
@@ -737,3 +778,52 @@ class syncontainerGTK:
 
    o.show()
 
+
+
+class synreportGTK:
+
+   o = gtk.HBox()
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+   lname = gtk.Label(str="Name")
+   #loutput = gtk.Label(str="Output File")
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+   
+
+   #ifile = gtk.HBox()
+   ifilename = gtk.Entry()
+   ibrowse = gtk.Button(label="Save To ")
+   #ifile.pack_start(ifilename,False,True,5)
+   #ifile.pack_start(ibrowse,False,True,0)
+   ifilename.show()
+   ibrowse.show()
+   
+
+
+   iname = gtk.Entry()
+
+   gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(ibrowse,False,True,3)  
+
+   gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(ifilename,False,True,7) 
+
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      child2.show()
+
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()
