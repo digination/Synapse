@@ -1,5 +1,9 @@
+import pygtk
+pygtk.require("2.0")
 import gtk
 import os
+
+
 
 #Inter modules Variable exchange Class
 class IMVEC:
@@ -49,6 +53,8 @@ class IMVEC:
    containerPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),32,32)
    reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
 
+
+   labelPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),32,32)
    exportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export.png" % (RES_PATH),32,32)
 
 
@@ -64,7 +70,8 @@ class IMVEC:
    monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
    containerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),16,16)
    reportPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),16,16)
-   
+   labelPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),16,16)   
+
 
    resizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/resize.png" % (RES_PATH),16,16)
 

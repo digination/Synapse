@@ -5,9 +5,11 @@ sys.path.append("/usr/lib/synapse")
 from synapseObjects import *
 from synapseIMVEC import *
 from synapseUtils import *
-
-
+from synapseDialogs import inputDialog
+import pygtk
+pygtk.require("2.0")
 import gtk
+
 
 MAKE_LINE=0
 
@@ -1394,3 +1396,69 @@ class reportItem(synItem):
 
       self.connectAll()
 
+
+
+
+
+class labelItem(synItem):
+
+
+   def on_t_valid(self,widget):
+
+      new_input = self.inpd.getInput()
+      self.inpd.getWindow().hide()
+
+      IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj().setContent(new_input)
+
+      self.content_label.set_property("text",new_input)
+
+
+   def on_clickable_change(self,item,target_item,event):
+
+      self.inpd = inputDialog()
+      self.inpd.setCallBack(self.on_t_valid)
+      self.inpd.run()
+
+
+      
+     
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.clickable = goocanvas.Rect(parent = self.o, x=0, y=10,radius_x=10,radius_y=10, width=150, height=30,
+				stroke_color="#cccccc", fill_color_rgba=0x151515dd,
+				line_width=1)
+
+      self.mf = goocanvas.Rect(parent = self.o, x=138, y=0,radius_x=10,radius_y=10, width=50, height=50,
+				stroke_color="#cccccc", fill_color="#c5264f",
+				line_width=4)
+
+      self.pixbuf = IMVEC.labelPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=148,y=10,pixbuf=self.pixbuf)
+
+    
+
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.outputs[0].set_property("x",188)
+      self.outputs[0].set_property("y",10)
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-10,
+						width=100,font="sans 8", fill_color="#c5264f")
+
+
+      self.content_label = goocanvas.Text(parent = self.o, text="Click Here To set Value", x=10, y=18,
+						width=150,font="sans 8", fill_color="#dadada")
+
+
+
+      self.connectAll()
+      self.clickable.connect("button-press-event",self.on_clickable_change)
+      self.content_label.connect("button-press-event",self.on_clickable_change)

@@ -668,10 +668,31 @@ Drag'n'drop it to the drawing area.</property>
                                       </packing>
                                     </child>
                                     <child>
+                                      <widget class="GtkButton" id="synlabel_btn">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip" translatable="yes">Adds a label item to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <widget class="GtkImage" id="synlabel_img">
+                                            <property name="visible">True</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <widget class="GtkButton" id="synmux_btn">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Multiplexor item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">none</property>
@@ -683,7 +704,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">2</property>
+                                        <property name="position">3</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -691,6 +712,7 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Test item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">none</property>
@@ -702,7 +724,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">3</property>
+                                        <property name="position">4</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -710,6 +732,7 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Commentary item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">none</property>
@@ -721,7 +744,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">4</property>
+                                        <property name="position">5</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -741,7 +764,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">5</property>
+                                        <property name="position">6</property>
                                       </packing>
                                     </child>
                                   </widget>

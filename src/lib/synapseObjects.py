@@ -1980,3 +1980,84 @@ class syncontainer(synobj):
 
       self.name = name
       self.color = "DEFAULT"
+
+
+
+
+class synlabel(synobj):
+
+
+   def onTextChange(self,widget):
+
+      if (widget == synlabelGTK.iname):
+         self.name = synlabelGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+
+     
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synlabelGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
+   def getPropWidget(self):
+
+      synlabelGTK.iname.set_text(self.name)
+      synlabelGTK.icolor.set_text(self.color)
+      
+
+      synlabelGTK.chdict['icolorBtn'] = synlabelGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synlabelGTK.chdict['iname'] = synlabelGTK.iname.connect("changed",self.onTextChange)
+
+      return synlabelGTK.o
+
+
+   def disconnectAll(self):
+
+      synlabelGTK.icolorBtn.disconnect(synlabelGTK.chdict['icolorBtn'])
+      synlabelGTK.iname.disconnect(synlabelGTK.chdict['iname'])
+
+
+   def getContent(self):
+
+      return self.content
+      
+   def setContent(self,content):
+      self.content = content
+
+   def __init__(self,name):
+
+      self.peers = list()
+      self.name = name
+      self.alive = False
+      self.WOI = False
+      self.mInput = False
+      self.needSender = True
+      self.color = "DEFAULT"
+
+      self.ibuff = None
+      self.obuff = None
+      self.content = None
+
+   def run(self):
+ 
+      self.obuff = self.content + "\r\n"
+      self.broadcast()
+
+

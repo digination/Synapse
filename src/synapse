@@ -103,7 +103,7 @@ class document(object):
       LS0.clear()
       for obj in IMVEC.activeDoc.getContainer().getSynObjects():
   
-         # Dirty, replace by switch
+         # Dirty, replace by dict()
          if (str(obj.__class__) == "synapseObjects.synapp"):         
             pixbuf = IMVEC.appPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syntest"):
@@ -132,6 +132,9 @@ class document(object):
             pixbuf = IMVEC.containerPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synreport"):
             pixbuf = IMVEC.reportPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synlabel"):
+            pixbuf = IMVEC.labelPixbuf_s
+
 
 
          iter = LS0.append()
@@ -328,6 +331,21 @@ class document(object):
          newitem.setText("Report%d" % (self.nbreports))
 
          self.refresh_objects_list()
+
+    
+      elif (context.get_source_widget().get_name() == "synlabel_btn"):
+
+         self.nblabels+=1
+         newobj = synlabel("Label%d" % (self.nblabels))
+         newitem = labelItem(self.root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",x)
+         newitem.getO().set_property("y",y)
+         newitem.setText("Label%d" % (self.nblabels))
+
+         self.refresh_objects_list()
+
 
 
        
@@ -542,6 +560,7 @@ class document(object):
       self.nbservices = 0
       self.nbcontainers = 0
       self.nbreports = 0
+      self.nblabels = 0
       self.zoom = 1
       
       
@@ -847,6 +866,7 @@ class MainWindow(object):
       nbservices = 0
       nbcontainers = 0
       nbreports = 0
+      nblabels = 0
 
       
       for pobj in pickled_objects:
@@ -1237,6 +1257,12 @@ class MainWindow(object):
       self.synreport_img = builder.get_object("synreport_img")
       self.synreport_img.set_from_pixbuf(IMVEC.reportPixbuf)
 
+
+      self.synlabel_btn = builder.get_object("synlabel_btn")
+      self.synlabel_img = builder.get_object("synlabel_img")
+      self.synlabel_img.set_from_pixbuf(IMVEC.labelPixbuf)
+      
+
       try:
 
          from reportlab.pdfgen import canvas
@@ -1378,6 +1404,11 @@ class MainWindow(object):
                                gtk.gdk.ACTION_COPY)
 
 
+      self.synlabel_btn.connect("drag_data_get", self.sendCallback)
+      self.synlabel_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
       self.synapp_btn.set_name("synapp_btn")
       self.syntest_btn.set_name("syntest_btn")
       self.syncom_btn.set_name("syncom_btn")
@@ -1392,6 +1423,8 @@ class MainWindow(object):
 
       self.syncontainer_btn.set_name("syncontainer_btn")
       self.synreport_btn.set_name("synreport_btn")
+      self.synlabel_btn.set_name("synlabel_btn")
+
 
       self.hpaned1.set_position(800)
       self.vpaned1.set_position(250)
