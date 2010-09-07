@@ -308,8 +308,9 @@ class document(object):
          self.nbcontainers+=1
          newobj = syncontainer("Container%d" % (self.nbcontainers))
          newitem = containerItem(self.root)
-         self.container.append(linker(newobj,newitem))
-         self.syncontainersList.append(linker(newobj,newitem))
+         nlinker = linker(newobj,newitem)
+         self.container.append(nlinker)
+         self.syncontainersList.append(nlinker)
         
 
          newitem.getO().set_property("x",x)
@@ -516,6 +517,10 @@ class document(object):
 
 
       
+   def getSyncontainersList(self):
+
+      return self.syncontainersList
+
 
    def __init__(self,name,notebook):
       
@@ -781,6 +786,13 @@ class MainWindow(object):
       elif event.keyval == 65307 and synapseCanvas.MAKE_LINE ==1:
          synapseCanvas.MAKE_LINE=0
          del synapseCanvas.NLPARAMETERS[:]
+
+         for item in IMVEC.activeDoc.getContainer().getSynItems():
+            try:
+               item.changeInputsColor("#00CBFF")
+            except:
+               pass
+
          IMVEC.status_lbl.set_text("")
          
       
@@ -837,6 +849,67 @@ class MainWindow(object):
        
 
 
+   def getRecursiveRoot(self,pickled_objects,root_dict,root_name):
+
+      print root_name
+
+      for  i in range (0, len(pickled_objects)) :
+
+         pobj = pickled_objects[i]
+
+         if pobj.getName() == root_name:
+
+            print "found container"
+
+            canvasProperties = list(pobj.getCanvasProperties())
+
+            try:
+               root = root_dict[canvasProperties[6]]
+               print "containers root found"
+
+            except:
+               root = getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
+
+            newitem = containerItem(root)
+
+            print "container created"
+
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+            newitem.setText(pobj.getName())
+         
+
+            newitem.getO().set_property("x",canvasProperties[0])
+            newitem.getO().set_property("y",canvasProperties[1])
+            newitem.getO().set_property("width",canvasProperties[2])
+            newitem.getO().set_property("height",canvasProperties[3])
+            
+            if pobj.getColor() != "DEFAULT":
+               newitem.getMF().set_property("fill_color",pobj.getColor())
+               newitem.getLtext().set_property("fill_color",pobj.getColor())
+
+            print "container properties added"
+         
+            nlinker = linker(pobj,newitem)
+
+            IMVEC.activeDoc.getSyncontainersList().append(nlinker)         
+            IMVEC.activeDoc.getContainer().append(nlinker)
+
+            print "container added to lists"
+
+
+            root_dict[root_name] = newitem.getO()
+            del pickled_objects[i]
+            return newitem.getO()
+            break
+         
+      return None
+
+
+
    def loadDoc(self,filename):
    
       fh = open(filename,"r")
@@ -846,7 +919,11 @@ class MainWindow(object):
       docname = filename.split("/")[len(filename.split("/"))-1].rstrip(".sws")
 
       IMVEC.activeDoc = document(docname,self.notebook)
-      root = IMVEC.activeDoc.getRootItem()
+   
+
+      root_dict = dict()
+      root_dict['___root___'] = IMVEC.activeDoc.getRootItem() 
+
 
       docprops = pickled_objects[0] 
       del pickled_objects[0]
@@ -881,6 +958,15 @@ class MainWindow(object):
          print str(pobj.__class__)
          canvasProperties = list(pobj.getCanvasProperties())
 
+         try:
+
+            root = root_dict[canvasProperties[6]]
+
+         except:
+            print "EXCEPT"
+            root = self.getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
+
+
          if str(pobj.__class__) == "synapseObjects.synapp":
             newitem = synappItem(root)
             nbsynapp += 1
@@ -905,7 +991,6 @@ class MainWindow(object):
             newitem.getExtender().set_property("y",canvasProperties[5]-10)
 
             newitem.setText(pobj.getText())
-
             nbcomments +=1
 
          elif str(pobj.__class__) == "synapseObjects.synmonitor":
@@ -921,8 +1006,6 @@ class MainWindow(object):
 
             newitem.getExtender().set_property("x",canvasProperties[4]-10)
             newitem.getExtender().set_property("y",canvasProperties[5]-10)
-
-
             nbmonitors +=1
 
          elif str(pobj.__class__) == "synapseObjects.synserv":
@@ -944,10 +1027,30 @@ class MainWindow(object):
             newitem = filterItem(root)
             nbfilters +=1
 
+
+         elif str(pobj.__class__) == "synapseObjects.syncontainer":
+
+            newitem = containerItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+            newitem.setText(pobj.getName())
+            nbcontainers +=1
+            IMVEC.activeDoc.getSyncontainersList().append(linker(pobj,newitem))
+
          elif str(pobj.__class__) == "synapseObjects.synreport":
             print "REPORT ITEM ADDED"
             newitem = reportItem(root)
             nbreports +=1
+
+         elif str(pobj.__class__) == "synapseObjects.synlabel":
+
+            pobj.setContent("")
+            newitem = labelItem(root)
+            nblabels +=1
+
 
          if (newitem != None):
             newitem.getO().set_property("x",canvasProperties[0])
@@ -964,7 +1067,6 @@ class MainWindow(object):
                if str(pobj.__class__) != "synapseObjects.syncom":
                   newitem.getLtext().set_property("fill_color",pobj.getColor())
                   
-
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
 
          
@@ -980,7 +1082,7 @@ class MainWindow(object):
             initem =  IMVEC.activeDoc.getContainer().getMemberFromSynObj(  pobj.getInObj()  ).getSynItem() 
             inp = initem.getInput(pobj.getInputNum())
             outp = outitem.getOutput(pobj.getOutputNum())
-            newitem = linkItem(root,outitem,outp,initem,inp)
+            newitem = linkItem(root_dict['___root___'],outitem,outp,initem,inp)
             newitem.update()            
             IMVEC.linkList.append(newitem)
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
@@ -1064,40 +1166,7 @@ class MainWindow(object):
       
       if widget == self.savedoc_btn:
 
-          dialog = gtk.FileChooserDialog(title="Save as...", parent=None, action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK), backend=None)
-
-          response = dialog.run()
-          if response == gtk.RESPONSE_OK:
-            savefile = dialog.get_filename()
-            dialog.destroy()
-          
-            #try:
-            fh = open(savefile,"w+")
-            pickled_objects = list()    
-
-            
-            pickled_objects.append((IMVEC.activeDoc.getColor(),IMVEC.activeDoc.getWidth(),IMVEC.activeDoc.getHeight()))
-
-            pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
-
-            for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
-               
-                  member.updateSynObjCanvasProperties()
-                  pickled_objects.append(member.getSynObj())
-            pickle.dump(pickled_objects,fh)
-
-            #except:
-               #return
-
-            savedName = savefile.split("/").pop().rstrip('.sws')
-            IMVEC.activeDoc.setSavedName(savedName)
-            IMVEC.activeDoc.setHeadLabel(savedName)
-
-
-          elif response == gtk.RESPONSE_CANCEL:
-             dialog.destroy()
-             return
-
+         self.startSave()
 
 
    def playWorkflow(self):
@@ -1178,6 +1247,50 @@ class MainWindow(object):
          self.loadDoc(loadfile)
       elif response == gtk.RESPONSE_CANCEL:
          dialog.destroy()
+
+
+
+
+
+   def startSave(self):
+
+          dialog = gtk.FileChooserDialog(title="Save as...", parent=None, action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=    
+          (gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK), backend=None)
+          response = dialog.run()
+          if response == gtk.RESPONSE_OK:
+            savefile = dialog.get_filename()
+
+            if (savefile.rstrip('.sws') == savefile):
+               savefile += ".sws"
+
+            dialog.destroy()
+          
+            #try:
+            fh = open(savefile,"w+")
+            pickled_objects = list()    
+
+            
+            pickled_objects.append((IMVEC.activeDoc.getColor(),IMVEC.activeDoc.getWidth(),IMVEC.activeDoc.getHeight()))
+
+            pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
+
+            for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+               
+                  member.updateSynObjCanvasProperties()
+                  pickled_objects.append(member.getSynObj())
+            pickle.dump(pickled_objects,fh)
+
+            #except:
+               #return
+
+            savedName = savefile.split("/").pop().rstrip('.sws')
+            IMVEC.activeDoc.setSavedName(savedName)
+            IMVEC.activeDoc.setHeadLabel(savedName)
+
+
+          elif response == gtk.RESPONSE_CANCEL:
+             dialog.destroy()
+             return
 
 
    def createNewDoc(self):

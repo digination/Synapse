@@ -74,6 +74,15 @@ class container:
             break
 
 
+
+   def getMemberFromParentSynItem(self,parent):
+
+      for  mname,member in self.members.items():
+         if (member.getSynItem().getO() == parent):
+            return member
+            break
+
+
    def getMembers(self):
 
       return self.members
@@ -153,7 +162,20 @@ class linker(object):
          height = self.synItem.getO().get_property("height")
          mfwidth = self.synItem.getMF().get_property("width")
          mfheight = self.synItem.getMF().get_property("height")
-         canvasProperties = (x,y,width,height,mfwidth,mfheight)
+
+         if self.synItem.getO().get_property("parent") == IMVEC.activeDoc.getRootItem():
+            rootItem = "___root___"
+         else:
+
+            print "ROOT DIFFERENT:"
+            ri = self.synItem.getO().get_property("parent")             
+            rootItem = IMVEC.activeDoc.getContainer().getMemberFromParentSynItem(ri).getSynObj().getName() 
+            print rootItem
+
+
+              
+
+         canvasProperties = (x,y,width,height,mfwidth,mfheight,rootItem)
 
       else:
          data = self.synItem.getO().get_property("data")
@@ -1444,8 +1466,6 @@ class synapp(synobj):
              #pass
 
 
-
-
          if (self.ibuff != ""):
             (input_num,sep,content) = self.ibuff.partition(":")
             print "WRTIING TO %s STDIN" % (self.name)
@@ -1635,6 +1655,7 @@ class synserv(synobj):
       self.keepalive = keepalive
       self.autoreco = True
       self.proto = proto
+      self.WOI = False
 
       self.peers = list()
       
@@ -1964,6 +1985,7 @@ class syncontainer(synobj):
       syncontainerGTK.iname.disconnect(syncontainerGTK.chdict['iname'])
       syncontainerGTK.icolorBtn.disconnect(syncontainerGTK.chdict['icolorBtn'])
 
+
    def getPropWidget(self):
 
       syncontainerGTK.iname.set_text(self.name)
@@ -1993,6 +2015,12 @@ class synlabel(synobj):
          self.name = synlabelGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
 
+      elif (widget == synlabelGTK.icrlf):
+         if widget.get_active_text() == "True":
+            self.crlf = True
+         else:
+            self.crlf = False
+
      
    def onColorChange(self,widget):
 
@@ -2021,10 +2049,16 @@ class synlabel(synobj):
       synlabelGTK.iname.set_text(self.name)
       synlabelGTK.icolor.set_text(self.color)
       
+      if self.crlf:
+         synlabelGTK.icrlf.set_active(0)
+      else:
+         synlabelGTK.icrlf.set_active(1)
+
 
       synlabelGTK.chdict['icolorBtn'] = synlabelGTK.icolorBtn.connect("clicked",self.onColorChange)
       synlabelGTK.chdict['iname'] = synlabelGTK.iname.connect("changed",self.onTextChange)
-
+      synlabelGTK.chdict['icrlf'] = synlabelGTK.icrlf.connect("changed",self.onTextChange)
+      
       return synlabelGTK.o
 
 
@@ -2032,6 +2066,7 @@ class synlabel(synobj):
 
       synlabelGTK.icolorBtn.disconnect(synlabelGTK.chdict['icolorBtn'])
       synlabelGTK.iname.disconnect(synlabelGTK.chdict['iname'])
+      synlabelGTK.icrlf.disconnect(synlabelGTK.chdict['icrlf'])
 
 
    def getContent(self):
@@ -2048,16 +2083,21 @@ class synlabel(synobj):
       self.alive = False
       self.WOI = False
       self.mInput = False
-      self.needSender = True
+      self.needSender = False
+      self.crlf = True
       self.color = "DEFAULT"
-
+      
       self.ibuff = None
-      self.obuff = None
-      self.content = None
+      self.obuff = ""
+      self.content = ""
 
    def run(self):
- 
-      self.obuff = self.content + "\r\n"
+
+      if self.crlf:
+         self.obuff = self.content.replace("\\n",'\n') + "\r\n"
+      else:
+         self.obuff = self.content.replace("\\n",'\n')
+
       self.broadcast()
 
 

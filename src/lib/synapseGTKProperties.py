@@ -836,6 +836,7 @@ class synlabelGTK:
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
+   lcrlf = gtk.Label(str="Trailing CRLF")
 
    
    #color definition
@@ -845,12 +846,29 @@ class synlabelGTK:
    
    iname = gtk.Entry()
 
+
+   icrlf = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   icrlf.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   icrlf.pack_start(cellr0)
+   icrlf.add_attribute(cellr0, 'text', 0)
+
+   icrlf.append_text("True")
+   icrlf.append_text("False")
+   icrlf.set_active(0)
+
+
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lcrlf,False,True,10)
+
   
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
- 
+   gtkPVbox2.pack_start(icrlf,False,True,5) 
+
    chdict = dict()
 
    for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):

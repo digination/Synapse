@@ -217,7 +217,7 @@ class synItem():
       print "INPUT CLICKED", item
       if MAKE_LINE == 1:
 
-         newitem = linkItem(self.root,NLPARAMETERS[0],NLPARAMETERS[1],self,item)
+         newitem = linkItem(IMVEC.activeDoc.getRootItem(),NLPARAMETERS[0],NLPARAMETERS[1],self,item)
          IMVEC.linkList.append(newitem)
          newobj = synlink("pipe%d" % len(IMVEC.linkList),IMVEC.activeDoc.getContainer().getMemberFromSynItem(NLPARAMETERS[0]).getSynObj(),
                                              IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj())
@@ -235,7 +235,14 @@ class synItem():
          MAKE_LINE=0
          del NLPARAMETERS[:]
          IMVEC.status_lbl.set_text("")
-     
+
+         for item in IMVEC.activeDoc.getContainer().getSynItems():
+            try:
+               item.changeInputsColor("#00CBFF")
+            except:
+               pass     
+
+
    #starts link line   
    def on_output_clicked(self,item, target_item, event):
       global MAKE_LINE, NLPARAMETERS
@@ -245,6 +252,13 @@ class synItem():
          NLPARAMETERS.append(item)
          print "OUTPUT CLICKED", item
          IMVEC.status_lbl.set_text("Choose input object to link with %s" % (IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj().getName()))
+
+         for item in IMVEC.activeDoc.getContainer().getSynItems():
+            try:
+               item.changeInputsColor("#00FF00")
+            except:
+               pass
+
          MAKE_LINE = 1
 
 
@@ -264,6 +278,13 @@ class synItem():
       return self.ltext
 
 
+   def changeInputsColor(self,color):
+
+       for inp in self.inputs:
+         inp.set_property("fill_color",color)
+
+
+
    def connectAll(self):
 
       self.mf.connect("button-press-event",self.on_mf_clicked)
@@ -278,10 +299,29 @@ class synItem():
 
       for inp in self.inputs:
          inp.connect("button-press-event",self.on_input_clicked)
-
+         inp.connect("enter-notify-event",self.on_inp_enter)
+         inp.connect("leave-notify-event",self.on_conn_leave)
+ 
       for out in self.outputs:
          out.connect("button-press-event",self.on_output_clicked)
+         out.connect("enter-notify-event",self.on_conn_enter)
+         out.connect("leave-notify-event",self.on_conn_leave)
 
+
+
+   def on_inp_enter(self,item,target_item,event):
+      global MAKE_LINE
+      if MAKE_LINE == 1:
+         IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.crossCursor)
+
+   def on_conn_enter(self,item,target_item,event):
+      global MAKE_LINE
+      if MAKE_LINE == 0:
+         IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.crossCursor)
+
+   def on_conn_leave(self,item,target_item,event):
+
+      IMVEC.activeDoc.getCanvas().window.set_cursor(None)
 
 
    def getInput(self,n):
@@ -1178,6 +1218,19 @@ class headerItem():
 
       self.mf.connect("button-press-event",self.on_mf_clicked)
       self.mf.connect("button-press-event",self.objectSelectionChange)
+
+      self.dateLabel.connect("button-press-event",self.on_mf_clicked)
+      self.dateLabel.connect("button-press-event",self.objectSelectionChange)
+
+      self.titleLabel.connect("button-press-event",self.on_mf_clicked)
+      self.titleLabel.connect("button-press-event",self.objectSelectionChange)
+
+      self.authorLabel.connect("button-press-event",self.on_mf_clicked)
+      self.authorLabel.connect("button-press-event",self.objectSelectionChange)
+
+      self.descrLabel.connect("button-press-event",self.on_mf_clicked)
+      self.descrLabel.connect("button-press-event",self.objectSelectionChange)
+
 
       self.on_showbtn_clicked(self,None,None)
 
