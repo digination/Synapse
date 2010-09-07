@@ -1415,7 +1415,7 @@ class labelItem(synItem):
 
    def on_clickable_change(self,item,target_item,event):
 
-      self.inpd = inputDialog()
+      self.inpd = inputDialog("Please enter a label Value")
       self.inpd.setCallBack(self.on_t_valid)
       self.inpd.run()
 

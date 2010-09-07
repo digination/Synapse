@@ -727,6 +727,12 @@ class aboutWindow(object):
       builder = gtk.Builder()
       builder.add_from_file("%s/ui/about.xml" % (RES_PATH))
       self.window = builder.get_object("window1")
+ 
+
+      self.window.set_title("About...")
+
+      self.image = builder.get_object("image1")
+      self.image.set_from_pixbuf(IMVEC.synapse_logo)
    
       
 class MainWindow(object):       
@@ -1029,66 +1035,12 @@ class MainWindow(object):
 
       if widget == self.stop_btn:
   
-         try:
-            if self.woiWatchAlive:
-               print "stopping watch thread"
-               self.woiWatchAlive = False
-         except:
-            pass
-
-
-         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-            if (str(obj.__class__) != "synapseObjects.syncom") \
-            and (str(obj.__class__) != "synapseObjects.synlink") \
-            and (str(obj.__class__) != "synapseObjects.syncontainer"):
-               if (obj.isRunning()):
-                  print "stopping thread for object", obj
-                  obj.kill()
-               if (str(obj.__class__) == "synapseObjects.synmonitor"):
-                  IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
-         
-         IMVEC.running = False
-
+         self.stopWorkflow()         
 
 
       if widget == self.play_btn:
    
-         self.woiObjects = list()
-
-         if (IMVEC.running == False):
-         #define a boolean executable attr for synObjects to avoid repeted and ...
-
-
-            for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-               if (str(obj.__class__) == "dummy"):
-                  obj.run()
-                  print "starting APP", obj
-               elif (str(obj.__class__) != "synapseObjects.syncom") \
-               and (str(obj.__class__) != "synapseObjects.synlink") \
-               and (str(obj.__class__) != "synapseObjects.syncontainer") \
-               and (obj.getWOI() == False):
-                  th0 = thwrapper()
-                  th0.setMethod(obj.run)
-                  th0.start()
-                  print "thread for object", obj, "started"
-               elif (str(obj.__class__) != "synapseObjects.syncom") \
-               and (str(obj.__class__) != "synapseObjects.synlink") \
-               and (str(obj.__class__) != "synapseObjects.syncontainer") \
-               and (obj.getWOI() == True):
-                  self.woiObjects.append(obj)
-
-            if len(self.woiObjects) != 0:
-               th1 = thwrapper()
-               th1.setMethod(self.woiWatchThread)
-               self.woiWatchAlive = True
-               th1.start()
-               print "thread for WOI Watcher started"
- 
-               
-
-            IMVEC.running = True    
-                         
-
+         self.playWorkflow()                      
 
 
       if widget == self.zoomin_btn:
@@ -1098,10 +1050,8 @@ class MainWindow(object):
          IMVEC.activeDoc.zoomOut()
          return 0
       if widget == self.newdoc_btn:
-         document.nbnewinst+=1
-         #IMVEC.docList.append(document("new-workflow-%d" % document.nbnewinst,self.notebook))
-         document("new-workflow-%d" % document.nbnewinst,self.notebook)
-         IMVEC.activeDoc = IMVEC.docList[len(IMVEC.docList)-1]
+
+         self.createNewDoc()
 
       if widget == self.synapp_btn:
          return True      
@@ -1109,22 +1059,7 @@ class MainWindow(object):
 
       if widget == self.loaddoc_btn:
 
-         loadfile = ""
-
-         dialog = gtk.FileChooserDialog(title="Choose a Workflow file to load", parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK), backend=None)
-
-         filter = gtk.FileFilter()
-         filter.set_name("Synapse Workflow Scheme")
-         filter.add_pattern("*.sws")
-         dialog.add_filter(filter)
-
-         response = dialog.run()
-         if response == gtk.RESPONSE_OK:
-            loadfile = dialog.get_filename()
-            dialog.destroy()
-            self.loadDoc(loadfile)
-         elif response == gtk.RESPONSE_CANCEL:
-            dialog.destroy()
+         self.startLoad()
 
       
       if widget == self.savedoc_btn:
@@ -1163,6 +1098,94 @@ class MainWindow(object):
              dialog.destroy()
              return
 
+
+
+   def playWorkflow(self):
+
+      self.woiObjects = list()
+
+      if (IMVEC.running == False):
+      #define a boolean executable attr for synObjects to avoid repeted and ...
+
+         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+            if (str(obj.__class__) == "dummy"):
+               obj.run()
+               print "starting APP", obj
+            elif (str(obj.__class__) != "synapseObjects.syncom") \
+            and (str(obj.__class__) != "synapseObjects.synlink") \
+            and (str(obj.__class__) != "synapseObjects.syncontainer") \
+            and (obj.getWOI() == False):
+               th0 = thwrapper()
+               th0.setMethod(obj.run)
+               th0.start()
+               print "thread for object", obj, "started"
+            elif (str(obj.__class__) != "synapseObjects.syncom") \
+            and (str(obj.__class__) != "synapseObjects.synlink") \
+            and (str(obj.__class__) != "synapseObjects.syncontainer") \
+            and (obj.getWOI() == True):
+               self.woiObjects.append(obj)
+
+         if len(self.woiObjects) != 0:
+            th1 = thwrapper()
+            th1.setMethod(self.woiWatchThread)
+            self.woiWatchAlive = True
+            th1.start()
+            print "thread for WOI Watcher started"
+        
+         IMVEC.running = True    
+
+
+
+
+   def stopWorkflow(self):
+
+         try:
+            if self.woiWatchAlive:
+               print "stopping watch thread"
+               self.woiWatchAlive = False
+         except:
+            pass
+
+
+         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+            if (str(obj.__class__) != "synapseObjects.syncom") \
+            and (str(obj.__class__) != "synapseObjects.synlink") \
+            and (str(obj.__class__) != "synapseObjects.syncontainer"):
+               if (obj.isRunning()):
+                  print "stopping thread for object", obj
+                  obj.kill()
+               if (str(obj.__class__) == "synapseObjects.synmonitor"):
+                  IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
+         
+         IMVEC.running = False
+
+
+   def startLoad(self):
+
+      loadfile = ""
+
+      dialog = gtk.FileChooserDialog(title="Choose a Workflow file to load", parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK), backend=None)
+
+      filter = gtk.FileFilter()
+      filter.set_name("Synapse Workflow Scheme")
+      filter.add_pattern("*.sws")
+      dialog.add_filter(filter)
+
+      response = dialog.run()
+      if response == gtk.RESPONSE_OK:
+         loadfile = dialog.get_filename()
+         dialog.destroy()
+         self.loadDoc(loadfile)
+      elif response == gtk.RESPONSE_CANCEL:
+         dialog.destroy()
+
+
+   def createNewDoc(self):
+
+      document.nbnewinst+=1
+      #IMVEC.docList.append(document("new-workflow-%d" % document.nbnewinst,self.notebook))
+      document("new-workflow-%d" % document.nbnewinst,self.notebook)
+      IMVEC.activeDoc = IMVEC.docList[len(IMVEC.docList)-1]
             
    #Fix boundaries on horizontal panes.
    def on_hpaned_resize(self,widget,allocation):
@@ -1182,6 +1205,44 @@ class MainWindow(object):
 
 
 
+   def on_menu_activate(self,widget):
+
+      if widget == self.menu_new:
+
+        self.createNewDoc()
+
+      elif widget == self.menu_open:
+
+         self.startLoad()
+      
+
+      elif widget == self.menu_close:
+
+
+         self.notebook.remove_page(self.notebook.get_current_page())
+
+
+      elif widget == self.menu_about:
+
+         win = aboutWindow()
+         win.getWindow().show()
+
+      elif widget == self.menu_play:
+
+         self.playWorkflow()
+
+      elif widget == self.menu_stop:
+         self.stopWorkflow()
+
+      elif widget == self.menu_zoomout:
+         IMVEC.activeDoc.zoomOut()
+
+      elif widget == self.menu_zoomin:
+         IMVEC.activeDoc.zoomIn()      
+
+
+
+
    def __init__(self):
         
       global LS0
@@ -1190,8 +1251,229 @@ class MainWindow(object):
       builder2 = gtk.Builder()      
 
       builder.add_from_file("%s/ui/main.xml" % (RES_PATH))
-      
+    
       self.window = builder.get_object("window1")
+
+
+     
+      mb = builder.get_object("menubar1")
+
+      agr = gtk.AccelGroup()
+      self.window.add_accel_group(agr)
+
+
+      filemenu = gtk.Menu()
+      filemenu.show()      
+
+
+
+      self.menu_new = gtk.ImageMenuItem(gtk.STOCK_NEW, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>N")
+      self.menu_new.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+
+      self.menu_new.connect("activate",self.on_menu_activate)
+      self.menu_new.show()
+
+      filemenu.append(self.menu_new)
+
+
+
+      self.menu_open = gtk.ImageMenuItem(gtk.STOCK_OPEN, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>O")
+      self.menu_open.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_open.connect("activate",self.on_menu_activate)
+      self.menu_open.show()
+      filemenu.append(self.menu_open)
+
+      sep0_0 = gtk.SeparatorMenuItem()
+      sep0_0.show()
+      filemenu.append(sep0_0)
+
+      self.menu_save = gtk.ImageMenuItem(gtk.STOCK_SAVE, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>S")
+      self.menu_save.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_save.connect("activate",self.on_menu_activate)
+      self.menu_save.show()
+      filemenu.append(self.menu_save)
+
+
+
+      self.menu_saveas = gtk.ImageMenuItem(gtk.STOCK_SAVE_AS, agr)
+      key, mod = gtk.accelerator_parse("<ctrl><shift>S")
+      self.menu_saveas.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_saveas.connect("activate",self.on_menu_activate)
+      self.menu_saveas.show()
+      filemenu.append(self.menu_saveas)
+
+
+
+
+
+      sep0_1 = gtk.SeparatorMenuItem()
+      sep0_1.show()
+      filemenu.append(sep0_1)
+
+
+      self.menu_close = gtk.ImageMenuItem(gtk.STOCK_CLOSE, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>W")
+      self.menu_close.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_close.connect("activate",self.on_menu_activate)
+      self.menu_close.show()
+      filemenu.append(self.menu_close)
+
+
+      menu_quit = gtk.ImageMenuItem(gtk.STOCK_QUIT, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>Q")
+      menu_quit.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      menu_quit.connect("activate",gtk.main_quit)
+      menu_quit.show()
+      filemenu.append(menu_quit)
+
+
+      editmenu = gtk.Menu()
+      editmenu.show()
+
+      self.menu_undo = gtk.ImageMenuItem(gtk.STOCK_UNDO, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>Z")
+      self.menu_undo.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_undo.connect("activate",self.on_menu_activate)
+      self.menu_undo.show()
+      editmenu.append(self.menu_undo)
+
+
+      self.menu_redo = gtk.ImageMenuItem(gtk.STOCK_REDO, agr)
+      key, mod = gtk.accelerator_parse("<ctrl><shift>Z")
+      self.menu_redo.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_redo.connect("activate",self.on_menu_activate)
+      self.menu_redo.show()
+      editmenu.append(self.menu_redo)
+
+
+      sep1 = gtk.SeparatorMenuItem()
+      sep1.show()
+      editmenu.append(sep1)
+      
+
+      self.menu_cut = gtk.ImageMenuItem(gtk.STOCK_CUT, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>X")
+      self.menu_cut.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_cut.connect("activate",self.on_menu_activate)
+      self.menu_cut.show()
+      editmenu.append(self.menu_cut)
+
+
+      self.menu_copy = gtk.ImageMenuItem(gtk.STOCK_COPY, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>C")
+      self.menu_copy.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_copy.connect("activate",self.on_menu_activate)
+      self.menu_copy.show()
+      editmenu.append(self.menu_copy)
+
+
+      self.menu_paste = gtk.ImageMenuItem(gtk.STOCK_PASTE, agr)
+      key, mod = gtk.accelerator_parse("<ctrl>V")
+      self.menu_paste.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_paste.connect("activate",self.on_menu_activate)
+      self.menu_paste.show()
+      editmenu.append(self.menu_paste)
+
+
+
+      wfmenu = gtk.Menu()
+      wfmenu.show()
+
+      self.menu_play = gtk.MenuItem("Play", agr)
+      key, mod = gtk.accelerator_parse("<ctrl>P")
+      self.menu_play.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_play.connect("activate",self.on_menu_activate)
+      self.menu_play.show()
+      wfmenu.append(self.menu_play)
+
+
+      self.menu_stop = gtk.MenuItem("Stop", agr)
+      key, mod = gtk.accelerator_parse("<ctrl>M")
+      self.menu_stop.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_stop.connect("activate",self.on_menu_activate)
+      self.menu_stop.show()
+      wfmenu.append(self.menu_stop)
+
+
+
+      viewmenu = gtk.Menu()
+      viewmenu.show()
+      
+      self.menu_zoomout = gtk.MenuItem("Zoom Out", agr)
+      key, mod = gtk.accelerator_parse("<ctrl>I")
+      self.menu_zoomout.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_zoomout.connect("activate",self.on_menu_activate)
+      self.menu_zoomout.show()
+      viewmenu.append(self.menu_zoomout)
+
+
+      self.menu_zoomin = gtk.MenuItem("Zoom In", agr)
+      key, mod = gtk.accelerator_parse("<ctrl>K")
+      self.menu_zoomin.add_accelerator("activate", agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_zoomin.connect("activate",self.on_menu_activate)
+      self.menu_zoomin.show()
+      viewmenu.append(self.menu_zoomin)
+
+
+
+      helpmenu = gtk.Menu()
+      helpmenu.show()  
+
+
+      self.menu_about = gtk.ImageMenuItem(gtk.STOCK_ABOUT, agr)
+      self.menu_about.connect("activate",self.on_menu_activate)
+      self.menu_about.show()
+      helpmenu.append(self.menu_about)
+
+
+      filem = gtk.MenuItem("_File")
+      editm = gtk.MenuItem("_Edit")
+      viewm = gtk.MenuItem("_View")
+      wfm = gtk.MenuItem("_Workflow")
+      helpm = gtk.MenuItem("_Help")
+      
+     
+      filem.set_submenu(filemenu)
+      filem.show()
+
+      editm.set_submenu(editmenu)
+      editm.show()
+
+      wfm.set_submenu(wfmenu)
+      wfm.show()
+      
+      helpm.set_submenu(helpmenu)
+      helpm.show()
+
+
+      viewm.set_submenu(viewmenu)
+      viewm.show()
+
+
+      mb.append(filem)
+      mb.append(editm)
+      mb.append(viewm)
+      mb.append(wfm)
+      mb.append(helpm)
+
       self.hpaned1 = builder.get_object("hpaned1")
       self.hpaned2 = builder.get_object("hpaned2")
       self.vpaned1 = builder.get_object("vpaned1")
@@ -1461,23 +1743,12 @@ if __name__ == "__main__":
 
    win0 = splashWindow()
 
-   win1 = aboutWindow()
-
-   IMVEC.aboutWindow = win1.getWindow()
-
    gobject.timeout_add(2000, win0.start)
 
    os.chdir(os.path.expanduser("~"))
        
    gtk.gdk.threads_init()
    gtk.main()
-
-
-
-
-
-
-
 
 
 
