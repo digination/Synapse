@@ -90,7 +90,13 @@ class container:
 
    def updatePeers(self):
       for obj in self.getSynObjects():
-         obj.updatePeers()
+
+         obj.updatePeers() 
+
+      for obj in self.getSynObjects():
+         if str(obj.__class__) == "synapseObjects.synlink" and obj.getBidir():
+            obj.setDirection()
+         
 
 
    def getSynObjects(self):
@@ -971,14 +977,40 @@ class synlink(synobj):
       
      synlinkGTK.ibidir.disconnect(synlinkGTK.chdict['ibidir'])
 
+
+   def setDirection(self):
+
+      try:
+
+         inpeers = self.inObj.getPeers()
+
+         if self.bidir:
+            inpeers.append((0,self.outObj))
+         else:
+            for i in range(0,len(inpeers)):
+               if inpeers[i][1] == self.outObj:
+                  del inpeers[i]
+         return True
+
+      except:
+         print "ERROR: linked item 2:", self.inObj , ": doesn't have output, can't establish bidirectional link"
+         return False
+
+
+         
+
    def onBidirChanged(self,widget):
-      
+ 
       if widget.get_active_text() == "False":
-         self.bidir = False
+         self.bidir = False       
       else:
          self.bidir = True
+  
+      if not self.setDirection():
+         self.bidir = False
+         synlinkGTK.ibidir.set_active(0)
+         
 
-   
    def getPropWidget(self):
 
       if self.bidir == True:
@@ -2100,4 +2132,35 @@ class synlabel(synobj):
 
       self.broadcast()
 
+
+class synsel:
+
+
+   def unselect(self):
+
+      for item in self.selectedItems:
+         
+         (nx,ny) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),item.getO(),0,0)
+         item.getO().set_property("parent",IMVEC.activeDoc.getRootItem())
+         item.getO().set_property("x",nx)
+         item.getO().set_property("y",ny)
+
+         item.getMF().set_property("stroke_color","#cccccc")
+         item.connectMF()      
+
+      self.selectedItems = list()
+   
+
+   def getSelectedItems(self):
+
+      return self.selectedItems
+
+   def isEmpty(self):
+
+      if len(self.selectedItems) == 0 : return True
+      return False
+
+   def __init__(self):
+
+      self.selectedItems = list()
 

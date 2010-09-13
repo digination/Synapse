@@ -1,8 +1,12 @@
+ask for save what to do with unsaved docs before closing
+Add inputs and outputs orientation ( mux/demux will have 2 pos only, monitor, comment and container will have none)
+Add loop on itself feature for concerned building blocks
 Implement Wake on input feature (70% done)
 Implement synjector BB
 Finish to implement synfilter component
 Implement saving and loading ( 95% done )
-Implement multi select,clipboard and undu/redo
+Implement clipboard
+Implement undu/redo
 Implement display buffer
 Implement building blocks z-index
 Embeeded Documentation
@@ -10,4 +14,3 @@ implement propagation of stop signal
 add locks on input buffers while being processed by run() loop, and a broadcasts queue in case of locked var
 implement stdout/stderr discrimination on pexpect module
 add events for progress and status bars
-implement a new Building block: synsplitter

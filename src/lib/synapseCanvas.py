@@ -40,6 +40,17 @@ def motion_notify(widget, event):
 
 
       MOUSE_COORDS = [int(event.x),int(event.y)]
+      IMVEC.mouseCoords = MOUSE_COORDS
+      
+      try:
+         selobject = IMVEC.activeDoc.getSelObject().getSynItem()
+
+         if IMVEC.activeDoc.getSelObject().getSynObj().isEmpty():
+            selobject.getMF().set_property("width",int(event.x) - selobject.getMF().get_property("x") )
+            selobject.getMF().set_property("height",int(event.y) - selobject.getMF().get_property("y") )
+      except:
+         pass
+
       
       if RESIZED_OBJECT != None:
 
@@ -181,6 +192,10 @@ class synItem():
 
    def on_mf_clicked(self,item,target_item,event):
       
+
+      if IMVEC.activeDoc.getSelObject() != None:
+         IMVEC.activeDoc.getSelObject().getSynObj().unselect()
+
       IMVEC.activeDoc.setActiveM(IMVEC.activeDoc.getContainer().getMemberFromSynItem(self))
       
       if (IMVEC.activeDoc.getPrevM() != None):
@@ -265,6 +280,10 @@ class synItem():
    def getMF(self):
       return self.mf
 
+   def getIcon(self):
+      return self.icon
+
+
    def getO(self):
 
       return self.o
@@ -284,18 +303,38 @@ class synItem():
          inp.set_property("fill_color",color)
 
 
+   def connectMF(self):
 
-   def connectAll(self):
+      self.conns = list()
 
-      self.mf.connect("button-press-event",self.on_mf_clicked)
-      self.mf.connect("button-press-event",self.objectSelectionChange)
-      self.mf.connect("button-release-event",self.on_mf_released)
+      self.conns.append(self.mf.connect("button-press-event",self.on_mf_clicked))
+      self.conns.append(self.mf.connect("button-press-event",self.objectSelectionChange))
+      
       
       if self.icon != None:
 
-         self.icon.connect("button-press-event",self.on_mf_clicked)
-         self.icon.connect("button-press-event",self.objectSelectionChange)
-         self.icon.connect("button-release-event",self.on_mf_released)
+         self.conns.append(self.icon.connect("button-press-event",self.on_mf_clicked))
+         self.conns.append(self.icon.connect("button-press-event",self.objectSelectionChange))
+         
+
+      
+   def disconnectMF(self):
+
+      self.mf.disconnect(self.conns[0])
+      self.mf.disconnect(self.conns[1])
+
+      if (self.icon != None):
+         self.icon.disconnect(self.conns[2])
+         self.icon.disconnect(self.conns[3])
+
+
+
+   def connectAll(self):
+
+      self.connectMF()
+      self.conns.append(self.mf.connect("button-release-event",self.on_mf_released))
+      if self.icon != None:
+         self.conns.append(self.icon.connect("button-release-event",self.on_mf_released))
 
       for inp in self.inputs:
          inp.connect("button-press-event",self.on_input_clicked)
@@ -782,6 +821,9 @@ class linkItem():
 
    def on_mf_clicked(self,item,target_item,event):
 
+      if IMVEC.activeDoc.getSelObject() != None:
+         IMVEC.activeDoc.getSelObject().getSynObj().unselect()
+
       self.on_line_clicked(item,target_item,event)
 
 
@@ -1059,6 +1101,9 @@ class headerItem():
 
 
    def on_mf_clicked(self,item,target_item,event):
+
+      if IMVEC.activeDoc.getSelObject() != None:
+         IMVEC.activeDoc.getSelObject().getSynObj().unselect()
       
       IMVEC.activeDoc.setActiveM(IMVEC.activeDoc.getHeader())
       
@@ -1079,22 +1124,23 @@ class headerItem():
 
    def on_showbtn_clicked(self,item,target_item,event):
 
-      if self.mf.get_property("height") == 120:
+      if self.o.get_property("y") == 0:
 
          self.h_extended = False
 
-         self.sepLine1.set_property("y",-25)
-         self.sepLine2.set_property("y",-65)
-         self.mf.set_property("height",2)
-         self.showbtn.set_property("y",-118)
-         self.arrow.set_property("data","M 0 0 L 20 0 L 10 8 L 0 0 z")
-         self.arrow.set_property("x",5)
-         self.arrow.set_property("y",122)
+         self.o.set_property("y",-120)
+         #self.sepLine1.set_property("y",-25)
+         #self.sepLine2.set_property("y",-65)
+         #self.mf.set_property("height",2)
+         #self.showbtn.set_property("y",-118)
+         #self.arrow.set_property("data","M 0 0 L 20 0 L 10 8 L 0 0 z")
+         #self.arrow.set_property("x",5)
+         #self.arrow.set_property("y",122)
 
-         self.titleLabel.set_property('fill_color_rgba',0xffffff00)
-         self.authorLabel.set_property('fill_color_rgba',0xffffff00)
-         self.dateLabel.set_property('fill_color_rgba',0xffffff00)
-         self.descrLabel.set_property('fill_color_rgba',0xffffff00)
+         #self.titleLabel.set_property('fill_color_rgba',0xffffff00)
+         #self.authorLabel.set_property('fill_color_rgba',0xffffff00)
+         #self.dateLabel.set_property('fill_color_rgba',0xffffff00)
+         #self.descrLabel.set_property('fill_color_rgba',0xffffff00)
 
          #lower the whole canvas of 118px
          if IMVEC.activeDoc != None:
@@ -1106,23 +1152,25 @@ class headerItem():
       else:
 
          self.h_extended = True
+         self.o.set_property("y",0)
 
-         self.mf.set_property("height",120)
-         self.showbtn.set_property("y",0)
-         self.sepLine1.set_property("y",25)
-         self.sepLine2.set_property("y",65)
-         self.arrow.set_property("data","M 0 8 L 10 0 L 20 8 L 0 8 z")
+
+         #self.mf.set_property("height",120)
+         #self.showbtn.set_property("y",0)
+         #self.sepLine1.set_property("y",25)
+         #self.sepLine2.set_property("y",65)
+         #self.arrow.set_property("data","M 0 8 L 10 0 L 20 8 L 0 8 z")
          
-         self.arrow.set_property("x",5)
-         self.arrow.set_property("y",122)
+         #self.arrow.set_property("x",5)
+         #self.arrow.set_property("y",122)
 
-         self.titleLabel.set_property('fill_color_rgba',0xffffffff)
-         self.authorLabel.set_property('fill_color_rgba',0xffffffff)
-         self.dateLabel.set_property('fill_color_rgba',0xffffffff)
-         self.descrLabel.set_property('fill_color_rgba',0xffffffff)
+         #self.titleLabel.set_property('fill_color_rgba',0xffffffff)
+         #self.authorLabel.set_property('fill_color_rgba',0xffffffff)
+         #self.dateLabel.set_property('fill_color_rgba',0xffffffff)
+         #self.descrLabel.set_property('fill_color_rgba',0xffffffff)
 
 
-         #lower the whole canvas of 118px
+         #aise the whole canvas of 118px
          if IMVEC.activeDoc != None:
             for item in IMVEC.activeDoc.getContainer().getSynItems():
                if item.getO().get_parent() == IMVEC.activeDoc.getRootItem():
@@ -1162,11 +1210,14 @@ class headerItem():
       self.root = parent_canvas
       self.o = goocanvas.Group(parent=self.root)
 
+      self.o.set_property("x",0)
+      self.o.set_property("y",0)
+
      
       self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,width=self.root.get_property("width"), height=120, stroke_color="#8BA2BD", fill_color_rgba=0x8BA2BDAA,line_width=0)
 
 
-      self.showbtn = goocanvas.Group(parent=self.root)
+      self.showbtn = goocanvas.Group(parent=self.o)
 
       self.showbtnf = goocanvas.Rect(parent = self.showbtn, x=0, y=120,width=30, height=12, stroke_color="#8BA2BD", fill_color_rgba=0x8BA2BDAA,line_width=0)
 
@@ -1515,3 +1566,47 @@ class labelItem(synItem):
       self.connectAll()
       self.clickable.connect("button-press-event",self.on_clickable_change)
       self.content_label.connect("button-press-event",self.on_clickable_change)
+
+
+
+
+class selItem:
+
+
+   def on_mf_clicked(self,item,target_item,event):
+      
+      global MOVED_OBJECT
+      global COORDS_OFFSET
+      global MOUSE_COORDS
+      global ACTIVE_OBJECT
+
+      if (item != None):
+         MOVED_OBJECT = self.getO()
+         ACTIVE_OBJECT = self
+
+         (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
+         #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
+
+         COORDS_OFFSET = [ MOUSE_COORDS[0] - self.getO().get_property("x") ,  MOUSE_COORDS[1] - self.getO().get_property("y")]
+
+
+
+   def getO(self):
+
+      return self.o
+
+   def getMF(self):
+
+      return self.mf
+
+   def __init__(self,parent_canvas):
+
+
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+      self.mf = goocanvas.Rect(parent = self.o, x=IMVEC.mouseCoords[0], y=IMVEC.mouseCoords[1], radius_x=0, radius_y=0,width=0, height=0,
+      stroke_color="#0099cc", fill_color_rgba=0x40ddff90,
+      line_width=1)
+
+

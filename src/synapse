@@ -509,14 +509,86 @@ class document(object):
 
       return None
 
+
+
+   def getSelObject(self):
+
+      return self.selobject
+
+   def on_bg_released(self,item,target,event):
+
+      if self.selobject != None:
+
+         (x_sel,y_sel) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.selobject.getSynItem().getMF(),0,0)
+         width_sel = self.selobject.getSynItem().getMF().get_property("width")
+         height_sel = self.selobject.getSynItem().getMF().get_property("height")
+
+         for item in IMVEC.activeDoc.getContainer().getSynItems():
+
+            if (item.getO().get_property("parent") == IMVEC.activeDoc.getRootItem() ):
+
+               (x_item,y_item) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),item.getMF(),0,0)
+               width_item = item.getMF().get_property("width")
+               height_item  = item.getMF().get_property("height")
+
+               if ( x_sel <= x_item \
+               and y_sel <= y_item \
+               and width_sel >= (width_item + (x_item - x_sel) )  \
+               and  height_sel >= (height_item + (y_item - y_sel) ) ):
+
+
+                  item.getO().set_property("parent",self.selobject.getSynItem().getO())
+                  item.getMF().set_property("stroke_color","#00FF00")
+                  self.selobject.getSynObj().getSelectedItems().append(item)
+       
+                  item.disconnectMF()
+                  item.getMF().connect("button-press-event",self.selobject.getSynItem().on_mf_clicked )
+                  try:
+                     item.getIcon().connect("button-press-event",self.selobject.getSynItem().on_mf_clicked )
+                  except:
+                     pass
+                     #to handle case where bb has no icon
+
+                  print IMVEC.activeDoc.getContainer().getMemberFromSynItem(item).getSynObj().getName()
+
+
+
+         if self.selobject.getSynObj().isEmpty() :
+            self.root.remove_child(self.selobject.getSynItem().getO())
+            self.selobject = None
+         else:
+            self.selobject.getSynItem().getO().remove_child(self.selobject.getSynItem().getMF())
+
+         print "x_sel:%d\ny_sel:%d\nwidth_sel:%d\nheight_sel:%d\n" % (x_sel,y_sel,width_sel,height_sel)
+
+
+     
    def on_bg_clicked(self,item,target,event):
+
+      try:
+         if str(IMVEC.activeDoc.getActiveM().getSynObj().__class__) != "synapseObjects.synlink":
+            IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("stroke_color","#cccccc")
+         elif IMVEC.activeDoc.getActiveM().getSynObj().getBidir() == False:
+            IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("stroke_color","#000000")
+         else:
+            IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("stroke_color","#00cbFF")
+
+      except:
+         pass
+      
 
       for child in IMVEC.oprop.get_nth_page(0).get_children():
          IMVEC.oprop.get_nth_page(0).remove(child)
       IMVEC.oprop.get_nth_page(0).add(self.getPropWidget())
 
+      # create new selection object
 
-      
+      if self.selobject != None and not self.selobject.getSynObj().isEmpty():
+         self.selobject.getSynObj().unselect()
+
+      self.selobject = linker(synsel(),selItem(self.root))
+
+          
    def getSyncontainersList(self):
 
       return self.syncontainersList
@@ -533,6 +605,8 @@ class document(object):
       self.color = "DEFAULT"
       self.width = 1024
       self.height = 1024
+
+      self.selobject = None
 
       
       #define a new empty objects container
@@ -618,6 +692,7 @@ class document(object):
 				line_width=0)
 
       self.rect.connect("button-press-event",self.on_bg_clicked)
+      self.rect.connect("button-release-event",self.on_bg_released)
 
       self.root.set_property("width",self.width)
       self.root.set_property("height",self.height)
@@ -1086,6 +1161,11 @@ class MainWindow(object):
             newitem.update()            
             IMVEC.linkList.append(newitem)
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+            if pobj.getBidir():
+               newitem.getMF().set_property("stroke_color","#00cbff")
+               pobj.setDirection()
+
+
       IMVEC.activeDoc.refresh_objects_list()
 
       nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
