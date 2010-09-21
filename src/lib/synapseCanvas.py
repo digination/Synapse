@@ -6,6 +6,8 @@ from synapseObjects import *
 from synapseIMVEC import *
 from synapseUtils import *
 from synapseDialogs import inputDialog
+from synapseDebug import dbg
+
 import pygtk
 pygtk.require("2.0")
 import gtk
@@ -90,7 +92,7 @@ def motion_notify(widget, event):
 
             if syn_c.getSynItem().getO() != MOVED_OBJECT:
                if (int(event.x)-COORDS_OFFSET[0] < sync_x + sync_width  and int(event.x)-COORDS_OFFSET[0] > sync_x and int(event.y)-COORDS_OFFSET[1] < sync_y + sync_height and int(event.y)-COORDS_OFFSET[1] > sync_y):
-                  #print "BLOCK ADDED TO CONTAINER", syn_c
+
         
                   IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.plusCursor)          
                   PRE_CONTAINER = syn_c.getSynItem().getO()
@@ -117,6 +119,36 @@ def compute_bary(item):
 
    item_height = item.get_property("height")
 
+
+
+   #test if item has transformation matrix:
+      
+   if (item.get_simple_transform() != None):
+
+      IMVEC.dbg.debug("OBJECT HAS TRANSFORMATION MATRIX",tuple(),dbg.EXDEBUG)
+
+      transform = item.get_simple_transform()
+
+      #change parameters if object is rotated
+      if transform[3] == 90:
+
+         buff = item_width
+         item_width = item_height * -1
+         item_height = buff
+
+      elif transform[3] == 180:
+
+         item_width = item_width * -1
+         item_height = item_height * -1
+
+      elif transform[3] == 270: 
+
+         buff = item_width
+         item_width = item_height
+         item_height = buff * -1
+
+
+
    (nx,ny) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),item,0,0)
 
 
@@ -129,11 +161,7 @@ def compute_bary(item):
    y = ny + (item_height / 2 )
 
    coords = (x,y)
-
-
-   #print "[nx,ny] : [%d,%d]" % (nx,ny)
-   #print "[x,y] : [%d,%d]" % (x,y)
-
+  
    return coords
 
 
@@ -164,7 +192,60 @@ def compute_bary_internal(item):
 class synItem():
 
 
+   def reinit_pos(self):
 
+      for inp in self.inputs:
+         inp.set_transform(None)
+
+      for output in self.outputs:
+         output.set_transform(None)
+
+
+   def changeIOPos(self,input_pos,output_pos):
+
+      self.reinit_pos()
+
+      if (input_pos != "left"):
+
+         rotate_coords = compute_bary_internal(self.inputs[0])
+
+         self.inputs[0].rotate(self.tr_table_in[input_pos][2],rotate_coords[0],rotate_coords[1])
+         new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(self.inputs[0],self.tr_table_in[input_pos][0],self.tr_table_in[input_pos][1])
+
+         self.inputs[0].set_property("x",new_coords[0])
+         self.inputs[0].set_property("y",new_coords[1])      
+
+
+      if (output_pos != "right" and output_pos != None ) :
+
+         process_outputs = 0
+
+         for outp in self.outputs:
+
+            rotate_coords = compute_bary_internal(outp)
+            outp.rotate(self.tr_table_out[output_pos][2],rotate_coords[0],rotate_coords[1])
+
+
+            if (output_pos != "left"):
+
+               new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(outp,self.tr_table_out[output_pos][0]+(17*process_outputs),self.tr_table_out[output_pos][1])
+
+
+            else:
+
+               new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(outp,self.tr_table_out[output_pos][0],self.tr_table_out[output_pos][1]+(17*process_outputs))
+
+            outp.set_property("x",new_coords[0])
+            outp.set_property("y",new_coords[1])   
+            
+            process_outputs +=1      
+
+
+
+
+
+
+  
    def objectSelectionChange(self,item, target_item, event):
 
       global ACTIVE_OBJECT
@@ -229,7 +310,8 @@ class synItem():
    #stops link line
    def on_input_clicked(self,item, target_item, event):
       global MAKE_LINE,NLPARAMETERS
-      print "INPUT CLICKED", item
+      IMVEC.dbg.debug("INPUT CLICKED: %s",(item),dbg.DEBUG)
+
       if MAKE_LINE == 1:
 
          newitem = linkItem(IMVEC.activeDoc.getRootItem(),NLPARAMETERS[0],NLPARAMETERS[1],self,item)
@@ -265,7 +347,8 @@ class synItem():
          
          NLPARAMETERS.append(self)
          NLPARAMETERS.append(item)
-         print "OUTPUT CLICKED", item
+         IMVEC.dbg.debug("OUTPUT CLICKED: %s",(item),dbg.DEBUG)
+         
          IMVEC.status_lbl.set_text("Choose input object to link with %s" % (IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj().getName()))
 
          for item in IMVEC.activeDoc.getContainer().getSynItems():
@@ -378,8 +461,7 @@ class synItem():
          if output == self.outputs[i]:
             return i
             break
-      print "ERROR: Output not found"
-
+      IMVEC.dbg.debug("Output not found",tuple(),dbg.CRITICAL)
 
    def getInNum(self,inp):
 
@@ -387,13 +469,18 @@ class synItem():
          if inp == self.inputs[i]:
             return i
             break
-      print "ERROR: Input not found"
+      IMVEC.dbg.debug("Input not found",tuple(),dbg.CRITICAL)
 
 
 class synappItem(synItem):
 
 
    def __init__(self,parent_canvas):
+
+
+      self.tr_table_in = { 'right' : (135,40,180) , 'top' : (83,0,90), 'bottom' : (53,50,270) }
+      self.tr_table_out = { 'left' : (0,25,180) , 'top' : (53,0,270), 'bottom' : (67,50,90) }
+      
 
       self.outputs = list()
       self.inputs = list()
@@ -945,7 +1032,7 @@ class monitorItem(synItem):
 
    def updateInputs(self):
 
-      print "MF_X_COORD:", self.mf.get_property("x")
+      IMVEC.dbg.debug("MF_X_COORD: %d",(self.mf.get_property("x")),dbg.DEBUG)
 
       #self.inputs[0].set_property("y",(self.mf.get_property("height")-30)/2 )
       #self.inputs[0].set_property("x",self.mf.get_property("x")-1)
@@ -1004,9 +1091,8 @@ class monitorItem(synItem):
       self.hideBtn = goocanvas.Image(parent = self.o,x=260,y=5,pixbuf=IMVEC.monitorHidePixbuf)
       self.maxBtn = goocanvas.Image(parent = self.o,x=280,y=5,pixbuf=IMVEC.monitorMaximizePixbuf) 
 
-
-
-      print "MF_X_COORD:", self.mf.get_property("x")
+      IMVEC.dbg.debug("MF_X_COORD: %d",(self.mf.get_property("x")),dbg.DEBUG)
+      
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 8 L 0 16 L 0 1 z",

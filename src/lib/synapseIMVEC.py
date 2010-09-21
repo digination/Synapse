@@ -2,11 +2,14 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 import os
+from synapseDebug import dbg
 
 
 
 #Inter modules Variable exchange Class
 class IMVEC:
+
+   dbg = dbg(0x05);
 
    running = False
 
@@ -82,6 +85,14 @@ class IMVEC:
    linkPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/linkItem.png" % (RES_PATH),16,16)
 
    synapse_logo = gtk.gdk.pixbuf_new_from_file("%s/images/synapse.png" % (RES_PATH))
+
+
+   ioleft = gtk.gdk.pixbuf_new_from_file("%s/images/io_left.png" % (RES_PATH));
+   ioright = gtk.gdk.pixbuf_new_from_file("%s/images/io_right.png" % (RES_PATH));
+   iotop = gtk.gdk.pixbuf_new_from_file("%s/images/io_top.png" % (RES_PATH));
+   iobottom = gtk.gdk.pixbuf_new_from_file("%s/images/io_bottom.png" % (RES_PATH));
+
+   bbhoriz = gtk.gdk.pixbuf_new_from_file("%s/images/bb_horiz.png" % (RES_PATH));
 
    extendCursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
    plusCursor = gtk.gdk.Cursor(gtk.gdk.PLUS)

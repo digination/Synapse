@@ -33,12 +33,11 @@ class pkgManager:
       pkgs =  os.listdir('/tmp/synapse')  
      
       for pkg in pkgs:
-         print "pkg: %s" % (pkg)
+         
          pkgsha1 = pkg.split("/").pop()
-         print "pkgsha: %s" % (pkgsha1)
+
          for msha1,member in self.members.items():
             if pkgsha1 == msha1:
-               print "FOUND %s" % (msha1)
                tsname = "%s (%s)" % (member.getName(),msha1)
                iter = self.treestore.append(None,[IMVEC.folderPixbuf_s,tsname] )
                self.treestore.append(iter,[IMVEC.folderPixbuf_s,"building_blocks"])
@@ -64,20 +63,27 @@ class pkgManager:
             shutil.rmtree("/tmp/synapse")
          os.mkdir("/tmp/synapse")
       except:
-         print "cannot create tmp directory in /tmp, skipping pkg load.."
+
+         IMVEC.dbg.debug("cannot create tmp directory in /tmp, skipping pkg load..",tuple(),dbg.ERROR)
+
          return
 
       for libpath in IMVEC.libpaths:
 
          for filename in glob.glob( os.path.join(libpath, '*.spkg') ):
 
+            IMVEC.dbg.debug("FOUND PKG: %s",(filename),dbg.NOTICE)
+
             newpkg = synpkg(filename)
             newpkg.computeSHA1()
+
+            IMVEC.dbg.debug("PKG DIGEST: %s",(newpkg.getSHA1()),dbg.NOTICE)
+
             #compares with current list to see if sha1 already exists
             for msha1,member in self.members.items():
 
                if newpkg.getSHA1() == msha1:
-                  print "Package %s Already imported, skipping.." % (filename)
+                  IMVEC.dbg.debug("Package %s Already imported, skipping..",(filename),dbg.WARNING)
                   newpkg = None
                   break
       
@@ -91,7 +97,7 @@ class pkgManager:
                   tar.extractall(path="/tmp/synapse/%s" % (newpkg.getSHA1()) )
                   tar.close()
                except:
-                  print "cannot open or extract synapse pkg file: %s" % (filename)
+                  IMVEC.dbg.debug("cannot open or extract synapse pkg file: %s",(filename),dbg.ERROR)
                   newpkg = None
 
             if newpkg != None:
@@ -115,8 +121,7 @@ class synpkg:
          self.SHA1 = h.hexdigest()
          f.close()
       except:
-         print "Cannot compute sha1 digest for archive: %s" % (self.pkgfile)
-
+         IMVEC.dbg.debug("Cannot compute sha1 digest for archive: %s",(self.pkgfile),dbg.ERROR)
 
 
    def setName(self,name):

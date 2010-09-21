@@ -1,20 +1,25 @@
 import os
-
-
+from synapseIMVEC import *
+from synapseDebug import dbg
 
 
 
 def getAbsoluteCoords(ref,item,x,y):
 
    if item == ref:
+      IMVEC.dbg.debug("COMPUTED ABSOLUTE COORDS: %d,%d",(x,y),dbg.EXDEBUG)
       return (x,y)
+      
 
-   x += item.get_property("x")
-   y += item.get_property("y")
+   ispace_coords = IMVEC.activeDoc.getCanvas().convert_from_item_space(item,item.get_property("x"),item.get_property("y"))
+   
+   x += ispace_coords[0]
+   y += ispace_coords[1]
 
    if (item.get_parent() != None):
 
       (x,y) = getAbsoluteCoords(ref,item.get_property("parent"),x,y)    
+   
    
    return (x,y)
 

@@ -9,6 +9,7 @@ sys.path.append("/usr/lib/synapse")
 from synapseIMVEC import *
 from synapseGTKProperties import *
 from synapseUtils import *
+from synapseDebug import dbg
 
 from subprocess import Popen, PIPE
 from fcntl import fcntl , F_GETFL, F_SETFL
@@ -27,7 +28,7 @@ try:
    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image
    from reportlab.lib.styles import getSampleStyleSheet
 except:
-   print "report API not loaded"
+   IMVEC.dbg.debug("REPORT API NOT LOADED",(filename),dbg.WARNING)
    
 
 
@@ -50,12 +51,12 @@ class container:
 
    def delete(self,dmember):
 
-      print "DELEtE METHOD CALLED WITH OBJ:", dmember
+      IMVEC.dbg.debug("DELETE METHOD CALLED WITH OBJ %s",(dmember),dbg.EXDEBUG)
 
       for mname,member in self.members.items():
 
          if member == dmember:
-               print "DELETING MEMBER:",member
+               IMVEC.dbg.debug("DELETING MEMBER %s",(member),dbg.DEBUG)
                member.getSynObj().delete()
                del self.members[mname]
                
@@ -117,15 +118,13 @@ class container:
    def getSynItem(self,synObj):
 
       for mname,member in self.members.items():
-         print member
          if (member.getSynObj() == synObj):
             return member.getSynItem()
             break
 
-   def getSynObj(self,synItem):
-     
+   def getSynObj(self,synItem):     
       for mname,member in self.members.items():
-         print member
+
          if (member.getSynItem() == synItem):
             return member.getSynObj()
             break
@@ -173,13 +172,9 @@ class linker(object):
             rootItem = "___root___"
          else:
 
-            print "ROOT DIFFERENT:"
             ri = self.synItem.getO().get_property("parent")             
             rootItem = IMVEC.activeDoc.getContainer().getMemberFromParentSynItem(ri).getSynObj().getName() 
-            print rootItem
 
-
-              
 
          canvasProperties = (x,y,width,height,mfwidth,mfheight,rootItem)
 
@@ -234,19 +229,20 @@ class synobj:
          (input_num, peerobj) = tuple(peer)         
 
          if (peerobj.mInput == True):
-            print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+
+            IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
             peerobj.setIbuff(input_num,self.obuff)
   
          else:
 
             if (peerobj.needSender == False):
 
-               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                peerobj.setIbuff(str(input_num) + ":" +self.obuff)
 
             else:
 
-               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
 
 
@@ -312,7 +308,8 @@ class synobj:
          
          if str(obj.__class__) == "synapseObjects.synlink":
             if obj.getOutObj() == self and obj.getOutputNum() == 0:
-               print "UPDATING LINK FOR ", self
+
+               IMVEC.dbg.debug("UPDATING LINK FOR %s",(self),dbg.NOTICE)
                self.peers.append([obj.getInputNum(),obj.getInObj()])
                
 
@@ -399,10 +396,8 @@ class synfilter(synobj):
 
       self.alive = True
 
-      print "FILTERCMD:",filterCmd
-
+      IMVEC.dbg.debug("%s FILTERCMD: %s",(self,filterCmd),dbg.DEBUG)
      
-
       proc = Popen(filterCmd, shell=True, stdout=PIPE,stdin=PIPE,bufsize=4096)
       fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
       fcntl(proc.stdin,F_SETFL,fcntl(proc.stdin,F_GETFL) | os.O_NONBLOCK)            
@@ -421,7 +416,9 @@ class synfilter(synobj):
                self.broadcast() 
             
          if (self.ibuff != ""):
-            print "WRITING IBUFF TO FILTER"
+
+            IMVEC.dbg.debug("WRITING IBUFF TO FILTER %s",(self),dbg.DEBUG)
+
             (input_num,sep,content) = self.ibuff.partition(":")
             proc.stdin.write(content)
             proc.stdin.flush()
@@ -433,10 +430,10 @@ class synfilter(synobj):
       try:
          proc.kill()
       except:
-         print "subprocess already closed",self   
-         print "return code:", proc.returncode  
-     
 
+         IMVEC.dbg.debug("SUBPROCESS ALREADY CLOSED FOR %s (RETURN CODE %d)",(self,proc.returncode),dbg.DEBUG)
+
+       
    def __init__(self,name,filter_type="Simple Grep",data=""):
 
       self.name = name
@@ -489,12 +486,14 @@ class synfilter(synobj):
          self.name = widget.get_text()
 
       elif (widget == synfilterGTK.ift):
-         print "FT CHANGED"
+
+         IMVEC.dbg.debug("SYNFILTER FILTERTYPE CHANGED",tuple(),dbg.DEBUG)
+
          self.filterType = widget.get_active_text()
 
       elif (widget == synfilterGTK.idataBuffer):
 
-         print "DATA CHANGED"
+         IMVEC.dbg.debug("SYNFILTER DATA CHANGED",tuple(),dbg.DEBUG)
          self.data = synfilterGTK.idataBuffer.get_text(synfilterGTK.idataBuffer.get_start_iter(),synfilterGTK.idataBuffer.get_end_iter())
 
 
@@ -544,20 +543,26 @@ class syntimer(synobj):
          if not self.alive: break
          
          if (buff_repeat != ""):
-            print "BCASTING ", buff_repeat            
+            
+            IMVEC.dbg.debug("BROADCASTING %s",(buff_repeat),dbg.DEBUG)
+          
             self.obuff = buff_repeat
             self.broadcast() 
 
          if (self.ibuff != ""):
             (input_num,sep,content) = self.ibuff.partition(":")
-            print "%s IBUFF: %s" % (self.name,content) 
+            
+            IMVEC.dbg.debug("%s IBUFF: %s",(self.name,content) ,dbg.DEBUG)
+
             #time.sleep(float(int(self.interval)/1000))
 
             if (self.loop == False): 
                buff_repeat = ""      
             else:
                buff_repeat = copy.copy(content)
-               print "KEEPING BUFFER FOR FURTHER USAGE"
+               IMVEC.dbg.debug("KEEPING BUFFER FOR FURTHER USAGE",tuple() ,dbg.DEBUG)
+
+                
            
             self.obuff = content
             self.broadcast()
@@ -822,19 +827,20 @@ class syntest(synobj):
             (input_num, peerobj) = tuple(peer)         
 
             if (peerobj.mInput == True):
-               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+               IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
+
                peerobj.setIbuff(input_num,self.obuff)
   
             else:
 
                if (peerobj.needSender == False):
 
-                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+                  IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                   peerobj.setIbuff(str(input_num) + ":" +self.obuff)
 
                else:
 
-                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuff,peerobj.getName(),input_num)
+                  IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                   peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
 
 
@@ -848,7 +854,7 @@ class syntest(synobj):
           if (self.ibuff != ""):
 
             (input_num,sep,content) = self.ibuff.partition(":")
-            #print "%s IBUFF: %s" % (self.name,content)
+
             self.obuff = content
 
             exec "if %s :\n   self.bcast(True)\nelse:\n   self.bcast(False)" % ( self.operation_dict[self.testType][0] ) 
@@ -993,7 +999,8 @@ class synlink(synobj):
          return True
 
       except:
-         print "ERROR: linked item 2:", self.inObj , ": doesn't have output, can't establish bidirectional link"
+
+         IMVEC.dbg.debug("linked item %s  doesn't have output, can't establish bidirectional link",(self.inObj),dbg.ERROR)
          return False
 
 
@@ -1119,7 +1126,9 @@ class synmux(synobj):
             data_copy = data_copy.replace("[[SI%d]]"% (i),self.buffs[i].rstrip('\r').rstrip('\n')).replace("\\\n","\n").replace("\\\t","\t")
          
          if ready > 0:
-            print "BROADCASTING"
+
+            IMVEC.dbg.debug("MUXER %s BROADCASTING",(self),dbg.DEBUG)
+            
             self.obuff = data_copy
             self.broadcast()
             self.obuff = ""
@@ -1242,7 +1251,7 @@ class syndemux(synobj):
             self.ibuff = s2
 
             del self.obuffs[:]
-            print "DEMUX IBUFF:",self.ibuff
+
             pbuff = copy.copy(self.ibuff)
 
             for i in range(0,5):
@@ -1253,9 +1262,7 @@ class syndemux(synobj):
                pbuff = sep3
 
             if sep3 != "":
-               self.obuffs.append(sep3)
-            print self.obuffs
-            print self.opeers            
+               self.obuffs.append(sep3)    
             self.bcast()
             self.ibuff = ""
              
@@ -1273,23 +1280,23 @@ class syndemux(synobj):
             (input_num, peerobj) = tuple(peer)         
 
             if (peerobj.mInput == True):
-               print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+               IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
                peerobj.setIbuff(input_num,self.obuffs[i])
   
             else:
 
                if (peerobj.needSender == False):
 
-                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+                  IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
                   peerobj.setIbuff(str(input_num) + ":" +self.obuffs[i])
 
                else:
 
-                  print "SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d" % (self.obuffs[i],peerobj.getName(),input_num)
+                  IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
                   peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuffs[i])
 
 
-      print self.obuffs      
+
 
 
    def __init__(self,name,separator="\\n"):
@@ -1437,10 +1444,12 @@ class synapp(synobj):
          
          if str(obj.__class__) == "synapseObjects.synlink":
             if obj.getOutObj() == self and obj.getOutputNum() == 0:
-               print "UPDATING LINK FOR ", self
+               
+               IMVEC.dbg.debug("UPDATING LINK FOR %s",(self),dbg.NOTICE)
+
                self.peers.append([obj.getInputNum(),obj.getInObj()])
             elif obj.getOutObj() == self and obj.getOutputNum() == 1:
-               print "UPDATING LINK FOR ", self
+               IMVEC.dbg.debug("UPDATING LINK FOR %s",(self),dbg.NOTICE)
                self.peersSTDERR.append([obj.getInputNum(),obj.getInObj()])
 
    def bcastSTDERR(self):
@@ -1449,7 +1458,6 @@ class synapp(synobj):
 
          (input_num, peerobj) = tuple(peer)  
 
-         print "SENDING ERR MESSAGE \"%s\" TO %s" % (self.obuff2,peerobj.getName())
          peerobj.setIbuff(self.obuff2)
 
       #self.ibuff = ""
@@ -1500,7 +1508,8 @@ class synapp(synobj):
 
          if (self.ibuff != ""):
             (input_num,sep,content) = self.ibuff.partition(":")
-            print "WRTIING TO %s STDIN" % (self.name)
+            IMVEC.dbg.debug("WRTIING TO %s STDIN",(self.name),dbg.DEBUG)
+
             proc.send(content)
             #proc.sendeof()
             #proc.stdin.write(content)
@@ -1511,8 +1520,8 @@ class synapp(synobj):
          #proc.kill()
          pass
       except:
-         print "subprocess already closed",self   
-         print "return code:", proc.returncode
+         
+         IMVEC.dbg.debug("SUBPROCESS ALREADY CLOSED FOR %s (RETURN CODE %d)",(self,proc.returncode),dbg.DEBUG)
 
    def __init__(self,name,cmd="",keepalive=True):
 
@@ -1561,11 +1570,12 @@ class synapp(synobj):
 
 
    def onTextChange(self,widget):
-      print "ONTEXTCHANGE:", widget
 
       if (widget == synappGTK.iname):
          self.name = synappGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synappGTK.iname.get_text())
+         #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
+
 
       elif (widget == synappGTK.icmd):
          self.cmd = synappGTK.icmd.get_text()
@@ -1643,7 +1653,7 @@ class synserv(synobj):
       try:
          sockfd.connect((host,int(port)))
       except: 
-         print "ERROR: CANT CONNECT TO %s:%s" % (host,port)
+         IMVEC.dbg.debug("CANT CONNECT TO %s:%s",(host,port),dbg.ERROR)
          return -1
 
       fcntl(sockfd,F_SETFL,fcntl(sockfd,F_GETFL) | os.O_NONBLOCK)
@@ -1662,7 +1672,7 @@ class synserv(synobj):
       while(self.alive == True and (self.autoreco or sockfd != -1) ):
 
          while(sockfd == -1 and self.autoreco and self.alive):
-            print "RECONNECTING"
+            IMVEC.dbg.debug("RECONNECTING SOCKET ON %s",(self.connectInfos),dbg.NOTICE)
             sockfd = self.sockConnect()
 
          (rr,wr,er) = select.select([sockfd],[],[],2)
@@ -1742,7 +1752,7 @@ class synserv(synobj):
 
 
    def onTextChange(self,widget):
-      print "ONTEXTCHANGE:", widget
+
 
       if (widget == synservGTK.iname):
          self.name = synservGTK.iname.get_text()
@@ -1924,7 +1934,7 @@ class synreport(synobj):
 
       #try:
 
-         print "writing %s to report" % (self.pdfContent)
+         IMVEC.dbg.debug("writing %s to report",(self.pdfContent),dbg.EXDEBUG)
 
          pdf = SimpleDocTemplate(self.output_file)
          styles = getSampleStyleSheet()
@@ -1968,7 +1978,7 @@ class synreport(synobj):
           if (self.ibuff != ""):
             (sender,sep,content0) = self.ibuff.partition(":")
             (input_num,sep,content) = content0.partition(":")
-            print "%s IBUFF: %s" % (self.name,content)
+
 
             try:
                self.buffersDict[sender] += content

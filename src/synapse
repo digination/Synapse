@@ -144,19 +144,7 @@ class document(object):
       IMVEC.obrowser.append_column(C1)
       IMVEC.obrowser.set_model(LS0)
 
-
-   def loadFromFile(self,sws_file):
-
-      return True
-
-
-   def saveToFile(self,sws_file):
-
-      for obj in objectsList:
-
-         print obj.getName()
-         
-      
+    
    def on_closebtn_clicked(self,widget):
       
  
@@ -165,9 +153,7 @@ class document(object):
   
    def receiveCallback(self, widget, context, x, y, selection, targetType,time):
 
-
-      print "DROPPED:", context.get_source_widget().get_name()
-
+      IMVEC.dbg.debug("DROPPED OBJECT FROM BTN: %s",(context.get_source_widget().get_name()),dbg.DEBUG)
      
       if (context.get_source_widget().get_name() == "synapp_btn"):
 
@@ -392,7 +378,7 @@ class document(object):
       nwidth = int(self.root.get_property("width") * self.zoom)
       nheight = int(self.root.get_property("height") * self.zoom)
       
-      #print "ROOT_W: %d\nROOT_H: %d\nW_INT: %d\nH_INT: %d" % (self.root.get_property("width"),self.root.get_property("height"),nwidth,nheight)
+
 
       self.root.set_simple_transform(0,0,self.zoom,0)
       self.canvas.set_size_request(nwidth,nheight)
@@ -548,8 +534,9 @@ class document(object):
                   except:
                      pass
                      #to handle case where bb has no icon
-
-                  print IMVEC.activeDoc.getContainer().getMemberFromSynItem(item).getSynObj().getName()
+                  
+                  
+                  #print IMVEC.activeDoc.getContainer().getMemberFromSynItem(item).getSynObj().getName()
 
 
 
@@ -559,7 +546,7 @@ class document(object):
          else:
             self.selobject.getSynItem().getO().remove_child(self.selobject.getSynItem().getMF())
 
-         print "x_sel:%d\ny_sel:%d\nwidth_sel:%d\nheight_sel:%d\n" % (x_sel,y_sel,width_sel,height_sel)
+         #print "x_sel:%d\ny_sel:%d\nwidth_sel:%d\nheight_sel:%d\n" % (x_sel,y_sel,width_sel,height_sel)
 
 
      
@@ -743,7 +730,7 @@ class document(object):
 
    #def getItemsAt(self,x,y):
 
-      #print x
+
 
       #self.cairo_context = self.canvas.create_cairo_context()
 
@@ -828,7 +815,8 @@ class MainWindow(object):
 
    def on_key_press(self,widget,event):
 
-      print event.keyval
+      IMVEC.dbg.debug("KEY PRESSED: %d",(event.keyval),dbg.DEBUG)
+
       #object deletion
       if IMVEC.activeDoc.getActiveM() != None and event.keyval == 65535:
          
@@ -919,14 +907,13 @@ class MainWindow(object):
 
    #dnd send callback
    def sendCallback(self, widget, context, selection, targetType, eventTime):
-      print "SENT"
+      #print "SENT"
       selection.set(selection.target, 8, "foo")
-       
+      return
 
 
    def getRecursiveRoot(self,pickled_objects,root_dict,root_name):
 
-      print root_name
 
       for  i in range (0, len(pickled_objects)) :
 
@@ -934,20 +921,22 @@ class MainWindow(object):
 
          if pobj.getName() == root_name:
 
-            print "found container"
+
+            IMVEC.dbg.debug("FOUND CONTAINER",tuple(),dbg.EXDEBUG)
 
             canvasProperties = list(pobj.getCanvasProperties())
 
             try:
                root = root_dict[canvasProperties[6]]
-               print "containers root found"
+               IMVEC.dbg.debug("CONTAINER'S ROOT NOT FOUND",tuple(),dbg.DEBUG)
 
             except:
                root = getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
 
             newitem = containerItem(root)
 
-            print "container created"
+            
+            IMVEC.dbg.debug("CONTAINER CREATED",tuple(),dbg.DEBUG)
 
             newitem.getMF().set_property("width",canvasProperties[4])
             newitem.getMF().set_property("height",canvasProperties[5])
@@ -966,15 +955,14 @@ class MainWindow(object):
                newitem.getMF().set_property("fill_color",pobj.getColor())
                newitem.getLtext().set_property("fill_color",pobj.getColor())
 
-            print "container properties added"
+            IMVEC.dbg.debug("CONTAINER PROPERTIES ADDED",tuple(),dbg.DEBUG)
          
             nlinker = linker(pobj,newitem)
 
             IMVEC.activeDoc.getSyncontainersList().append(nlinker)         
             IMVEC.activeDoc.getContainer().append(nlinker)
 
-            print "container added to lists"
-
+            IMVEC.dbg.debug("CONTAINER ADDED TO LIST",tuple(),dbg.DEBUG)
 
             root_dict[root_name] = newitem.getO()
             del pickled_objects[i]
@@ -1030,7 +1018,9 @@ class MainWindow(object):
       for pobj in pickled_objects:
 
          newitem = None
-         print str(pobj.__class__)
+
+         IMVEC.dbg.debug("FOUND PICKLED OBJECT: %s",(str(pobj.__class__)),dbg.DEBUG)
+
          canvasProperties = list(pobj.getCanvasProperties())
 
          try:
@@ -1038,7 +1028,7 @@ class MainWindow(object):
             root = root_dict[canvasProperties[6]]
 
          except:
-            print "EXCEPT"
+            
             root = self.getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
 
 
@@ -1069,7 +1059,9 @@ class MainWindow(object):
             nbcomments +=1
 
          elif str(pobj.__class__) == "synapseObjects.synmonitor":
-            print "MONITOR ITEM ADDED"
+            
+            IMVEC.dbg.debug("MONITOR ITEM ADDED: %s",(pobj),dbg.DEBUG)
+
             newitem = monitorItem(root)
             newitem.getMF().set_property("width",canvasProperties[4])
             newitem.getMF().set_property("height",canvasProperties[5])
@@ -1084,21 +1076,21 @@ class MainWindow(object):
             nbmonitors +=1
 
          elif str(pobj.__class__) == "synapseObjects.synserv":
-            print "SERVICE ITEM ADDED"
+            IMVEC.dbg.debug("SERVICE ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = servItem(root)
             nbservices +=1
 
          elif str(pobj.__class__) == "synapseObjects.syndemux":
-            print "DEMUX ITEM ADDED"
+            IMVEC.dbg.debug("DEMUX ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = demuxItem(root)
             nbdemuxers +=1
          elif str(pobj.__class__) == "synapseObjects.synmux":
-            print "MUX ITEM ADDED"
+            IMVEC.dbg.debug("MUX ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = muxItem(root)
             nbmuxers +=1
      
          elif str(pobj.__class__) == "synapseObjects.synfilter":
-            print "FILTER ITEM ADDED"
+            IMVEC.dbg.debug("FILTER ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = filterItem(root)
             nbfilters +=1
 
@@ -1116,7 +1108,7 @@ class MainWindow(object):
             IMVEC.activeDoc.getSyncontainersList().append(linker(pobj,newitem))
 
          elif str(pobj.__class__) == "synapseObjects.synreport":
-            print "REPORT ITEM ADDED"
+            IMVEC.dbg.debug("REPORT ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = reportItem(root)
             nbreports +=1
 
@@ -1185,7 +1177,9 @@ class MainWindow(object):
                th0 = thwrapper()
                th0.setMethod(obj.run)
                th0.start()
-               print "thread for object", obj, "started"
+              
+               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
+               
                
          time.sleep(0.001)
       
@@ -1259,7 +1253,8 @@ class MainWindow(object):
          for obj in IMVEC.activeDoc.getContainer().getSynObjects():
             if (str(obj.__class__) == "dummy"):
                obj.run()
-               print "starting APP", obj
+               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
+
             elif (str(obj.__class__) != "synapseObjects.syncom") \
             and (str(obj.__class__) != "synapseObjects.synlink") \
             and (str(obj.__class__) != "synapseObjects.syncontainer") \
@@ -1267,7 +1262,7 @@ class MainWindow(object):
                th0 = thwrapper()
                th0.setMethod(obj.run)
                th0.start()
-               print "thread for object", obj, "started"
+               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
             elif (str(obj.__class__) != "synapseObjects.syncom") \
             and (str(obj.__class__) != "synapseObjects.synlink") \
             and (str(obj.__class__) != "synapseObjects.syncontainer") \
@@ -1279,7 +1274,7 @@ class MainWindow(object):
             th1.setMethod(self.woiWatchThread)
             self.woiWatchAlive = True
             th1.start()
-            print "thread for WOI Watcher started"
+            IMVEC.dbg.debug("THREAD WOI WATCHER STARTED",tuple(),dbg.NOTICE)
         
          IMVEC.running = True    
 
@@ -1290,7 +1285,7 @@ class MainWindow(object):
 
          try:
             if self.woiWatchAlive:
-               print "stopping watch thread"
+               IMVEC.dbg.debug("WOI WATCH THREAD STOPPED",tuple(),dbg.NOTICE)
                self.woiWatchAlive = False
          except:
             pass
@@ -1301,7 +1296,7 @@ class MainWindow(object):
             and (str(obj.__class__) != "synapseObjects.synlink") \
             and (str(obj.__class__) != "synapseObjects.syncontainer"):
                if (obj.isRunning()):
-                  print "stopping thread for object", obj
+                  IMVEC.dbg.debug("THREAD FOR ITEM %s STOPPED",(obj),dbg.NOTICE)
                   obj.kill()
                if (str(obj.__class__) == "synapseObjects.synmonitor"):
                   IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
@@ -1744,7 +1739,7 @@ class MainWindow(object):
          from reportlab.lib.units import inch
 
       except:
-         print "reportlab not found, disabling PDF reporting..."
+         IMVEC.dbg.debug("REPORTLAB EXTENTION NOT FOUND, DISABLING REPORTS",tuple(),dbg.WARNING)
          self.synreport_btn.hide()
 
 
