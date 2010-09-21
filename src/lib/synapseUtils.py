@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 from synapseIMVEC import *
 from synapseDebug import dbg
