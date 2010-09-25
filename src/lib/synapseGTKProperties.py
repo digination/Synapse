@@ -198,7 +198,10 @@ class synappGTK:
    lcmd = gtk.Label(str="command")
    icmd = gtk.Entry()
    lwoi = gtk.Label(str= "Wake on Input")
-   
+   lbo = gtk.Label(str="Buffured Output")   
+   lsl = gtk.Label(str="Split Lines")
+
+
    iwoi = gtk.ComboBox()
 
    ls0 = gtk.ListStore(str)
@@ -211,6 +214,33 @@ class synappGTK:
    iwoi.append_text("False")
    iwoi.set_active(0)
 
+   ibo = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   ibo.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   ibo.pack_start(cellr0)
+   ibo.add_attribute(cellr0, 'text', 0)
+
+   ibo.append_text("True")
+   ibo.append_text("False")
+   ibo.set_active(1)
+
+
+   isl = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   isl.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   isl.pack_start(cellr0)
+   isl.add_attribute(cellr0, 'text', 0)
+
+   isl.append_text("True")
+   isl.append_text("False")
+   isl.set_active(1)
+
+
+
 
    #position
 
@@ -221,12 +251,15 @@ class synappGTK:
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lcmd,False,True,10)
    gtkPVbox1.pack_start(lwoi,False,True,10)
+   gtkPVbox1.pack_start(lbo,False,True,10)
+   gtkPVbox1.pack_start(lsl,False,True,10)
 
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(icmd,False,True,5)
    gtkPVbox2.pack_start(iwoi,False,True,5)
-
+   gtkPVbox2.pack_start(ibo,False,True,5)
+   gtkPVbox2.pack_start(isl,False,True,5)
 
    for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
       child1.show()

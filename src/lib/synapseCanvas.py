@@ -1504,7 +1504,7 @@ class containerItem(synItem):
 
      
       self.mf = goocanvas.Rect(parent = self.o, x=5, y=5, radius_x=15, radius_y=15,width=300, height=200,
-				stroke_color="#000000", fill_color_rgba=0x151515dd,
+				stroke_color="#cccccc", fill_color_rgba=0x151515dd,
 				line_width=4)
 
 

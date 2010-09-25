@@ -6,10 +6,14 @@ from synapseDebug import dbg
 
 
 
-#Inter modules Variable exchange Class
+#Inter modules Variables exchange Class
 class IMVEC:
 
-   dbg = dbg(0x05);
+   dbg = None;
+   cfg = None;
+   
+   #application clipboard
+   cb =  None
 
    running = False
 

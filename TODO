@@ -1,5 +1,5 @@
 ask for save what to do with unsaved docs before closing
-Add inputs and outputs orientation ( mux/demux will have 2 pos only, monitor, comment and container will have none)
+Add inputs and outputs orientation ( mux/demux will have 2 pos only, monitor, comment and container will have none) (40% done)
 Add loop on itself feature for concerned building blocks
 Implement Wake on input feature (70% done)
 Implement synjector BB
@@ -11,6 +11,5 @@ Implement display buffer
 Implement building blocks z-index
 Embeeded Documentation
 implement propagation of stop signal
-add locks on input buffers while being processed by run() loop, and a broadcasts queue in case of locked var
 implement stdout/stderr discrimination on pexpect module
 add events for progress and status bars

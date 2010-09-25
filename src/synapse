@@ -9,6 +9,7 @@ import datetime
 import gobject
 import goocanvas
 import getpass
+import getopt
 
 
 import sys
@@ -18,6 +19,8 @@ import synapseCanvas
 from synapseCanvas import *
 from synapseCanvas import motion_notify
 from synapseIMVEC import *
+from synapseCFG import synCFG
+from synapseDebug import dbg
 from synapsePkg import *
 from synapseUtils import *
 import pickle
@@ -97,8 +100,8 @@ class document(object):
 
       global LS0
       global SYNAPP_ICON
-      global C0
-      global C1
+      #global C0
+      #global C1
 
       LS0.clear()
       for obj in IMVEC.activeDoc.getContainer().getSynObjects():
@@ -140,11 +143,9 @@ class document(object):
          iter = LS0.append()
          LS0.set(iter,0,pixbuf,1,obj.getName())
 
-      IMVEC.obrowser.append_column(C0)
-      IMVEC.obrowser.append_column(C1)
-      IMVEC.obrowser.set_model(LS0)
+         IMVEC.obrowser.set_model(LS0)
 
-    
+     
    def on_closebtn_clicked(self,widget):
       
  
@@ -424,7 +425,7 @@ class document(object):
    def setnbInsts(self,nbinsts):
 
       (self.nbsynapp,self.nbsyntest,self.nbcomments,self.nbmuxers,self.nbdemuxers,self.nbinjectors,
-      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices) = tuple(nbinsts)
+      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices,self.nbreports,self.nbcontainers) = tuple(nbinsts)
 
 
    def onResize(self,widget):
@@ -912,7 +913,7 @@ class MainWindow(object):
       return
 
 
-   def getRecursiveRoot(self,pickled_objects,root_dict,root_name):
+   def getRecursiveRoot(self,pickled_objects,root_dict,root_name,created_c):
 
 
       for  i in range (0, len(pickled_objects)) :
@@ -931,10 +932,10 @@ class MainWindow(object):
                IMVEC.dbg.debug("CONTAINER'S ROOT NOT FOUND",tuple(),dbg.DEBUG)
 
             except:
-               root = getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
+               root = getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6],created_c)
 
             newitem = containerItem(root)
-
+            created_c.append(1)
             
             IMVEC.dbg.debug("CONTAINER CREATED",tuple(),dbg.DEBUG)
 
@@ -1029,7 +1030,9 @@ class MainWindow(object):
 
          except:
             
-            root = self.getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6])
+            created_c = list()
+            root = self.getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6],created_c)
+            nbcontainers += len(created_c)
 
 
          if str(pobj.__class__) == "synapseObjects.synapp":
@@ -1161,7 +1164,7 @@ class MainWindow(object):
       IMVEC.activeDoc.refresh_objects_list()
 
       nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
-      nbtimers,nbfilters,nbmonitors,nbservices)
+      nbtimers,nbfilters,nbmonitors,nbservices,nbreports,nbcontainers)
       IMVEC.activeDoc.setnbInsts(nbinsts)
 
       
@@ -1350,14 +1353,19 @@ class MainWindow(object):
             pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
 
             for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
-               
+                  
                   member.updateSynObjCanvasProperties()
                   pickled_objects.append(member.getSynObj())
-            pickle.dump(pickled_objects,fh)
+            try:
+               pickle.dump(pickled_objects,fh)
+            except:
+               IMVEC.dbg.debug("CANNOT DUMP OBJECTS, LIST: %s" , (pickled_objects), dbg.ERROR)
+               return
+
 
             #except:
                #return
-
+               #
             savedName = savefile.split("/").pop().rstrip('.sws')
             IMVEC.activeDoc.setSavedName(savedName)
             IMVEC.activeDoc.setHeadLabel(savedName)
@@ -1734,19 +1742,19 @@ class MainWindow(object):
       
 
       try:
-
          from reportlab.pdfgen import canvas
-         from reportlab.lib.units import inch
 
       except:
-         IMVEC.dbg.debug("REPORTLAB EXTENTION NOT FOUND, DISABLING REPORTS",tuple(),dbg.WARNING)
+         print "[ WARNING ]REPORTLAB EXTENTION NOT FOUND, DISABLING REPORTS"
          self.synreport_btn.hide()
 
 
       self.zoomin_btn = builder.get_object("zoomin_btn")
       self.zoomout_btn = builder.get_object("zoomout_btn")
 
-      self.obrowser = builder.get_object("obrowser")     
+      self.obrowser = builder.get_object("obrowser") 
+      self.obrowser.append_column(C0)
+      self.obrowser.append_column(C1)    
       
       pkgMgr = pkgManager()
       IMVEC.pkgMgr = pkgMgr
@@ -1924,6 +1932,25 @@ class MainWindow(object):
 
 if __name__ == "__main__":
    
+
+   debug_lvl = 0x3
+
+   options, rem = getopt.getopt(sys.argv[1:], 'd:', ['debug=',])
+
+   for opt,arg in options:
+  
+      if opt in ('-d','--debug'):
+
+        debug_lvl = int(arg)
+   
+   IMVEC.cfg = synCFG(debugLevel=debug_lvl)
+
+   IMVEC.dbg = dbg(IMVEC.cfg.getDebugLevel())
+
+      
+
+   
+
 
    #gtk.rc_parse('/usr/share/themes/Murrina-Charcoal/gtk-2.0/gtkrc')
 

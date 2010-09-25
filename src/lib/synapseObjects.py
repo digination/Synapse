@@ -21,6 +21,9 @@ import copy
 import socket
 import pexpect
 from time import strftime
+from Queue import *
+
+
 
 try:
    from reportlab.pdfgen import canvas
@@ -28,7 +31,9 @@ try:
    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image
    from reportlab.lib.styles import getSampleStyleSheet
 except:
-   IMVEC.dbg.debug("REPORT API NOT LOADED",(filename),dbg.WARNING)
+
+   #using print here, because debug object not created yet
+   print "[WARNING] REPORT API NOT LOADED"
    
 
 
@@ -202,7 +207,14 @@ class synobj:
    def kill(self):
       self.alive = False
 
+   def setIqueue(self,iqueue):
+      self.iqueue = iqueue
 
+
+   def getIqueue(self):
+      return self.iqueue
+
+  
    def getIbuff(self):
       return self.ibuff
 
@@ -216,37 +228,67 @@ class synobj:
       self.obuff = self.obuff + buff
 
    def setIbuff(self,ibuff):
+
       self.ibuff = ibuff
-   
+      
    def appendIbuff(self,buff):
 
       self.ibuff = self.ibuff + buff 
-     
+ 
+
+   def init_common(self):
+
+      self.iqueue = Queue(0)
+      self.color = "DEFAULT"
+      self.mInput = False
+      self.needSender = False
+      self.alive = False
+  
+
+   def init_common_queueless(self):
+
+      self.color = "DEFAULT"
+      self.mInput = False
+      self.needSender = False
+      self.alive = False
+
+
+   def __getstate__(self):
+
+      self.inqueue = None
+  
    def broadcast(self):
 
       for peer in self.peers:
 
          (input_num, peerobj) = tuple(peer)         
 
+
          if (peerobj.mInput == True):
 
             IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-            peerobj.setIbuff(input_num,self.obuff)
-  
+            #peerobj.setIbuff(input_num,self.obuff)
+            peerobj.getIqueues()[input_num].put("%d:%s" % (input_num,self.obuff) )
+            
+   
          else:
 
             if (peerobj.needSender == False):
 
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-               peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+               #peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+               peerobj.getIqueue().put("%d:%s" % (input_num,self.obuff) )
 
             else:
 
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-               peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
+               #peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
+               peerobj.getIqueue().put("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
 
+         #peerobj.getILock().release()
 
-      self.ibuff = ""
+         
+      self.ibuff = None
 
    #method to override for each building block
    def run(self):
@@ -334,12 +376,14 @@ class synheader(synobj):
 
    def __init__(self,title="Workflow title",author="",date="",descr="your description here"):
 
+      self.init_common_queueless()
 
       self.title = title
       self.author = author
       self.date = date
       self.descr = descr
-      self.color="DEFAULT"
+      
+      
    
     
    def onITextBufferChanged(self,textbuff):
@@ -414,8 +458,13 @@ class synfilter(synobj):
             if (line != ""):
                self.obuff = line 
                self.broadcast() 
-            
-         if (self.ibuff != ""):
+      
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass         
+       
+         if (self.ibuff != None):
 
             IMVEC.dbg.debug("WRITING IBUFF TO FILTER %s",(self),dbg.DEBUG)
 
@@ -424,7 +473,7 @@ class synfilter(synobj):
             proc.stdin.flush()
             proc.stdout.flush()
             #proc.stdin.close()
-            self.ibuff = ""
+            self.ibuff = None
        
            
       try:
@@ -436,15 +485,13 @@ class synfilter(synobj):
        
    def __init__(self,name,filter_type="Simple Grep",data=""):
 
+      self.init_common()
       self.name = name
       self.filterType = filter_type
       self.data = data
-      self.color="DEFAULT"
- 
-      self.alive = False
-      self.mInput = False
-      self.needSender = False
-      self.ibuff = ""
+
+      
+      self.ibuff = None
       self.obuff = ""
 
       self.peers = list()
@@ -549,7 +596,13 @@ class syntimer(synobj):
             self.obuff = buff_repeat
             self.broadcast() 
 
-         if (self.ibuff != ""):
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass
+
+
+         if (self.ibuff != None):
             (input_num,sep,content) = self.ibuff.partition(":")
             
             IMVEC.dbg.debug("%s IBUFF: %s",(self.name,content) ,dbg.DEBUG)
@@ -570,18 +623,15 @@ class syntimer(synobj):
           
    def __init__(self,name,interval=1000,loop=False):
 
+      self.init_common()
+
       self.name = name
       self.interval = interval
       self.loop = loop
       self.WOI = False
-      self.color="DEFAULT"
-      self.alive = False
 
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
-      self.mInput = False
-      self.needSender = False
-
       self.peers= list()
 
    def getPeriod(self):
@@ -669,9 +719,9 @@ class synjector(synobj):
 
    def __init__(self,name,injectType="string",data="",linesPerBlock=1,loop=False,fileName=""):
 
+      self.init_common()
       self.name = name
       self.WOI = False
-      self.color="DEFAULT"
       self.injectType = injectType
       self.data = data
       self.fileName = fileName    
@@ -784,20 +834,17 @@ class syntest(synobj):
    def __init__(self,name,testType="Stream contains"):
 
       syntest.nbinst+=1
-
+      self.init_common()
       self.name = name
-      self.color="DEFAULT"
-      self.needSender = False
-      self.mInput = False
-      self.alive = False
       self.WOI = False
+      
       self.testType = testType
       self.operand = ""
       
       self.ret = "Stream"
 
       self.opeers = list()   
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
 
 
@@ -829,20 +876,22 @@ class syntest(synobj):
             if (peerobj.mInput == True):
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
 
-               peerobj.setIbuff(input_num,self.obuff)
+               #peerobj.setIbuff(input_num,self.obuff)
+               peerobj.getIqueues()[input_num].put("%d:%s" % (input_num,self.obuff) )
   
             else:
 
                if (peerobj.needSender == False):
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-                  peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+                  #peerobj.setIbuff(str(input_num) + ":" +self.obuff)
+                  peerobj.getIqueue().put("%d:%s" % (input_num,self.obuff) )
 
                else:
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-                  peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
-
+                  #peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
+                  peerobj.getIqueue().put("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
 
 
    def run(self):
@@ -851,14 +900,19 @@ class syntest(synobj):
 
       while (self.alive):
 
-          if (self.ibuff != ""):
+          try:  
+            self.ibuff = self.iqueue.get(False)
+          except:
+            pass          
+
+          if (self.ibuff != None):
 
             (input_num,sep,content) = self.ibuff.partition(":")
 
             self.obuff = content
 
             exec "if %s :\n   self.bcast(True)\nelse:\n   self.bcast(False)" % ( self.operation_dict[self.testType][0] ) 
-            self.ibuff = ""
+            self.ibuff = None
 
 
                        
@@ -1035,9 +1089,9 @@ class syncom(synobj):
 
    def __init__(self,name,text):
 
+      self.init_common()
       self.text = text
       self.name = name
-      self.color="DEFAULT"
    def getText(self):
 
       return self.text
@@ -1138,17 +1192,15 @@ class synmux(synobj):
    def __init__(self,name,data="[[SI0]] [[SI1]] [[SI2]] [[SI3]] [[SI4]] [[SI5]]",timeout=2000):
 
       synmux.nbinst+=1
+      self.init_common()
+      self.mInput = True
       self.name = name
       self.WOI = False
-      self.color="DEFAULT"
       self.data = data
       self.timeout = timeout
       
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
-      self.alive = False
-      self.mInput = True
-      self.needSender = False
       self.peers=list()
       
 
@@ -1244,8 +1296,12 @@ class syndemux(synobj):
       self.separator = self.separator.replace("\\n","\n").replace("\\t","\t").replace("\\r","\r")
       
       while(self.alive == True):
-      
-         if (self.ibuff != ""):
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass
+
+         if (self.ibuff != None):
 
             (s0,s1,s2) = self.ibuff.partition(":")
             self.ibuff = s2
@@ -1264,7 +1320,7 @@ class syndemux(synobj):
             if sep3 != "":
                self.obuffs.append(sep3)    
             self.bcast()
-            self.ibuff = ""
+            self.ibuff = None
              
 
    def bcast(self):
@@ -1281,20 +1337,21 @@ class syndemux(synobj):
 
             if (peerobj.mInput == True):
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
-               peerobj.setIbuff(input_num,self.obuffs[i])
-  
+               #peerobj.setIbuff(input_num,self.obuffs[i])
+               peerobj.getIqueues()[input_num].put("%d:%s" % (input_num,self.obuffs[i]) )
             else:
 
                if (peerobj.needSender == False):
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
-                  peerobj.setIbuff(str(input_num) + ":" +self.obuffs[i])
+                  #peerobj.setIbuff(str(input_num) + ":" +self.obuffs[i])
+                  peerobj.getIqueue().put("%d:%s" % (input_num,self.obuffs[s]) )
 
                else:
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuffs[i],peerobj.getName(),input_num),dbg.DEBUG)
-                  peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuffs[i])
-
+                  #peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuffs[i])
+                  peerobj.getIqueue().put("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
 
 
 
@@ -1302,19 +1359,16 @@ class syndemux(synobj):
    def __init__(self,name,separator="\\n"):
 
       syndemux.nbinst+=1
+      self.init_common()
       self.name = name
-      self.color="DEFAULT"
+      
       self.separator = separator
    
       self.obuffs = list()
       self.opeers = list()      
 
-      self.ibuff = ""
+      self.ibuff = None
       self.WOI = False
-      self.mInput = False
-      self.needSender = False
-      self.alive = False
-
 
    
    def getSeparator(self):
@@ -1379,20 +1433,32 @@ class synmonitor(synobj):
 
 
    def run(self):
-     
+
       self.alive = True
       xref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem()
       self.fullContent = ""
       self.displayBuff = ""     
 
+      
+
       while(self.alive == True):
-         if (self.ibuff != ""):
+          
+         #print "MONITOR IBUFF: %s" % self.ibuff
+
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass
+
+         if (self.ibuff != None):
+           
+            IMVEC.dbg.debug("PROCESSED BUFF: %s" , (self.ibuff),dbg.EXDEBUG)
             (input_num,sep,content) = self.ibuff.partition(":")
             self.fullContent += content
             self.displayBuff = ""
             fclist = self.fullContent.split("\n")
             if len(fclist)-self.displayBuffSize < 0:
-              init_var = 0
+               init_var = 0
             else:
                init_var = len(fclist)-self.displayBuffSize
 
@@ -1400,28 +1466,29 @@ class synmonitor(synobj):
                self.displayBuff+= fclist[i] + "\n"
                
             #ici mettre la gestion de la taille de buffer suivant taille de monitor item
-            gtk.gdk.threads_enter()
-            
+            gtk.gdk.threads_enter() 
             xref.setText(self.displayBuff)
             gtk.gdk.threads_leave()
-            self.ibuff = ""
+            self.ibuff = None
+            
+         
 
-
+         
    def __init__(self,name):
+
+      self.init_common()
+
       synmonitor.nbinst += 1
       self.name = name
       self.WOI = False
-      self.color="DEFAULT"
-      
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
-
       self.fullContent = ""
       self.displayBuff = ""
       self.displayBuffSize = 10
-      self.alive = False
-      self.mInput = False
-      self.needSender = False
+
+
+
 
    def disconnectAll(self):
       return 0
@@ -1460,14 +1527,19 @@ class synapp(synobj):
 
          peerobj.setIbuff(self.obuff2)
 
-      #self.ibuff = ""
+      #self.ibuff = None
 
    def run(self):
           
       self.alive = True
   
+      if (self.buffured_output):
 
-      proc = pexpect.spawn(self.cmd)
+         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT BUFFURED MODE",tuple(),dbg.DEBUG)
+         proc = pexpect.spawn(self.cmd)
+      else:
+         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT UNBUFFURED MODE",tuple(),dbg.DEBUG)
+         proc = pexpect.spawn(self.cmd,maxread=1)
 
 
       #proc = Popen(self.cmd, shell=True, stdout=PIPE,stdin=PIPE,stderr=PIPE,bufsize=4096)
@@ -1485,8 +1557,19 @@ class synapp(synobj):
          except:
             pass
 
-         if (self.obuff != ""):            
-            self.broadcast()
+         
+         if (self.obuff != ""): 
+
+            if self.split_lines:
+               splitted_list = list()
+               splitted_list = self.obuff.split("\n")
+               #IMVEC.dbg.debug("SPLITTED_LIST: %s",(splitted_list),dbg.EXDEBUG)
+               for sp_line in splitted_list:
+                  if sp_line != "":
+                     self.obuff = sp_line + "\n"
+                     self.broadcast()
+            else:
+               self.broadcast()
          
          #proc.poll()
 
@@ -1504,9 +1587,13 @@ class synapp(synobj):
                #self.bcastSTDERR()
          #except:
              #pass
+ 
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass
 
-
-         if (self.ibuff != ""):
+         if (self.ibuff != None):
             (input_num,sep,content) = self.ibuff.partition(":")
             IMVEC.dbg.debug("WRTIING TO %s STDIN",(self.name),dbg.DEBUG)
 
@@ -1514,7 +1601,7 @@ class synapp(synobj):
             #proc.sendeof()
             #proc.stdin.write(content)
             #proc.stdin.flush()
-            #self.ibuff = ""
+            #self.ibuff = None
             
       try:
          #proc.kill()
@@ -1526,23 +1613,21 @@ class synapp(synobj):
    def __init__(self,name,cmd="",keepalive=True):
 
       synapp.nbinst+=1
+      self.init_common()
 
       self.WOI = True
       self.name = name
-      self.color="DEFAULT"
+
       self.cmd = cmd
       self.keepalive = keepalive
       self.peers = list()
       self.peersSTDERR = list()
       
-      self.alive = False
-      self.mInput = False
-      self.needSender = False
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
+      self.buffured_output = False
+      self.split_lines = False
 
-      self.alive = False
-      self.mInput = False
 
    def getPeersSTDERR(self):
 
@@ -1586,6 +1671,19 @@ class synapp(synobj):
          else:
             self.WOI = False
 
+      elif (widget == synappGTK.ibo):
+         if synappGTK.ibo.get_active_text() == "True":
+            self.buffured_output = True
+         else:
+            self.buffured_output = False
+
+      elif (widget == synappGTK.isl):
+         if synappGTK.isl.get_active_text() == "True":
+            self.split_lines = True
+         else:
+            self.split_lines = False
+
+
 
    def onColorChange(self,widget):
 
@@ -1615,6 +1713,8 @@ class synapp(synobj):
          synappGTK.iname.disconnect(synappGTK.chdict['iname'])
          synappGTK.icmd.disconnect(synappGTK.chdict['icmd'])
          synappGTK.iwoi.disconnect(synappGTK.chdict['iwoi'])
+         synappGTK.ibo.disconnect(synappGTK.chdict['ibo'])
+         synappGTK.isl.disconnect(synappGTK.chdict['isl'])
          synappGTK.icolorBtn.disconnect(synappGTK.chdict['icolorBtn'])
 
    def getPropWidget(self):
@@ -1628,14 +1728,25 @@ class synapp(synobj):
       else:
          synappGTK.iwoi.set_active(1)
 
-      
+      if self.buffured_output == True:
+         synappGTK.ibo.set_active(0)
+      else:
+         synappGTK.ibo.set_active(1)
+
+      if self.split_lines == True:
+         synappGTK.isl.set_active(0)
+      else:
+         synappGTK.isl.set_active(1)
 
       synappGTK.chdict['iname'] = synappGTK.iname.connect("changed",self.onTextChange)
       synappGTK.chdict['icmd'] = synappGTK.icmd.connect("changed",self.onTextChange)
       synappGTK.chdict['iwoi'] = synappGTK.iwoi.connect("changed",self.onTextChange)
+      synappGTK.chdict['ibo'] = synappGTK.ibo.connect("changed",self.onTextChange)
+      synappGTK.chdict['isl'] = synappGTK.isl.connect("changed",self.onTextChange)
       synappGTK.chdict['icolorBtn'] = synappGTK.icolorBtn.connect("clicked",self.onColorChange)
 
       return synappGTK.o
+
 
 
 
@@ -1682,7 +1793,12 @@ class synserv(synobj):
                self.obuff = line
                self.broadcast() 
       
-         if (self.ibuff != "" ):
+         try:  
+            self.ibuff = self.iqueue.get(False)
+         except:
+            pass
+
+         if (self.ibuff != None ):
             (input_num,sep,content) = self.ibuff.partition(":")
             sockfd.send(content)
          
@@ -1690,9 +1806,9 @@ class synserv(synobj):
    def __init__(self,name,proto="Tcp",connectInfos="",keepalive=True):
 
       synserv.nbinst+=1
+      self.init_common()
 
       self.name = name
-      self.color="DEFAULT"
       self.connectInfos = connectInfos
       self.keepalive = keepalive
       self.autoreco = True
@@ -1701,15 +1817,8 @@ class synserv(synobj):
 
       self.peers = list()
       
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = ""
-
-      self.alive = False
-      self.mInput = False
-      self.needSender = False
-
-      
-
   
    def getConnectInfos(self):
 
@@ -1906,22 +2015,21 @@ class synreport(synobj):
 
    def __init__(self,name):
 
+      self.init_common()
 
       self.buffersDict = dict()
       self.senders = list()
 
       self.name = name
       self.output_file = "synapse_report.pdf"
-      self.alive = False
       self.WOI = False
-      self.mInput = False
       self.needSender = True
       self.color = "DEFAULT"
 
       self.textFont = "Helvetica"
       self.textFontSize = 10
 
-      self.ibuff = ""
+      self.ibuff = None
       self.obuff = None
 
    def kill(self):
@@ -1975,7 +2083,12 @@ class synreport(synobj):
 
       while (self.alive):
 
-          if (self.ibuff != ""):
+          try:  
+            self.ibuff = self.iqueue.get(False)
+          except:
+            pass          
+
+          if (self.ibuff != None):
             (sender,sep,content0) = self.ibuff.partition(":")
             (input_num,sep,content) = content0.partition(":")
 
@@ -1986,7 +2099,7 @@ class synreport(synobj):
                self.buffersDict[sender] = content 
                self.senders.append(sender)
                
-            self.ibuff = ""
+            self.ibuff = None
 
 
     
@@ -2120,15 +2233,12 @@ class synlabel(synobj):
 
    def __init__(self,name):
 
+      self.init_common()
       self.peers = list()
       self.name = name
-      self.alive = False
       self.WOI = False
-      self.mInput = False
-      self.needSender = False
       self.crlf = True
-      self.color = "DEFAULT"
-      
+
       self.ibuff = None
       self.obuff = ""
       self.content = ""
