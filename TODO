@@ -5,7 +5,7 @@ Implement Wake on input feature (70% done)
 Implement synjector BB
 Finish to implement synfilter component
 Implement saving and loading ( 95% done )
-Implement clipboard
+Implement clipboard (60 % done)
 Implement undu/redo
 Implement display buffer
 Implement building blocks z-index

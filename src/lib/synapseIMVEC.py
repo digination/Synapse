@@ -13,7 +13,7 @@ class IMVEC:
    cfg = None;
    
    #application clipboard
-   cb =  None
+   cb =  gtk.Clipboard(gtk.gdk.display_get_default(),"CLIPBOARD")
 
    running = False
 

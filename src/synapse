@@ -24,6 +24,7 @@ from synapseDebug import dbg
 from synapsePkg import *
 from synapseUtils import *
 import pickle
+from Queue import Queue
 
 
 
@@ -1136,6 +1137,11 @@ class MainWindow(object):
                newitem.getMF().set_property("fill_color",pobj.getColor())
                if str(pobj.__class__) != "synapseObjects.syncom":
                   newitem.getLtext().set_property("fill_color",pobj.getColor())
+
+
+            #recreates queue
+            if pobj.getIqueue() == "queue":
+               pobj.setIqueue(Queue())
                   
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
 
@@ -1167,7 +1173,141 @@ class MainWindow(object):
       nbtimers,nbfilters,nbmonitors,nbservices,nbreports,nbcontainers)
       IMVEC.activeDoc.setnbInsts(nbinsts)
 
+ 
+
+
+   def loadBB(self,serialized_string,load_type):
+
+      pobj = pickle.loads(serialized_string)
+      canvasProperties = list(pobj.getCanvasProperties())
+      root = IMVEC.activeDoc.getRootItem()
+
+
+      newobj_name = pobj.getName()
+
+      while(IMVEC.activeDoc.getContainer().findName(newobj_name)):
+         newobj_name += "_1"
+
+      pobj.setName(newobj_name)
+
+
+      if load_type == "clipboard":
+
+         canvasProperties[0] +=10
+         canvasProperties[1] +=10
+
+
+      if str(pobj.__class__) == "synapseObjects.synapp":
+            newitem = synappItem(root)
+            #nbsynapp += 1
+     
+      elif str(pobj.__class__) == "synapseObjects.syntest":
+            newitem = testItem(root)
+            #nbsyntest += 1
+     
+      elif str(pobj.__class__) == "synapseObjects.syntimer":
+            newitem = timerItem(root)
+            #nbtimers +=1
+  
+      elif str(pobj.__class__) == "synapseObjects.synjector":
+            newitem = injectorItem(root)
+            #nbinjectors +=1
+
+      elif str(pobj.__class__) == "synapseObjects.syncom":
+            newitem = commentItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+            newitem.setText(pobj.getText())
+            #nbcomments +=1
+
+      elif str(pobj.__class__) == "synapseObjects.synmonitor":
+            
+            IMVEC.dbg.debug("MONITOR ITEM ADDED: %s",(pobj),dbg.DEBUG)
+
+            newitem = monitorItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getWinBorder().set_property("width",canvasProperties[4])
+
+            (hidebtn,maxbtn) = newitem.getButtons()
+            hidebtn.set_property("x", canvasProperties[4] -40 )
+            maxbtn.set_property("x",  canvasProperties[4] -20 )
+
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+            #nbmonitors +=1
+
+      elif str(pobj.__class__) == "synapseObjects.synserv":
+            IMVEC.dbg.debug("SERVICE ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = servItem(root)
+            #nbservices +=1
+
+      elif str(pobj.__class__) == "synapseObjects.syndemux":
+            IMVEC.dbg.debug("DEMUX ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = demuxItem(root)
+            #nbdemuxers +=1
+      elif str(pobj.__class__) == "synapseObjects.synmux":
+            IMVEC.dbg.debug("MUX ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = muxItem(root)
+            #nbmuxers +=1
+     
+      elif str(pobj.__class__) == "synapseObjects.synfilter":
+            IMVEC.dbg.debug("FILTER ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = filterItem(root)
+            #nbfilters +=1
+
+
+      elif str(pobj.__class__) == "synapseObjects.syncontainer":
+
+            newitem = containerItem(root)
+            newitem.getMF().set_property("width",canvasProperties[4])
+            newitem.getMF().set_property("height",canvasProperties[5])
+            newitem.getExtender().set_property("x",canvasProperties[4]-10)
+            newitem.getExtender().set_property("y",canvasProperties[5]-10)
+
+            newitem.setText(pobj.getName())
+            #nbcontainers +=1
+            IMVEC.activeDoc.getSyncontainersList().append(linker(pobj,newitem))
+
+      elif str(pobj.__class__) == "synapseObjects.synreport":
+            IMVEC.dbg.debug("REPORT ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = reportItem(root)
+            #nbreports +=1
+
+      elif str(pobj.__class__) == "synapseObjects.synlabel":
+
+            pobj.setContent("")
+            newitem = labelItem(root)
+            #nblabels +=1
+
+
+      if (newitem != None):
+            newitem.getO().set_property("x",canvasProperties[0])
+            newitem.getO().set_property("y",canvasProperties[1])
+            newitem.getO().set_property("width",canvasProperties[2])
+            newitem.getO().set_property("height",canvasProperties[3])
+            
+            if str(pobj.__class__) != "synapseObjects.syncom" and str(pobj.__class__) != "synapseObjects.synmonitor":
+               newitem.setText(pobj.getName())
+
+
+            if pobj.getColor() != "DEFAULT":
+               newitem.getMF().set_property("fill_color",pobj.getColor())
+               if str(pobj.__class__) != "synapseObjects.syncom":
+                  newitem.getLtext().set_property("fill_color",pobj.getColor())
+
+
+            #recreates queue
+            if pobj.getIqueue() == "queue":
+               pobj.setIqueue(Queue())
+                  
       
+            IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+            IMVEC.activeDoc.refresh_objects_list()
+
 
    def woiWatchThread(self):
 
@@ -1354,6 +1494,10 @@ class MainWindow(object):
 
             for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
                   
+                  #removes queue for pickle serialization.
+                  if member.getSynObj().getIqueue() != None:
+                     member.getSynObj().setIqueue("queue")
+
                   member.updateSynObjCanvasProperties()
                   pickled_objects.append(member.getSynObj())
             try:
@@ -1400,6 +1544,74 @@ class MainWindow(object):
             self.hpaned1.set_position(self.window.get_size()[0] - 300)
 
 
+   def startCut(self):
+
+      focused_widget = self.window.get_focus()
+     
+      print "FOCUSED_WIDGET: %s | %s" % (focused_widget, str(focused_widget.__class__))
+
+      if (str(focused_widget.__class__) == "<type 'gtk.Entry'>" ):
+
+         focused_widget.copy_clipboard()
+
+      elif (str(focused_widget.__class__) == "<type 'gtk.TextView'>"):
+
+         focused_widget.get_buffer().cut_clipboard(IMVEC.cb,True)
+
+
+   def startCopy(self):
+
+      focused_widget = self.window.get_focus()
+      print focused_widget     
+
+      if (str(focused_widget.__class__) == "<type 'gtk.Entry'>" ):
+
+         focused_widget.copy_clipboard()
+
+      elif (str(focused_widget.__class__) == "<type 'gtk.TextView'>"):
+
+         focused_widget.get_buffer().copy_clipboard(IMVEC.cb)        
+
+      
+      else:
+
+         if (IMVEC.activeDoc.getActiveM()  != None):
+
+            print "Copying %s" % (IMVEC.activeDoc.getActiveM().getSynObj())
+            tmpqueue =  IMVEC.activeDoc.getActiveM().getSynObj().getIqueue()
+            IMVEC.activeDoc.getActiveM().getSynObj().setIqueue(None)
+            IMVEC.activeDoc.getActiveM().updateSynObjCanvasProperties()
+            pickled_object = pickle.dumps(IMVEC.activeDoc.getActiveM().getSynObj())
+            IMVEC.activeDoc.getActiveM().getSynObj().setIqueue(tmpqueue)
+
+            copy_string = "SYNAPSE_BB_CLIPBOARD_SERIALIZED: %s" % (pickled_object)
+            IMVEC.cb.set_text(copy_string)
+            
+
+
+   def startPaste(self):
+
+      text = IMVEC.cb.wait_for_text()
+      if text == None: text = ""
+
+      if text.find("SYNAPSE_BB_CLIPBOARD_SERIALIZED: ") != 0:
+
+         focused_widget = self.window.get_focus()
+     
+         if (str(focused_widget.__class__) == "<type 'gtk.Entry'>" ):
+
+            focused_widget.paste_clipboard()
+
+         elif (str(focused_widget.__class__) == "<type 'gtk.TextView'>"):
+
+            focused_widget.get_buffer().paste_clipboard(IMVEC.cb,None,True)
+
+      else:
+
+         print "PASTING BUILDING BLOCK"  
+         self.loadBB(text.lstrip("SYNAPSE_BB_CLIPBOARD_SERIALIZED: "),"clipboard")
+
+ 
 
    def on_menu_activate(self,widget):
 
@@ -1434,9 +1646,20 @@ class MainWindow(object):
          IMVEC.activeDoc.zoomOut()
 
       elif widget == self.menu_zoomin:
-         IMVEC.activeDoc.zoomIn()      
+         IMVEC.activeDoc.zoomIn()  
 
 
+      elif widget == self.menu_copy:
+
+         self.startCopy()
+
+      elif widget == self.menu_paste:
+
+         self.startPaste()
+    
+      elif widget == self.menu_cut:
+
+         self.startCut()
 
 
    def __init__(self):
@@ -1745,7 +1968,7 @@ class MainWindow(object):
          from reportlab.pdfgen import canvas
 
       except:
-         print "[ WARNING ]REPORTLAB EXTENTION NOT FOUND, DISABLING REPORTS"
+         print "[ WARNING ] REPORTLAB EXTENTION NOT FOUND, DISABLING REPORTS"
          self.synreport_btn.hide()
 
 

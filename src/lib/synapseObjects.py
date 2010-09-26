@@ -54,6 +54,15 @@ class container:
       return self.members[name]
 
 
+   def findName(self,name):
+
+      for mname,member in self.members.items():
+
+         if mname == name:
+            return True
+      return False
+
+
    def delete(self,dmember):
 
       IMVEC.dbg.debug("DELETE METHOD CALLED WITH OBJ %s",(dmember),dbg.EXDEBUG)
@@ -236,27 +245,19 @@ class synobj:
       self.ibuff = self.ibuff + buff 
  
 
-   def init_common(self):
+   def init_common(self,has_queue=True):
 
-      self.iqueue = Queue(0)
+      if has_queue:
+         self.iqueue = Queue(0)
+      else:
+         self.iqueue = None
+
       self.color = "DEFAULT"
       self.mInput = False
       self.needSender = False
       self.alive = False
   
 
-   def init_common_queueless(self):
-
-      self.color = "DEFAULT"
-      self.mInput = False
-      self.needSender = False
-      self.alive = False
-
-
-   def __getstate__(self):
-
-      self.inqueue = None
-  
    def broadcast(self):
 
       for peer in self.peers:
@@ -376,7 +377,7 @@ class synheader(synobj):
 
    def __init__(self,title="Workflow title",author="",date="",descr="your description here"):
 
-      self.init_common_queueless()
+      self.init_common(has_queue=False)
 
       self.title = title
       self.author = author
@@ -1089,7 +1090,7 @@ class syncom(synobj):
 
    def __init__(self,name,text):
 
-      self.init_common()
+      self.init_common(has_queue=False)
       self.text = text
       self.name = name
    def getText(self):
@@ -2127,6 +2128,11 @@ class syncontainer(synobj):
         IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
         IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
 
    def onTextChange(self,widget):
 
@@ -2156,7 +2162,7 @@ class syncontainer(synobj):
    def __init__(self,name):
 
       self.name = name
-      self.color = "DEFAULT"
+      self.init_common(has_queue=False)
 
 
 
@@ -2233,7 +2239,7 @@ class synlabel(synobj):
 
    def __init__(self,name):
 
-      self.init_common()
+      self.init_common(has_queue=False)
       self.peers = list()
       self.name = name
       self.WOI = False
