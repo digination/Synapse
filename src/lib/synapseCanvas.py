@@ -7,6 +7,7 @@ from synapseIMVEC import *
 from synapseUtils import *
 from synapseDialogs import inputDialog
 from synapseDebug import dbg
+from synapseHistory import *
 
 import pygtk
 pygtk.require("2.0")
@@ -270,6 +271,9 @@ class synItem():
       MOVED_OBJECT = None
       PRE_CONTAINER = None
       IMVEC.activeDoc.getCanvas().window.set_cursor(None)
+      
+      
+
 
    def on_mf_clicked(self,item,target_item,event):
       
@@ -304,8 +308,10 @@ class synItem():
 
          (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
          #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
-
          COORDS_OFFSET = [ MOUSE_COORDS[0] - self.getO().get_property("x") ,  MOUSE_COORDS[1] - self.getO().get_property("y")]
+         synapseHistory.history.addHistory()
+
+
 
    #stops link line
    def on_input_clicked(self,item, target_item, event):
@@ -1670,6 +1676,7 @@ class selItem:
          MOVED_OBJECT = self.getO()
          ACTIVE_OBJECT = self
 
+         synapseHistory.history.addHistory()
          (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
          #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
 

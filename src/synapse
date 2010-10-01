@@ -23,6 +23,7 @@ from synapseCFG import synCFG
 from synapseDebug import dbg
 from synapsePkg import *
 from synapseUtils import *
+from synapseHistory import *
 import pickle
 from Queue import Queue
 
@@ -71,6 +72,72 @@ class document(object):
    nbinst = 0
    nbnewinst = 0
 
+
+
+   # takes a serialized document string and puts it back to an actual document
+
+   def deserializeAll(self,serial_string):
+
+      try:
+         IMVEC.activeDoc.getActiveM().getSynObj().disconnectAll()
+      except:
+         pass
+
+      dsobjserial_list = pickle.loads(serial_string)
+
+      for dsobjserial in dsobjserial_list:
+
+         dsobj = pickle.loads(dsobjserial)
+
+         for mname,member in self.container.getMembers().items():
+
+            if mname == dsobj.getName():
+
+               cpobject = deepcopy(dsobj)
+               member.setSynObj(cpobject)
+               member.updateCanvas()
+
+
+      try:
+         IMVEC.activeDoc.getActiveM().getSynObj().getPropWidget()
+      except:
+         pass
+               
+         
+      
+
+      
+
+   def serializeAll(self):
+
+      obj_list = list()
+
+      for mname,member in self.container.getMembers().items():
+
+         sobj = member.getSynObj()
+         tmpqueue = sobj.getIqueue()
+         sobj.setIqueue(None)
+         member.updateSynObjCanvasProperties(clipboard=True)
+         obj_list.append( pickle.dumps(sobj) )
+         sobj.setIqueue(tmpqueue)
+         
+
+      return pickle.dumps(obj_list)
+
+
+
+   def hasChanged(self):
+
+      return self.changed
+
+   def setCHFlag(self,changed):
+ 
+      self.changed = changed
+
+
+   def getName(self):
+
+      return self.name
 
 
    def updateHeaderInfos(self):
@@ -590,12 +657,12 @@ class document(object):
       IMVEC.docList.append(self)
 
       self.name = name
-
       self.color = "DEFAULT"
       self.width = 1024
       self.height = 1024
 
       self.selobject = None
+      self.changed = 0
 
       
       #define a new empty objects container
@@ -1176,6 +1243,18 @@ class MainWindow(object):
  
 
 
+   def loadBBGroup(self,serialized_string,load_type):
+
+      pobjlist = pickle.loads(serialized_string)
+      for pobj in pobjlist:
+      
+         self.loadBB(pobj,load_type) 
+
+      
+
+
+
+
    def loadBB(self,serialized_string,load_type):
 
       pobj = pickle.loads(serialized_string)
@@ -1572,10 +1651,36 @@ class MainWindow(object):
 
          focused_widget.get_buffer().copy_clipboard(IMVEC.cb)        
 
-      
+
+
+       
       else:
 
-         if (IMVEC.activeDoc.getActiveM()  != None):
+
+         if IMVEC.activeDoc.getSelObject()  != None:
+
+            IMVEC.dbg.debug("COPYING GROUP", tuple(),dbg.EXDEBUG)
+
+            copy_string = "SYNAPSE_CLIPBOARD_SERIALIZED_BBGROUP: "
+
+            serial_list = list()
+
+            for mname, member in IMVEC.activeDoc.getContainer().getMembers().items():
+
+               if ( member.getSynItem().getO().get_property("parent") ==  IMVEC.activeDoc.getSelObject().getSynItem().getO() ):
+
+                  cobj = member.getSynObj()
+                  tmpqueue =  cobj.getIqueue()
+                  cobj.setIqueue(None)
+                  member.updateSynObjCanvasProperties(clipboard ="True")
+                  serial_list.append(pickle.dumps(cobj))
+                  cobj.setIqueue(tmpqueue)
+
+            copy_string += pickle.dumps(serial_list)
+            IMVEC.cb.set_text(copy_string)
+
+
+         elif (IMVEC.activeDoc.getActiveM()  != None):
 
             print "Copying %s" % (IMVEC.activeDoc.getActiveM().getSynObj())
             tmpqueue =  IMVEC.activeDoc.getActiveM().getSynObj().getIqueue()
@@ -1584,9 +1689,12 @@ class MainWindow(object):
             pickled_object = pickle.dumps(IMVEC.activeDoc.getActiveM().getSynObj())
             IMVEC.activeDoc.getActiveM().getSynObj().setIqueue(tmpqueue)
 
-            copy_string = "SYNAPSE_BB_CLIPBOARD_SERIALIZED: %s" % (pickled_object)
+            copy_string = "SYNAPSE_CLIPBOARD_SERIALIZED_BB: %s" % (pickled_object)
             IMVEC.cb.set_text(copy_string)
             
+
+
+
 
 
    def startPaste(self):
@@ -1594,7 +1702,7 @@ class MainWindow(object):
       text = IMVEC.cb.wait_for_text()
       if text == None: text = ""
 
-      if text.find("SYNAPSE_BB_CLIPBOARD_SERIALIZED: ") != 0:
+      if text.find("SYNAPSE_CLIPBOARD_SERIALIZED") != 0:
 
          focused_widget = self.window.get_focus()
      
@@ -1606,12 +1714,18 @@ class MainWindow(object):
 
             focused_widget.get_buffer().paste_clipboard(IMVEC.cb,None,True)
 
-      else:
+      elif (text.find("SYNAPSE_CLIPBOARD_SERIALIZED_BB: ") == 0) :
 
          print "PASTING BUILDING BLOCK"  
-         self.loadBB(text.lstrip("SYNAPSE_BB_CLIPBOARD_SERIALIZED: "),"clipboard")
+         self.loadBB(text.lstrip("SYNAPSE_CLIPBOARD_SERIALIZED_BB: "),"clipboard")
 
- 
+
+      elif (text.find("SYNAPSE_CLIPBOARD_SERIALIZED_BBGROUP: ") == 0) :
+
+         print "PASTING BUILDING BLOCK"  
+         self.loadBBGroup(text.lstrip("SYNAPSE_CLIPBOARD_SERIALIZED_BBGROUP: "),"clipboard") 
+
+
 
    def on_menu_activate(self,widget):
 
@@ -1660,6 +1774,16 @@ class MainWindow(object):
       elif widget == self.menu_cut:
 
          self.startCut()
+
+
+      elif widget == self.menu_undo:
+
+         synapseHistory.history.undo()
+
+
+      elif widget == self.menu_redo:
+
+         synapseHistory.history.redo()
 
 
    def __init__(self):
@@ -2151,12 +2275,14 @@ class MainWindow(object):
       self.window.connect("key-press-event",self.on_key_press)
 
       self.window.show()
-      
+
+
 
 if __name__ == "__main__":
    
 
    debug_lvl = 0x3
+   synapseHistory.history = synapseHistory(10)
 
    options, rem = getopt.getopt(sys.argv[1:], 'd:', ['debug=',])
 
@@ -2184,10 +2310,10 @@ if __name__ == "__main__":
    gobject.timeout_add(2000, win0.start)
 
    os.chdir(os.path.expanduser("~"))
-       
    gtk.gdk.threads_init()
    gtk.main()
 
+  
 
 
 #####################

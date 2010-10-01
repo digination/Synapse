@@ -101,8 +101,3 @@ class IMVEC:
    extendCursor = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
    plusCursor = gtk.gdk.Cursor(gtk.gdk.PLUS)
    crossCursor = gtk.gdk.Cursor(gtk.gdk.TCROSS)
-   
-   
-
-
-

@@ -2,6 +2,7 @@
 import os
 from synapseIMVEC import *
 from synapseDebug import dbg
+from copy import *
 
 
 

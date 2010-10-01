@@ -49,6 +49,7 @@ class container:
 
       self.members[member.getSynObj().getName()] = member
 
+
    def getMember(self,name):
 
       return self.members[name]
@@ -170,7 +171,25 @@ class linker(object):
 
       return self.synItem
 
-   def updateSynObjCanvasProperties(self):
+
+
+   def updateCanvas(self):
+
+      newcprops = self.synObject.getCanvasProperties()
+  
+      self.synItem.getO().set_property("x",newcprops[0])
+      self.synItem.getO().set_property("y",newcprops[1])
+      self.synItem.getO().set_property("width",newcprops[2])
+      self.synItem.getO().set_property("height",newcprops[3])
+      self.synItem.getMF().set_property("width",newcprops[4])
+      self.synItem.getMF().set_property("height",newcprops[5])
+
+
+      
+
+
+
+   def updateSynObjCanvasProperties(self,clipboard=False):
 
       canvasProperties = tuple()
 
@@ -182,15 +201,27 @@ class linker(object):
          mfwidth = self.synItem.getMF().get_property("width")
          mfheight = self.synItem.getMF().get_property("height")
 
-         if self.synItem.getO().get_property("parent") == IMVEC.activeDoc.getRootItem():
-            rootItem = "___root___"
+
+         if (clipboard):
+     
+            canvasProperties = (x,y,width,height,mfwidth,mfheight)
+            self.synObject.setCanvasProperties(canvasProperties)
+            return 
+           
          else:
 
-            ri = self.synItem.getO().get_property("parent")             
-            rootItem = IMVEC.activeDoc.getContainer().getMemberFromParentSynItem(ri).getSynObj().getName() 
+            if self.synItem.getO().get_property("parent") == IMVEC.activeDoc.getRootItem():
+               rootItem = "___root___"
+            else:
+
+               ri = self.synItem.getO().get_property("parent")             
+               rootItem = IMVEC.activeDoc.getContainer().getMemberFromParentSynItem(ri).getSynObj().getName() 
+
+            canvasProperties = (x,y,width,height,mfwidth,mfheight,rootItem)
 
 
-         canvasProperties = (x,y,width,height,mfwidth,mfheight,rootItem)
+
+
 
       else:
          data = self.synItem.getO().get_property("data")
@@ -1657,28 +1688,39 @@ class synapp(synobj):
 
    def onTextChange(self,widget):
 
+      
       if (widget == synappGTK.iname):
+
+         if synappGTK.iname.get_text()[len(synappGTK.iname.get_text())-1] == " ":
+            synHistory.history.addHistory()
+
          self.name = synappGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synappGTK.iname.get_text())
          #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
 
 
       elif (widget == synappGTK.icmd):
+
+         if synappGTK.icmd.get_text()[len(synappGTK.icmd.get_text())-1] == " ":
+            synHistory.addHistory()
          self.cmd = synappGTK.icmd.get_text()
 
       elif (widget == synappGTK.iwoi):
+         synHistory.history.addHistory()
          if synappGTK.iwoi.get_active_text() == "True":
             self.WOI = True
          else:
             self.WOI = False
 
       elif (widget == synappGTK.ibo):
+         synHistory.addHistory()
          if synappGTK.ibo.get_active_text() == "True":
             self.buffured_output = True
          else:
             self.buffured_output = False
 
       elif (widget == synappGTK.isl):
+         synHistory.addHistory()
          if synappGTK.isl.get_active_text() == "True":
             self.split_lines = True
          else:
