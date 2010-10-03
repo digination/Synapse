@@ -63,6 +63,10 @@ class IMVEC:
 
    labelPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),32,32)
    exportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export.png" % (RES_PATH),32,32)
+   exportOverPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export_over.png" % (RES_PATH),32,32)
+   cplayPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cplay.png" % (RES_PATH),32,32)
+   cplayOverPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cplay_over.png" % (RES_PATH),32,32)
+   cstopPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cstop.png" % (RES_PATH),32,32)
 
 
    appPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/synappItem.png" % (RES_PATH),16,16)
@@ -77,6 +81,7 @@ class IMVEC:
    monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
    containerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),16,16)
    reportPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),16,16)
+   
    labelPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),16,16)   
 
 
@@ -89,6 +94,10 @@ class IMVEC:
    linkPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/linkItem.png" % (RES_PATH),16,16)
 
    synapse_logo = gtk.gdk.pixbuf_new_from_file("%s/images/synapse.png" % (RES_PATH))
+
+   loopPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/loop.png" % (RES_PATH),16,16)  
+
+
 
 
    ioleft = gtk.gdk.pixbuf_new_from_file("%s/images/io_left.png" % (RES_PATH));

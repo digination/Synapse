@@ -58,10 +58,42 @@ def motion_notify(widget, event):
       if RESIZED_OBJECT != None:
 
          (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),RESIZED_OBJECT.getO(),0,0)
-         
-      
-         RESIZED_OBJECT.getO().set_property("width",int(event.x) +40 - abs_coord_x )
-         RESIZED_OBJECT.getO().set_property("height",int(event.y)+40 - abs_coord_y )
+
+         ##RESIZE_LIMITATIONS
+         try:
+            min_dim = RESIZED_OBJECT.getMinDim()
+ 
+            print min_dim
+
+            if (int(event.x) - abs_coord_x < min_dim[0] ):
+
+                #IMVEC.dbg.debug("CONTAINER WIDTH < 240",
+
+                RESIZED_OBJECT.getO().set_property("width",min_dim[0] + 7)
+                RESIZED_OBJECT.getMF().set_property("width",min_dim[0])
+                RESIZED_OBJECT.getExtender().set_property("x",RESIZED_OBJECT.getMF().get_property("width")-10)
+                RESIZED_OBJECT.getExtender().set_property("y",RESIZED_OBJECT.getMF().get_property("height")-10)
+
+                return
+
+            if (int(event.y) - abs_coord_y < min_dim[1] ):
+
+                #print "CONTAINER HEIGHT < %d" % (min_dim[1] + 40 )
+
+                RESIZED_OBJECT.getO().set_property("height",min_dim[1] + 7)
+                RESIZED_OBJECT.getMF().set_property("height",min_dim[1])
+                RESIZED_OBJECT.getExtender().set_property("x",RESIZED_OBJECT.getMF().get_property("width")-10)
+                RESIZED_OBJECT.getExtender().set_property("y",RESIZED_OBJECT.getMF().get_property("height")-10)
+
+                return
+
+         except Exception as e:
+            print e
+            pass
+
+
+         RESIZED_OBJECT.getO().set_property("width",int(event.x)+7  - abs_coord_x )
+         RESIZED_OBJECT.getO().set_property("height",int(event.y)+7 - abs_coord_y )
          RESIZED_OBJECT.getMF().set_property("height",int(event.y) - abs_coord_y )
          RESIZED_OBJECT.getMF().set_property("width",int(event.x) - abs_coord_x )
          RESIZED_OBJECT.getExtender().set_property("x",RESIZED_OBJECT.getMF().get_property("width")-10)
@@ -76,6 +108,7 @@ def motion_notify(widget, event):
             maxbtn.set_property("x",  RESIZED_OBJECT.getMF().get_property("width") -20 )
 
          elif str(RESIZED_OBJECT.__class__) == "synapseCanvas.containerItem":
+
             RESIZED_OBJECT.replaceIcon()
 
 
@@ -192,6 +225,11 @@ def compute_bary_internal(item):
 
 class synItem():
 
+
+
+   def getMinDim(self):
+
+      return (self.min_width,self.min_height)
 
    def reinit_pos(self):
 
@@ -320,19 +358,29 @@ class synItem():
 
       if MAKE_LINE == 1:
 
-         newitem = linkItem(IMVEC.activeDoc.getRootItem(),NLPARAMETERS[0],NLPARAMETERS[1],self,item)
-         IMVEC.linkList.append(newitem)
-         newobj = synlink("pipe%d" % len(IMVEC.linkList),IMVEC.activeDoc.getContainer().getMemberFromSynItem(NLPARAMETERS[0]).getSynObj(),
-                                             IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj())
+         out_obj = IMVEC.activeDoc.getContainer().getMemberFromSynItem(NLPARAMETERS[0]).getSynObj() 
+         in_obj = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
+
+
+         if (out_obj == in_obj):
+
+            out_obj.setLoopMode(True)
+            self.getLoopIcon().set_property("pixbuf",IMVEC.loopPixbuf)
+
+         else:
+            newitem = linkItem(IMVEC.activeDoc.getRootItem(),NLPARAMETERS[0],NLPARAMETERS[1],self,item)
+            IMVEC.linkList.append(newitem)
+            newobj = synlink("pipe%d" % len(IMVEC.linkList),out_obj,in_obj)
+                                             
          
-         newobj.setOutputNum(NLPARAMETERS[0].getOutNum(NLPARAMETERS[1]))
-         newobj.setInputNum(self.getInNum(item))
+            newobj.setOutputNum(NLPARAMETERS[0].getOutNum(NLPARAMETERS[1]))
+            newobj.setInputNum(self.getInNum(item))
 
 
-         IMVEC.activeDoc.getContainer().append(linker(newobj,newitem))
+            IMVEC.activeDoc.getContainer().append(linker(newobj,newitem))
 
-         IMVEC.activeDoc.getContainer().updatePeers()
-         IMVEC.activeDoc.refresh_objects_list()
+            IMVEC.activeDoc.getContainer().updatePeers()
+            IMVEC.activeDoc.refresh_objects_list()
          
                  
          MAKE_LINE=0
@@ -373,6 +421,10 @@ class synItem():
       return self.icon
 
 
+   def getLoopIcon(self):
+
+      return self.loop_icon
+
    def getO(self):
 
       return self.o
@@ -384,6 +436,14 @@ class synItem():
    def getLtext(self):
   
       return self.ltext
+
+
+   def onLoopClicked(self,item,target_item,event):
+
+      self.loop_icon.set_property("pixbuf",None)
+      obj = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
+      obj.setLoopMode(False)
+
 
 
    def changeInputsColor(self,color):
@@ -434,6 +494,12 @@ class synItem():
          out.connect("button-press-event",self.on_output_clicked)
          out.connect("enter-notify-event",self.on_conn_enter)
          out.connect("leave-notify-event",self.on_conn_leave)
+
+
+      try:
+         self.loop_icon.connect("button-press-event",self.onLoopClicked)
+      except:
+         pass
 
 
 
@@ -502,12 +568,16 @@ class synappItem(synItem):
       self.pixbuf = IMVEC.appPixbuf
       self.icon = goocanvas.Image(parent = self.o,x=52,y=10,pixbuf=self.pixbuf)
 
+      self.loop_icon = goocanvas.Image(parent = self.o,x=115,y=32)
+      
+
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
       self.inputs[0].set_property("x",-1)
       self.inputs[0].set_property("y",10)
+      self.inputs[0].set_property("tooltip","Application's stdin")
 
       
       
@@ -516,20 +586,21 @@ class synappItem(synItem):
       #self.inputs[0].set_property("tooltip","Application's stdin")
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
-                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1,tooltip="foo"))
 
       self.outputs[0].set_property("x",134)
       self.outputs[0].set_property("y",10)
+      self.outputs[0].set_property("tooltip","Application's stdout/stderr (tty)")
 
 
 
 
-      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
-                                      stroke_color="black", fill_color="#ff3200", line_width=1))
+      #self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 7 L 0 15 L 0 1 z",
+                                      #stroke_color="black", fill_color="#ff3200", line_width=1))
 
-      self.outputs[1].set_property("x",134)
-      self.outputs[1].set_property("y",25)
+      #self.outputs[1].set_property("x",134)
+      #self.outputs[1].set_property("y",25)
 
 
       
@@ -561,6 +632,7 @@ class servItem(synItem):
 
       self.pixbuf = IMVEC.servPixbuf
       self.icon = goocanvas.Image(parent = self.o,x=52,y=10,pixbuf=self.pixbuf)
+      self.loop_icon = goocanvas.Image(parent = self.o,x=115,y=32)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
@@ -605,6 +677,7 @@ class filterItem(synItem):
 
       self.pixbuf = IMVEC.filterPixbuf
       self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
+      self.loop_icon = goocanvas.Image(parent = self.o,x=60,y=32)
 
 
       self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
@@ -652,6 +725,7 @@ class timerItem(synItem):
 
       self.pixbuf = IMVEC.timerPixbuf
       self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+      self.loop_icon = goocanvas.Image(parent = self.o,x=30,y=32)
 
     
 
@@ -1071,6 +1145,10 @@ class monitorItem(synItem):
 
    def __init__(self,parent_canvas):
 
+
+      self.min_width = 190
+      self.min_height = 50
+
       self.outputs = list()
       self.inputs = list()
 
@@ -1413,6 +1491,10 @@ class commentItem(synItem):
 
    def __init__(self,parent_canvas):
 
+      self.min_width = 170
+      self.min_height = 50
+
+
       self.outputs = list()
       self.inputs = list()
 
@@ -1426,7 +1508,7 @@ class commentItem(synItem):
 				stroke_color="#cccccc", fill_color_rgba=0x333333aa,
 				line_width=0)
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 10" , text="this is a comment box", x=10, y=10,
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 10" , text="this is a comment box", x=15, y=20,
 						width=200,
 						fill_color="white")
 
@@ -1467,6 +1549,30 @@ class containerItem(synItem):
       self.icon.set_property("x",mfbary_x-16)
       self.icon.set_property("y",mfbary_y-16)
 
+
+
+   def on_exporticon_enter(self,item,target_item,event):
+
+      self.exporticon.set_property("pixbuf",IMVEC.exportOverPixbuf)
+
+   def on_exporticon_leave(self,item,target_item,event):
+
+      self.exporticon.set_property("pixbuf",IMVEC.exportPixbuf)
+
+
+   def on_playicon_enter(self,item,target_item,event):
+
+      self.playicon.set_property("pixbuf",IMVEC.cplayOverPixbuf)
+
+   def on_playicon_leave(self,item,target_item,event):
+
+      self.playicon.set_property("pixbuf",IMVEC.cplayPixbuf)
+
+      
+
+
+
+
    def on_extend_click(self,item,target_item,event):
       global RESIZED_OBJECT
       RESIZED_OBJECT = self
@@ -1496,6 +1602,10 @@ class containerItem(synItem):
 
    def __init__(self,parent_canvas):
 
+
+      self.min_width = 200
+      self.min_height = 100
+
       self.outputs = list()
       self.inputs = list()
 
@@ -1514,21 +1624,25 @@ class containerItem(synItem):
 				line_width=4)
 
 
-      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=150, height=35,
+      self.icon = goocanvas.Image(parent = self.o,x=0,y=0,pixbuf=self.pixbuf)
+      self.replaceIcon()
+
+
+      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=200, height=35,
 				stroke_color="#cccccc", fill_color_rgba=0xcccccccc,
 				line_width=0)
       
 
-      self.icon = goocanvas.Image(parent = self.o,x=0,y=0,pixbuf=self.pixbuf)
-      self.replaceIcon()
+      
      
 
      
-      self.exporticon = goocanvas.Image(parent = self.o,x=10,y=7,pixbuf=self.exportPixbuf)
+      self.exporticon = goocanvas.Image(parent = self.o,x=44,y=7,pixbuf=self.exportPixbuf)
+      self.playicon = goocanvas.Image(parent = self.o,x=10,y=7,pixbuf=IMVEC.cplayPixbuf)
 
 
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="foobar", x=50, y=17,
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="foobar", x=80, y=17,
 						width=200,
 						fill_color="back")
 
@@ -1557,6 +1671,14 @@ class containerItem(synItem):
      
       self.extender.connect("button-press-event",self.on_extend_click)
       self.extender.connect("button-release-event",self.on_extend_release)
+
+
+      self.playicon.connect("enter-notify-event",self.on_playicon_enter)
+      self.playicon.connect("leave-notify-event",self.on_playicon_leave)
+
+      self.exporticon.connect("enter-notify-event",self.on_exporticon_enter)
+      self.exporticon.connect("leave-notify-event",self.on_exporticon_leave)
+
 
 
 

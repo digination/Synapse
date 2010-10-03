@@ -34,6 +34,24 @@ except:
 
    #using print here, because debug object not created yet
    print "[WARNING] REPORT API NOT LOADED"
+
+
+try:
+
+   from MySQLdb import *
+
+except:
+
+   print "[WARNING] MYSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
+
+
+try:
+
+   from psycopg2 import *
+
+except:
+
+   print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
    
 
 
@@ -287,6 +305,7 @@ class synobj:
       self.mInput = False
       self.needSender = False
       self.alive = False
+      self.loop_mode = False
   
 
    def broadcast(self):
@@ -339,6 +358,17 @@ class synobj:
    def setName(self,name):
 
       self.name = name
+
+
+   def getLoopMode(self):
+
+      return self.loop_mode
+
+
+   def setLoopMode(self,loop_mode):
+
+      self.loop_mode = loop_mode
+
 
    def setPeers(self,peersList):
 
@@ -641,7 +671,7 @@ class syntimer(synobj):
 
             #time.sleep(float(int(self.interval)/1000))
 
-            if (self.loop == False): 
+            if (self.loop_mode == False): 
                buff_repeat = ""      
             else:
                buff_repeat = copy.copy(content)
@@ -659,7 +689,6 @@ class syntimer(synobj):
 
       self.name = name
       self.interval = interval
-      self.loop = loop
       self.WOI = False
 
       self.ibuff = None
@@ -668,10 +697,6 @@ class syntimer(synobj):
 
    def getPeriod(self):
       return self.interval
-
-   def getLoop(self):
-      return self.loop
-
 
    def onColorChange(self,widget):
 
@@ -706,15 +731,7 @@ class syntimer(synobj):
       elif (widget == syntimerGTK.iinterval):
          self.interval = widget.get_text()
 
-      elif (widget == syntimerGTK.iloop):
-      
-         if (widget.get_active_text() == "False"):   
-            self.loop = False
-         else:
-            self.loop = True
 
-
-   
    def disconnectAll(self):
 
       syntimerGTK.iname.disconnect(syntimerGTK.chdict['iname'])
@@ -729,16 +746,10 @@ class syntimer(synobj):
       syntimerGTK.icolor.set_text(self.color)
       syntimerGTK.iinterval.set_text(str(self.interval))
 
-      if self.loop == True:
-         syntimerGTK.iloop.set_active(1)
-      else:
-         syntimerGTK.iloop.set_active(0)
-
-
       syntimerGTK.chdict['iname'] = syntimerGTK.iname.connect("changed",self.on_widget_changed)
       syntimerGTK.chdict['icolorBtn'] = syntimerGTK.icolorBtn.connect("clicked",self.onColorChange)
       syntimerGTK.chdict['iinterval'] = syntimerGTK.iinterval.connect("changed",self.on_widget_changed)      
-      syntimerGTK.chdict['iloop'] = syntimerGTK.iloop.connect("changed",self.on_widget_changed)  
+
 
 
       

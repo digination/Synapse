@@ -788,29 +788,12 @@ class syntimerGTK:
    iinterval = gtk.Entry()
    iinterval.set_text("1000")
 
-
-   lloop = gtk.Label(str="Loop Mode")
-
-   iloop = gtk.ComboBox()
-   ls0 = gtk.ListStore(str)
-   iloop.set_model(ls0)
-   cellr0 = gtk.CellRendererText()
-   iloop.pack_start(cellr0)
-   iloop.add_attribute(cellr0, 'text', 0)
-
-   iloop.append_text("False")
-   iloop.append_text("True")
-   iloop.set_active(0)
-
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(linterval,False,True,10)
-   gtkPVbox1.pack_start(lloop,False,True,10)   
-
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iinterval,False,True,5)
-   gtkPVbox2.pack_start(iloop,False,True,5)
 
    chdict = dict()
 
