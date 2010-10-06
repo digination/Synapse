@@ -3,6 +3,7 @@ pygtk.require("2.0")
 import gtk
 import os
 from synapseDebug import dbg
+from synapseEngine import synapseEngine
 
 
 
@@ -15,7 +16,8 @@ class IMVEC:
    #application clipboard
    cb =  gtk.Clipboard(gtk.gdk.display_get_default(),"CLIPBOARD")
 
-   running = False
+   engine = None
+
 
    #gtk widget references shared by both main and canvas modules
    obrowser = None

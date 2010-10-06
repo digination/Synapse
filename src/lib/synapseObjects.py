@@ -168,11 +168,53 @@ class container:
 class linker(object):
 
 
-   def __init__(self,synObject,synItem):
+   def __init__(self,synObject,synItem,nbiqueues=1,nboqueues=0):
 
       self.synObject = synObject
       self.synItem = synItem
-      
+
+      self.nbiqueues = nbiqueues
+      self.nboqueus = nboqueues
+      self.iqueues = list()
+      self.oqueues = list() 
+
+      for i in range(0,nbiqueues):
+
+         self.iqueues.append(Queue(0))
+
+      for i in range(0,nboqueues):
+
+         self.oqueues.append(Queue(0))
+     
+   def deleteQReferences(self):
+
+      if (str(self.synObject.__class__) == "synapseObjects.synlink"):
+         self.synObject.getInObj().flushQueues()
+         self.synObject.getOutObj().flushQueues()
+
+      else:
+         try:
+            for peer in self.synObject.getPeers():
+               peer.flushQueues()
+         except:
+            pass
+
+
+   #for conveniency
+   def getIqueue(self):
+      if (self.nbiqueues >= 1):
+         return self.iqueues[0]
+      else:
+         return None
+  
+   def getIqueues(self):
+      return self.iqueues
+
+   def getOqueues(self):
+
+      return self.oqueues
+
+
    def setSynObj(self,synObject):
 
       self.synObject = synObject
@@ -265,14 +307,12 @@ class synobj:
    def kill(self):
       self.alive = False
 
-   def setIqueue(self,iqueue):
-      self.iqueue = iqueue
-
+   def flushQueues(self):
+      self.iqueue = None
 
    def getIqueue(self):
       return self.iqueue
 
-  
    def getIbuff(self):
       return self.ibuff
 
@@ -293,14 +333,9 @@ class synobj:
 
       self.ibuff = self.ibuff + buff 
  
+   def init_common(self):
 
-   def init_common(self,has_queue=True):
-
-      if has_queue:
-         self.iqueue = Queue(0)
-      else:
-         self.iqueue = None
-
+      self.iqueue = None
       self.color = "DEFAULT"
       self.mInput = False
       self.needSender = False
@@ -438,7 +473,7 @@ class synheader(synobj):
 
    def __init__(self,title="Workflow title",author="",date="",descr="your description here"):
 
-      self.init_common(has_queue=False)
+      self.init_common()
 
       self.title = title
       self.author = author
@@ -490,6 +525,8 @@ class synfilter(synobj):
 
 
    def run(self):
+
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
 
       if (self.filterType == "Simple Grep"):
          filterCmd = "grep --line-buffered " + self.data
@@ -643,6 +680,8 @@ class syntimer(synobj):
 
    def run(self):
      
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
+
       self.alive = True
       buff_repeat = ""
 
@@ -938,6 +977,8 @@ class syntest(synobj):
 
 
    def run(self):
+
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
  
       self.alive = True
 
@@ -1042,6 +1083,7 @@ class synlink(synobj):
 
    def __init__(self,name,outObj,inObj):
 
+      self.init_common()
       self.name = name
       
       self.bidir = False
@@ -1132,7 +1174,7 @@ class syncom(synobj):
 
    def __init__(self,name,text):
 
-      self.init_common(has_queue=False)
+      self.init_common()
       self.text = text
       self.name = name
    def getText(self):
@@ -1334,8 +1376,8 @@ class syndemux(synobj):
              
    def run(self):
 
-      self.alive = True
-      
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
+      self.alive = True      
       self.separator = self.separator.replace("\\n","\n").replace("\\t","\t").replace("\\r","\r")
       
       while(self.alive == True):
@@ -1471,12 +1513,19 @@ class synmonitor(synobj):
    nbinst = 0
 
 
+
+   def flush(self):
+
+      IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem().flush()
+
+
    def updateDisplayBuffSize(self):
       return 0
 
 
    def run(self):
-
+ 
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
       self.alive = True
       xref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem()
       self.fullContent = ""
@@ -1562,18 +1611,9 @@ class synapp(synobj):
                IMVEC.dbg.debug("UPDATING LINK FOR %s",(self),dbg.NOTICE)
                self.peersSTDERR.append([obj.getInputNum(),obj.getInObj()])
 
-   def bcastSTDERR(self):
-
-      for peer in self.peersSTDERR:
-
-         (input_num, peerobj) = tuple(peer)  
-
-         peerobj.setIbuff(self.obuff2)
-
-      #self.ibuff = None
-
    def run(self):
           
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
       self.alive = True
   
       if (self.buffured_output):
@@ -1672,14 +1712,6 @@ class synapp(synobj):
       self.split_lines = False
 
 
-   def getPeersSTDERR(self):
-
-      return self.peersSTDERR
-
-   def setPeersSTDERR(self,pstderr):
-
-      self.peersSTDERR = pstderr
-
    def getCmd(self):
 
       return self.cmd
@@ -1703,7 +1735,7 @@ class synapp(synobj):
       if (widget == synappGTK.iname):
 
          if synappGTK.iname.get_text()[len(synappGTK.iname.get_text())-1] == " ":
-            synHistory.history.addHistory()
+            synapseHistory.history.addHistory()
 
          self.name = synappGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synappGTK.iname.get_text())
@@ -1713,25 +1745,25 @@ class synapp(synobj):
       elif (widget == synappGTK.icmd):
 
          if synappGTK.icmd.get_text()[len(synappGTK.icmd.get_text())-1] == " ":
-            synHistory.addHistory()
+            synapseHistory.history.addHistory()
          self.cmd = synappGTK.icmd.get_text()
 
       elif (widget == synappGTK.iwoi):
-         synHistory.history.addHistory()
+         synapseHistory.history.addHistory()
          if synappGTK.iwoi.get_active_text() == "True":
             self.WOI = True
          else:
             self.WOI = False
 
       elif (widget == synappGTK.ibo):
-         synHistory.addHistory()
+         synapseHistory.history.addHistory()
          if synappGTK.ibo.get_active_text() == "True":
             self.buffured_output = True
          else:
             self.buffured_output = False
 
       elif (widget == synappGTK.isl):
-         synHistory.addHistory()
+         synapseHistory.history.addHistory()
          if synappGTK.isl.get_active_text() == "True":
             self.split_lines = True
          else:
@@ -1830,7 +1862,8 @@ class synserv(synobj):
       #s.close()
    
    def run(self):
-          
+     
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()     
       self.alive = True
       sockfd = self.sockConnect()
 
@@ -2132,6 +2165,7 @@ class synreport(synobj):
  
    def run(self):
  
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
       self.alive = True
       self.pdfContent = ""      
 
@@ -2215,7 +2249,7 @@ class syncontainer(synobj):
    def __init__(self,name):
 
       self.name = name
-      self.init_common(has_queue=False)
+      self.init_common()
 
 
 
@@ -2292,7 +2326,7 @@ class synlabel(synobj):
 
    def __init__(self,name):
 
-      self.init_common(has_queue=False)
+      self.init_common()
       self.peers = list()
       self.name = name
       self.WOI = False

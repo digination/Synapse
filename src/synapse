@@ -24,6 +24,7 @@ from synapseDebug import dbg
 from synapsePkg import *
 from synapseUtils import *
 from synapseHistory import *
+from synapseEngine import synapseEngine
 import pickle
 from Queue import Queue
 
@@ -45,16 +46,6 @@ RENDERER0 =  gtk.CellRendererPixbuf()
 RENDERER1 = gtk.CellRendererText()
 C0= gtk.TreeViewColumn(None,RENDERER0,pixbuf=0)
 C1= gtk.TreeViewColumn(None,RENDERER1,text=1)
-
-
-class thwrapper(threading.Thread):
-
- 
-   def setMethod(self,method):
-      self.method = method   
-
-   def run(self):
-      self.method()
 
 
 
@@ -114,13 +105,14 @@ class document(object):
 
       for mname,member in self.container.getMembers().items():
 
-         sobj = member.getSynObj()
-         tmpqueue = sobj.getIqueue()
-         sobj.setIqueue(None)
+         member.deleteQReferences()
          member.updateSynObjCanvasProperties(clipboard=True)
-         obj_list.append( pickle.dumps(sobj) )
-         sobj.setIqueue(tmpqueue)
+         sobj = member.getSynObj()
          
+         try:
+            obj_list.append( pickle.dumps(sobj) )
+         except:
+            IMVEC.dbg.debug("UNABLE TO PICKLE OBJECT %s",(sobj.getName()),dbg.CRITICAL)
 
       return pickle.dumps(obj_list)
 
@@ -1208,7 +1200,7 @@ class MainWindow(object):
 
             #recreates queue
             if pobj.getIqueue() == "queue":
-               pobj.setIqueue(Queue())
+               pobj.init_queue()
                   
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
 
@@ -1388,27 +1380,8 @@ class MainWindow(object):
             IMVEC.activeDoc.refresh_objects_list()
 
 
-   def woiWatchThread(self):
-
-      while(self.woiWatchAlive):
-
-         for obj in self.woiObjects:
-
-            if obj.getIbuff() != "" and not obj.isRunning() :
-
-               th0 = thwrapper()
-               th0.setMethod(obj.run)
-               th0.start()
-              
-               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
-               
-               
-         time.sleep(0.001)
+   
       
-
-
-
-
    #button clicked callback
    def on_button_clicked(self,widget):
 
@@ -1433,12 +1406,12 @@ class MainWindow(object):
 
       if widget == self.stop_btn:
   
-         self.stopWorkflow()         
+         IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())         
 
 
       if widget == self.play_btn:
    
-         self.playWorkflow()                      
+         IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())                      
 
 
       if widget == self.zoomin_btn:
@@ -1465,65 +1438,7 @@ class MainWindow(object):
          self.startSave()
 
 
-   def playWorkflow(self):
-
-      self.woiObjects = list()
-
-      if (IMVEC.running == False):
-      #define a boolean executable attr for synObjects to avoid repeted and ...
-
-         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-            if (str(obj.__class__) == "dummy"):
-               obj.run()
-               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
-
-            elif (str(obj.__class__) != "synapseObjects.syncom") \
-            and (str(obj.__class__) != "synapseObjects.synlink") \
-            and (str(obj.__class__) != "synapseObjects.syncontainer") \
-            and (obj.getWOI() == False):
-               th0 = thwrapper()
-               th0.setMethod(obj.run)
-               th0.start()
-               IMVEC.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
-            elif (str(obj.__class__) != "synapseObjects.syncom") \
-            and (str(obj.__class__) != "synapseObjects.synlink") \
-            and (str(obj.__class__) != "synapseObjects.syncontainer") \
-            and (obj.getWOI() == True):
-               self.woiObjects.append(obj)
-
-         if len(self.woiObjects) != 0:
-            th1 = thwrapper()
-            th1.setMethod(self.woiWatchThread)
-            self.woiWatchAlive = True
-            th1.start()
-            IMVEC.dbg.debug("THREAD WOI WATCHER STARTED",tuple(),dbg.NOTICE)
-        
-         IMVEC.running = True    
-
-
-
-
-   def stopWorkflow(self):
-
-         try:
-            if self.woiWatchAlive:
-               IMVEC.dbg.debug("WOI WATCH THREAD STOPPED",tuple(),dbg.NOTICE)
-               self.woiWatchAlive = False
-         except:
-            pass
-
-
-         for obj in IMVEC.activeDoc.getContainer().getSynObjects():
-            if (str(obj.__class__) != "synapseObjects.syncom") \
-            and (str(obj.__class__) != "synapseObjects.synlink") \
-            and (str(obj.__class__) != "synapseObjects.syncontainer"):
-               if (obj.isRunning()):
-                  IMVEC.dbg.debug("THREAD FOR ITEM %s STOPPED",(obj),dbg.NOTICE)
-                  obj.kill()
-               if (str(obj.__class__) == "synapseObjects.synmonitor"):
-                  IMVEC.activeDoc.getContainer().getMemberFromSynObj(obj).getSynItem().flush()
-         
-         IMVEC.running = False
+  
 
 
    def startLoad(self):
@@ -1574,9 +1489,7 @@ class MainWindow(object):
             for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
                   
                   #removes queue for pickle serialization.
-                  if member.getSynObj().getIqueue() != None:
-                     member.getSynObj().setIqueue("queue")
-
+                  member.deleteQReferences()
                   member.updateSynObjCanvasProperties()
                   pickled_objects.append(member.getSynObj())
             try:
@@ -1724,6 +1637,34 @@ class MainWindow(object):
 
          print "PASTING BUILDING BLOCK"  
          self.loadBBGroup(text.lstrip("SYNAPSE_CLIPBOARD_SERIALIZED_BBGROUP: "),"clipboard") 
+
+
+
+   def on_libtree_load(self,widget,path,view_colum):
+
+      path = ""
+
+      selection = widget.get_selection()
+      model, selection_iter = selection.get_selected()
+      path = model.get_value(selection_iter,1) + '/' + path
+
+      nselection_iter = selection_iter
+      nselection_iter = model.iter_parent(nselection_iter)
+      while ( nselection_iter != None):   
+         path = model.get_value(nselection_iter,1) + '/' + path
+         nselection_iter = model.iter_parent(nselection_iter)
+
+      path = path.rstrip('/').replace('(','').replace(')','')
+      
+      (spkg_name,space,real_path) = path.partition(" ")
+
+      print real_path
+
+      if real_path.find('/workflows/') > 0:
+
+         self.loadDoc("/tmp/synapse/" + real_path + ".sws")
+
+         
 
 
 
@@ -2106,11 +2047,16 @@ class MainWindow(object):
       pkgMgr = pkgManager()
       IMVEC.pkgMgr = pkgMgr
       self.libtree = builder.get_object("libtree")
+
+      self.libtree.connect("row-activated",self.on_libtree_load)
+ 
       IMVEC.libtree = self.libtree
       IMVEC.libtree.set_model(IMVEC.pkgMgr.getTreeStore())
       IMVEC.libtree.set_headers_visible(False)
       
       
+      
+
       tvcell0 = gtk.CellRendererPixbuf()
       tvcell1 = gtk.CellRendererText()
       
@@ -2295,6 +2241,8 @@ if __name__ == "__main__":
    IMVEC.cfg = synCFG(debugLevel=debug_lvl)
 
    IMVEC.dbg = dbg(IMVEC.cfg.getDebugLevel())
+
+   IMVEC.engine = synapseEngine(IMVEC.dbg)
 
       
 
