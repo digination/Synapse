@@ -87,8 +87,7 @@ def motion_notify(widget, event):
 
                 return
 
-         except Exception as e:
-            print e
+         except:
             pass
 
 

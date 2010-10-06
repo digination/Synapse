@@ -776,7 +776,6 @@ class syntimer(synobj):
       syntimerGTK.iname.disconnect(syntimerGTK.chdict['iname'])
       syntimerGTK.icolorBtn.disconnect(syntimerGTK.chdict['icolorBtn'])
       syntimerGTK.iinterval.disconnect(syntimerGTK.chdict['iinterval'])      
-      syntimerGTK.iloop.disconnect(syntimerGTK.chdict['iloop'])    
 
    def getPropWidget(self):
 

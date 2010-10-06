@@ -156,7 +156,7 @@ class document(object):
 
       self.head_label.set_text(text)
 
-   def refresh_objects_list(self):
+   def refresh_objects_list(self,sorting='none'):
 
       global LS0
       global SYNAPP_ICON
@@ -164,6 +164,11 @@ class document(object):
       #global C1
 
       LS0.clear()
+
+      obrowser_dict = dict()
+      terms_list = list()
+
+      
       for obj in IMVEC.activeDoc.getContainer().getSynObjects():
   
          # Dirty, replace by dict()
@@ -198,11 +203,21 @@ class document(object):
          elif (str(obj.__class__) == "synapseObjects.synlabel"):
             pixbuf = IMVEC.labelPixbuf_s
 
+         if sorting == 'name': 
+            obrowser_dict[obj.getName()] = (pixbuf,obj.getName())
+            terms_list.append(obj.getName())
+         else:
+            obrowser_dict[str(obj.__class__)+obj.getName()] = (pixbuf,obj.getName())
+            terms_list.append(str(obj.__class__)+obj.getName())
 
+         
+      terms_list.sort()
+      for term in terms_list:
+
+         (pixbuf,oname) = obrowser_dict[term]
 
          iter = LS0.append()
-         LS0.set(iter,0,pixbuf,1,obj.getName())
-
+         LS0.set(iter,0,pixbuf,1,oname)
          IMVEC.obrowser.set_model(LS0)
 
      
@@ -2092,7 +2107,8 @@ class MainWindow(object):
       self.zoom_lvl.connect("changed",self.on_zoomlvl_change)
 
 
-      IMVEC.obrowser = self.obrowser  
+      IMVEC.obrowser = self.obrowser
+      IMVEC.obrowser.set_headers_clickable(True)  
       IMVEC.obrowser.set_model(LS0)
       
       self.obrowser.connect("cursor-changed",self.on_obrowser_cursor_changed)
