@@ -2246,10 +2246,38 @@ class syncontainer(synobj):
 
 
 
+   def appendObj(self,obj):
+
+      self.objlist.append(obj)
+     
+ 
+   def getObjList(self):
+
+      return self.objlist
+
+   def flushObjList(self):
+
+      del self.objlist[:]
+
+
+   def updateObjList(self):
+
+      self.objlist = list()
+
+      self_canvas_ref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem().getO()
+      for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+ 
+         if member.getSynItem().getO().get_property("parent") == self_canvas_ref:
+
+            self.objlist.append(member.getSynObj())
+
+
+
    def __init__(self,name):
 
       self.name = name
       self.init_common()
+      self.objlist = list()
 
 
 

@@ -305,7 +305,7 @@ class synItem():
          MOVED_OBJECT.set_property("x",MOVED_OBJECT.get_property("x")- PRE_CONTAINER.get_property("x"))
          MOVED_OBJECT.set_property("y",MOVED_OBJECT.get_property("y")- PRE_CONTAINER.get_property("y"))
 
-
+         
       MOVED_OBJECT = None
       PRE_CONTAINER = None
       IMVEC.activeDoc.getCanvas().window.set_cursor(None)
@@ -1568,6 +1568,13 @@ class containerItem(synItem):
 
       self.playicon.set_property("pixbuf",IMVEC.cplayPixbuf)
 
+   def on_playicon_clicked(self,item,target_item,event):
+
+
+      self_synobj_ref = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
+      self_synobj_ref.updateObjList()
+      IMVEC.engine.playWorkflow(self_synobj_ref.getObjList())
+      
       
 
 
@@ -1675,6 +1682,9 @@ class containerItem(synItem):
 
       self.playicon.connect("enter-notify-event",self.on_playicon_enter)
       self.playicon.connect("leave-notify-event",self.on_playicon_leave)
+      self.playicon.connect("button-press-event",self.on_playicon_clicked)
+
+
 
       self.exporticon.connect("enter-notify-event",self.on_exporticon_enter)
       self.exporticon.connect("leave-notify-event",self.on_exporticon_leave)
