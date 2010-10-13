@@ -11,7 +11,6 @@ import goocanvas
 import getpass
 import getopt
 
-
 import sys
 sys.path.append("/usr/lib/synapse")
 from synapseObjects import *
@@ -65,6 +64,33 @@ class document(object):
 
 
 
+   def getKeyboard(self):
+
+      return self.keyboard
+
+
+   def setKeyboard(self,kbd):
+
+      self.keyboard = kbd
+
+   def isInContainer(self,coords):
+
+      result = (False,tuple())
+
+      for cont0 in self.syncontainersList:
+         
+         cont_canvas = cont0.getSynItem().getO()
+         (x_abs,y_abs) = getAbsoluteCoords(self.root,cont_canvas,0,0)
+         width = cont0.getSynItem().getMF().get_property("width")
+         height = cont0.getSynItem().getMF().get_property("height")
+         
+         if ( coords[0] > x_abs and coords[0] < (x_abs + width) and coords[1] > y_abs and coords[1] < (y_abs + height) ):
+
+            result = (cont_canvas,(coords[0]-x_abs,coords[1]-y_abs))
+
+      return result
+
+         
    # takes a serialized document string and puts it back to an actual document
 
    def deserializeAll(self,serial_string):
@@ -202,6 +228,9 @@ class document(object):
             pixbuf = IMVEC.reportPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synlabel"):
             pixbuf = IMVEC.labelPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synkbd"):
+            pixbuf = IMVEC.kbdPixbuf_s
+
 
          if sorting == 'name': 
             obrowser_dict[obj.getName()] = (pixbuf,obj.getName())
@@ -229,17 +258,30 @@ class document(object):
   
    def receiveCallback(self, widget, context, x, y, selection, targetType,time):
 
-      IMVEC.dbg.debug("DROPPED OBJECT FROM BTN: %s",(context.get_source_widget().get_name()),dbg.DEBUG)
+      IMVEC.dbg.debug("DROPPED OBJECT FROM BTN: %s TGT TYPE: %s",(context.get_source_widget().get_name(),targetType),dbg.DEBUG)
+
+
+      (newroot,new_coords) = self.isInContainer((x,y))
+      if ( newroot != False ):
+         root = newroot
+         cx = new_coords[0]
+         cy = new_coords[1]
+      else:
+         root = self.root
+         cx = x
+         cy = y
      
+
       if (context.get_source_widget().get_name() == "synapp_btn"):
 
          self.nbsynapp+=1
          newobj = synapp("Application%d" % (self.nbsynapp) )
-         newitem = synappItem(self.root)
+
+         newitem = synappItem(root)
          self.container.append(linker(newobj,newitem))
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Application%d" % (self.nbsynapp))
 
          self.refresh_objects_list()
@@ -249,11 +291,11 @@ class document(object):
 
          self.nbsyntest+=1
          newobj = syntest("Test%d" % (self.nbsyntest) )
-         newitem = testItem(self.root)
+         newitem = testItem(root)
          self.container.append(linker(newobj,newitem))
          
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Test%d" % (self.nbsyntest))
          self.refresh_objects_list()
 
@@ -263,11 +305,11 @@ class document(object):
          
          self.nbservices+=1
          newobj = synserv("Service%d" % (self.nbservices) )
-         newitem = servItem(self.root)
+         newitem = servItem(root)
          self.container.append(linker(newobj,newitem))
          
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Service%d" % (self.nbservices))
          self.refresh_objects_list()
          
@@ -276,11 +318,11 @@ class document(object):
 
          self.nbinjectors+=1
          newobj = synjector("Injector%d" % (self.nbinjectors))
-         newitem = injectorItem(self.root)
+         newitem = injectorItem(root)
          self.container.append(linker(newobj,newitem))         
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Injector%d" % (self.nbinjectors))
         
          self.refresh_objects_list()
@@ -290,11 +332,11 @@ class document(object):
 
          self.nbcomments+=1
          newobj = syncom("Comment%d" % (self.nbcomments),"This is a comment box")
-         newitem = commentItem(self.root)
+         newitem = commentItem(root)
          self.container.append(linker(newobj,newitem))
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
 
          self.refresh_objects_list()     
 
@@ -302,11 +344,11 @@ class document(object):
 
          self.nbmuxers+=1
          newobj = synmux("Muxer%d" % (self.nbmuxers))
-         newitem = muxItem(self.root)         
+         newitem = muxItem(root)         
          self.container.append(linker(newobj,newitem))
          
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Muxer%d" % (self.nbmuxers))
          self.refresh_objects_list() 
 
@@ -314,11 +356,11 @@ class document(object):
 
          self.nbdemuxers+=1
          newobj = syndemux("Demuxer%d" % (self.nbdemuxers))
-         newitem = demuxItem(self.root)
+         newitem = demuxItem(root)
          self.container.append(linker(newobj,newitem))
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Demuxer%d" % (self.nbdemuxers))
 
          self.refresh_objects_list()
@@ -327,11 +369,11 @@ class document(object):
 
          self.nbtimers+=1
          newobj = syntimer("Timer%d" % (self.nbtimers))
-         newitem = timerItem(self.root)
+         newitem = timerItem(root)
          self.container.append(linker(newobj,newitem))         
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Timer%d" % (self.nbtimers))
 
          self.refresh_objects_list()
@@ -341,11 +383,11 @@ class document(object):
 
          self.nbfilters+=1
          newobj = synfilter("Filter%d" % (self.nbfilters))
-         newitem = filterItem(self.root)
+         newitem = filterItem(root)
          self.container.append(linker(newobj,newitem))         
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Filter%d" % (self.nbfilters))
 
          self.refresh_objects_list()
@@ -355,11 +397,11 @@ class document(object):
 
          self.nbmonitors+=1
          newobj = synmonitor("Monitor%d" % (self.nbmonitors))
-         newitem = monitorItem(self.root)
+         newitem = monitorItem(root)
          self.container.append(linker(newobj,newitem))         
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          #newitem.setText("Monitor%d" % (self.nbfilters))
 
          self.refresh_objects_list()
@@ -369,14 +411,14 @@ class document(object):
 
          self.nbcontainers+=1
          newobj = syncontainer("Container%d" % (self.nbcontainers))
-         newitem = containerItem(self.root)
+         newitem = containerItem(root)
          nlinker = linker(newobj,newitem)
          self.container.append(nlinker)
          self.syncontainersList.append(nlinker)
         
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Container%d" % (self.nbcontainers))
 
          self.refresh_objects_list()
@@ -386,11 +428,11 @@ class document(object):
 
          self.nbreports+=1
          newobj = synreport("Report%d" % (self.nbreports))
-         newitem = reportItem(self.root)
+         newitem = reportItem(root)
          self.container.append(linker(newobj,newitem))
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Report%d" % (self.nbreports))
 
          self.refresh_objects_list()
@@ -400,12 +442,26 @@ class document(object):
 
          self.nblabels+=1
          newobj = synlabel("Label%d" % (self.nblabels))
-         newitem = labelItem(self.root)
+         newitem = labelItem(root)
          self.container.append(linker(newobj,newitem))
 
-         newitem.getO().set_property("x",x)
-         newitem.getO().set_property("y",y)
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
          newitem.setText("Label%d" % (self.nblabels))
+
+         self.refresh_objects_list()
+
+
+      elif (context.get_source_widget().get_name() == "synkbd_btn"):
+
+         self.nbkbds+=1
+         newobj = synkbd("Kbd%d" % (self.nbkbds))
+         newitem = kbdItem(root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
+         newitem.setText("Kbd%d" % (self.nbkbds))
 
          self.refresh_objects_list()
 
@@ -687,6 +743,8 @@ class document(object):
       self.savedName = ""
       self.path = ""
 
+      self.keyboard = None
+
       self.notebook = notebook      
 
       self.nbsynapp = 0
@@ -703,6 +761,9 @@ class document(object):
       self.nbcontainers = 0
       self.nbreports = 0
       self.nblabels = 0
+      self.nbkbds = 0
+
+
       self.zoom = 1
       
       
@@ -893,49 +954,63 @@ class MainWindow(object):
 
       IMVEC.dbg.debug("KEY PRESSED: %d",(event.keyval),dbg.DEBUG)
 
-      #object deletion
-      if IMVEC.activeDoc.getActiveM() != None and event.keyval == 65535:
+      if IMVEC.activeDoc.getKeyboard() == None:
+
+         #object deletion
+         if IMVEC.activeDoc.getActiveM() != None and event.keyval == 65535:
          
    
-         #delete links coming in and out the object
-         for mname, member in  IMVEC.activeDoc.getContainer().getMembers().items():
+            #delete links coming in and out the object
+            for mname, member in  IMVEC.activeDoc.getContainer().getMembers().items():
             
-            if str(member.getSynObj().__class__) == "synapseObjects.synlink":
+               if str(member.getSynObj().__class__) == "synapseObjects.synlink":
              
-               if member.getSynObj().getInObj() == IMVEC.activeDoc.getActiveM().getSynObj():
-                  IMVEC.activeDoc.getContainer().delete(member)
-                  IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
+                  if member.getSynObj().getInObj() == IMVEC.activeDoc.getActiveM().getSynObj():
+                     IMVEC.activeDoc.getContainer().delete(member)
+                     IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
                   
-               elif member.getSynObj().getOutObj() == IMVEC.activeDoc.getActiveM().getSynObj():
-                  IMVEC.activeDoc.getContainer().delete(member)
-                  IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
+                  elif member.getSynObj().getOutObj() == IMVEC.activeDoc.getActiveM().getSynObj():
+                     IMVEC.activeDoc.getContainer().delete(member)
+                     IMVEC.activeDoc.getRootItem().remove_child(member.getSynItem().getO())
                   
 
-         #suppress all references to the object
-         IMVEC.activeDoc.getActiveM().getSynItem().getO().remove()
-         IMVEC.activeDoc.getContainer().delete(IMVEC.activeDoc.getActiveM())
-         #IMVEC.activeDoc.getRootItem().remove_child(IMVEC.activeDoc.getActiveM().getSynItem().getO())
+            #suppress all references to the object
+            IMVEC.activeDoc.getActiveM().getSynItem().getO().remove()
+            IMVEC.activeDoc.getContainer().delete(IMVEC.activeDoc.getActiveM())
+            #IMVEC.activeDoc.getRootItem().remove_child(IMVEC.activeDoc.getActiveM().getSynItem().getO())
          
+            IMVEC.activeDoc.getContainer().updatePeers()
+            IMVEC.activeDoc.refresh_objects_list()
 
 
-         IMVEC.activeDoc.getContainer().updatePeers()
-         IMVEC.activeDoc.refresh_objects_list()
+         elif event.keyval == 65307 and synapseCanvas.MAKE_LINE ==1:
+            synapseCanvas.MAKE_LINE=0
+            del synapseCanvas.NLPARAMETERS[:]
+
+            for item in IMVEC.activeDoc.getContainer().getSynItems():
+               try:
+                  item.changeInputsColor("#00CBFF")
+               except:
+                  pass
+
+            IMVEC.status_lbl.set_text("")
+         
+      else:
+         
+         if (event.keyval == 65288):
+            content = chr(8)
+         elif (event.keyval == 65293):
+            content = "\r\n"
+         else:
+
+            content = chr(gtk.gdk.keyval_to_unicode(event.keyval))            
 
 
-      elif event.keyval == 65307 and synapseCanvas.MAKE_LINE ==1:
-         synapseCanvas.MAKE_LINE=0
-         del synapseCanvas.NLPARAMETERS[:]
+         #IMVEC.activeDoc.getKeyboard().getIqueue().put(chr(gtk.gdk.keyval_to_unicode(event.keyval)))
+         IMVEC.activeDoc.getKeyboard().getIqueue().put(content)
 
-         for item in IMVEC.activeDoc.getContainer().getSynItems():
-            try:
-               item.changeInputsColor("#00CBFF")
-            except:
-               pass
-
-         IMVEC.status_lbl.set_text("")
          
       
-
 
    def on_zoomlvl_change(self,widget):
   
@@ -2017,6 +2092,11 @@ class MainWindow(object):
       self.synmon_img = builder.get_object("synmon_img")
       self.synmon_img.set_from_pixbuf(IMVEC.monitorPixbuf)
 
+      self.synkbd_btn = builder.get_object("synkbd_btn")
+      self.synkbd_img = builder.get_object("synkbd_img")
+      self.synkbd_img.set_from_pixbuf(IMVEC.kbdPixbuf)
+
+
       self.synfilter_btn = builder.get_object("synfilter_btn")
       self.synfilter_img = builder.get_object("synfilter_img")
       self.synfilter_img.set_from_pixbuf(IMVEC.filterPixbuf)
@@ -2182,6 +2262,12 @@ class MainWindow(object):
       self.synmon_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
 
+
+      self.synkbd_btn.connect("drag_data_get", self.sendCallback)
+      self.synkbd_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
       self.syncontainer_btn.connect("drag_data_get", self.sendCallback)
       self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
@@ -2211,6 +2297,7 @@ class MainWindow(object):
       self.syncontainer_btn.set_name("syncontainer_btn")
       self.synreport_btn.set_name("synreport_btn")
       self.synlabel_btn.set_name("synlabel_btn")
+      self.synkbd_btn.set_name("synkbd_btn")
 
 
       self.hpaned1.set_position(800)

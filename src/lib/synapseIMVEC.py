@@ -63,14 +63,20 @@ class IMVEC:
    reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
 
 
+   kbdPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),32,32)
+   kbdPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),16,16)
+   
+
+
    labelPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),32,32)
    exportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export.png" % (RES_PATH),32,32)
    exportOverPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export_over.png" % (RES_PATH),32,32)
    cplayPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cplay.png" % (RES_PATH),32,32)
    cplayOverPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cplay_over.png" % (RES_PATH),32,32)
    cstopPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cstop.png" % (RES_PATH),32,32)
+   cstopOverPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/cstop_over.png" % (RES_PATH),32,32)
 
-
+   
    appPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/synappItem.png" % (RES_PATH),16,16)
    servPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/servItem.png" % (RES_PATH),16,16)
    timerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/timerItem.png" % (RES_PATH),16,16)

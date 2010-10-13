@@ -2373,6 +2373,97 @@ class synlabel(synobj):
       self.broadcast()
 
 
+
+class synkbd(synobj):
+
+   def onTextChange(self,widget):
+
+      if (widget == synkbdGTK.iname):
+         self.name = synkbdGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synkbdGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
+   def getPropWidget(self):
+
+      synkbdGTK.iname.set_text(self.name)
+      synkbdGTK.icolor.set_text(self.color)
+      
+     
+      synkbdGTK.chdict['icolorBtn'] = synkbdGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synkbdGTK.chdict['iname'] = synkbdGTK.iname.connect("changed",self.onTextChange)
+
+      
+      return synkbdGTK.o
+
+
+   def disconnectAll(self):
+
+      synkbdGTK.icolorBtn.disconnect(synkbdGTK.chdict['icolorBtn'])
+      synkbdGTK.iname.disconnect(synkbdGTK.chdict['iname'])
+
+
+   def setInputLock(self,ilock):
+
+      self.ilock = ilock
+
+   def getInputLock(self):
+
+      return self.ilock
+
+   def __init__(self,name):
+
+      self.init_common()
+      self.peers = list()
+      self.name = name
+      self.WOI = False
+
+      self.ibuff = None
+      self.obuff = None
+      self.content = ""
+      self.ilock = False
+   
+
+   def run(self):
+
+      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
+      self.alive = True
+
+      while (self.alive):
+
+         try:  
+            self.obuff = self.iqueue.get(False)
+         except:
+            pass
+
+         if (self.obuff != None):
+
+            #print "KBD IBUFF:%s\n" % (self.ibuff)
+            self.broadcast()
+            self.obuff = None
+
+
 class synsel:
 
 

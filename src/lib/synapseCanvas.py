@@ -1561,21 +1561,35 @@ class containerItem(synItem):
 
    def on_playicon_enter(self,item,target_item,event):
 
-      self.playicon.set_property("pixbuf",IMVEC.cplayOverPixbuf)
+      if self.running:
+
+         self.playicon.set_property("pixbuf",IMVEC.cstopOverPixbuf)
+
+      else:
+
+         self.playicon.set_property("pixbuf",IMVEC.cplayOverPixbuf)
 
    def on_playicon_leave(self,item,target_item,event):
 
-      self.playicon.set_property("pixbuf",IMVEC.cplayPixbuf)
+      if self.running:
+         self.playicon.set_property("pixbuf",IMVEC.cstopPixbuf)
+      else:
+         self.playicon.set_property("pixbuf",IMVEC.cplayPixbuf)
 
    def on_playicon_clicked(self,item,target_item,event):
 
-
       self_synobj_ref = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
-      self_synobj_ref.updateObjList()
-      IMVEC.engine.playWorkflow(self_synobj_ref.getObjList())
-      
-      
-
+      if not self.running: 
+         self_synobj_ref.updateObjList()
+         IMVEC.engine.playWorkflow(self_synobj_ref.getObjList())
+         self.playicon.set_property("pixbuf",IMVEC.cstopPixbuf)
+         self.running = True
+      else:
+         IMVEC.engine.stopWorkflow(self_synobj_ref.getObjList())
+         self_synobj_ref.flushObjList()
+         self.playicon.set_property("pixbuf",IMVEC.cplayPixbuf)
+         self.running = False
+         
 
 
 
@@ -1608,6 +1622,10 @@ class containerItem(synItem):
 
    def __init__(self,parent_canvas):
 
+
+      self.running = False
+
+      
 
       self.min_width = 200
       self.min_height = 100
@@ -1789,6 +1807,98 @@ class labelItem(synItem):
       self.connectAll()
       self.clickable.connect("button-press-event",self.on_clickable_change)
       self.content_label.connect("button-press-event",self.on_clickable_change)
+
+
+
+class kbdItem(synItem):
+
+
+
+   def lock(self):
+ 
+      self.content_label.set_property("text","Keyboard\nAcquired")
+      self.content_label.set_property("fill_color","#00FF00")
+
+   
+   def unlock(self):
+
+      self.content_label.set_property("text","Acquire\nKeyboard")
+      self.content_label.set_property("fill_color","#dadada")
+
+      
+   def on_clickable_change(self,item,target_item,event):
+
+      kbd_object = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
+
+      if not kbd_object.getInputLock():
+ 
+         if IMVEC.activeDoc.getKeyboard() != None:
+
+            prev_kbd_object = IMVEC.activeDoc.getKeyboard()
+            prev_kbd_item = IMVEC.activeDoc.getContainer().getMemberFromSynObj(prev_kbd_object).getSynItem()
+
+            prev_kbd_item.unlock()
+            prev_kbd_object.setInputLock(False)
+       
+         
+         IMVEC.activeDoc.setKeyboard(kbd_object)
+         kbd_object.setInputLock(True)
+         self.lock()
+     
+
+      else:
+         kbd_object.setInputLock(False)
+         self.unlock()
+         IMVEC.activeDoc.setKeyboard(None)
+   
+
+  
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.clickable = goocanvas.Rect(parent = self.o, x=10, y=40,radius_x=10,radius_y=10, width=80, height=40,
+				stroke_color="#cccccc", fill_color_rgba=0x151515dd,
+				line_width=1)
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=100, height=50,
+				stroke_color="#cccccc", fill_color="#5591ff",
+				line_width=4)
+
+      self.pixbuf = IMVEC.kbdPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=35,y=10,pixbuf=self.pixbuf)
+
+    
+
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.outputs[0].set_property("x",100)
+      self.outputs[0].set_property("y",10)
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#5591ff")
+
+
+      self.content_label = goocanvas.Text(parent = self.o, text="Acquire\nKeyboard", x=23, y=53,
+						width=150,font="sans 8", fill_color="#dadada")
+
+
+
+      self.connectAll()
+      self.clickable.connect("button-press-event",self.on_clickable_change)
+      self.content_label.connect("button-press-event",self.on_clickable_change)
+
+
+
+
+
+
 
 
 
