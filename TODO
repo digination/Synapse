@@ -4,29 +4,3 @@ flush object queues after kill
 set queues before running All (else some objects will start to broadcast to non queue-ready objects => WRONG )
 containers cannot be filled anymore after being loaded from sws file
 History: cannot click/move objects while running (because of queues )
-
-
-### OPTIMIZATIONS ###
-
-improve synapp datastreams xfer rates
-
-## IMPORTANT ##
-
-ask for save what to do with unsaved docs before closing
-Add inputs and outputs orientation ( mux/demux will have 2 pos only, monitor, comment and container will have none) (40% done)
-Add loop on itself feature for concerned building blocks
-Implement Wake on input feature (70% done)
-Implement synjector BB
-Finish to implement synfilter component
-Implement saving and loading ( 95% done )
-Implement clipboard (60 % done)
-Implement undu/redo (70 % done)
-Implement display buffer
-Implement building blocks z-index
-add events for progress and status bars
-
-# MAYBE #
-
-Embeeded Documentation
-implement propagation of stop signal
-
