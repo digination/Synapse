@@ -1635,7 +1635,7 @@ class synapp(synobj):
 
          self.obuff = ""
          try:
-            self.obuff = proc.read_nonblocking(size=4096,timeout=1)
+            self.obuff = proc.read_nonblocking(size=4096,timeout=0)
          except:
             pass
 
