@@ -17,6 +17,10 @@ import select
 import signal
 import os
 import time
+import datetime
+import hashlib
+import random
+
 import copy
 import socket
 import pexpect
@@ -65,44 +69,36 @@ class container:
 
    def append(self,member):
 
-      self.members[member.getSynObj().getName()] = member
+      self.members[member.getSynObj().getId()] = member
 
 
-   def getMember(self,name):
+   def getMember(self,mid):
 
-      return self.members[name]
-
-
-   def findName(self,name):
-
-      for mname,member in self.members.items():
-
-         if mname == name:
-            return True
-      return False
+      return self.members[mid]
 
 
    def delete(self,dmember):
 
       IMVEC.dbg.debug("DELETE METHOD CALLED WITH OBJ %s",(dmember),dbg.EXDEBUG)
 
-      for mname,member in self.members.items():
+      for mid,member in self.members.items():
 
          if member == dmember:
                IMVEC.dbg.debug("DELETING MEMBER %s",(member),dbg.DEBUG)
+               id_to_delete = member.getSynObj().getId()
                member.getSynObj().delete()
-               del self.members[mname]
+               del self.members[id_to_delete]
                
                 
    def getMemberFromSynItem(self,synItem):
-      for  mname,member in self.members.items():
+      for  mid,member in self.members.items():
          if (member.getSynItem() == synItem):
             return member
             break
 
 
    def getMemberFromSynObj(self,synObj):
-      for  mname,member in self.members.items():
+      for  mid,member in self.members.items():
          if (member.getSynObj() == synObj):
             return member
             break
@@ -111,7 +107,7 @@ class container:
 
    def getMemberFromParentSynItem(self,parent):
 
-      for  mname,member in self.members.items():
+      for  mid,member in self.members.items():
          if (member.getSynItem().getO() == parent):
             return member
             break
@@ -136,83 +132,51 @@ class container:
    def getSynObjects(self):
 
       objList = list()
-      for  mname,member in self.members.items():
+      for  mid,member in self.members.items():
          objList.append(member.getSynObj())
       return objList
 
    def getSynItems(self):
 
       itemList = list()
-      for mname,member in self.members.items():
+      for mid,member in self.members.items():
          itemList.append(member.getSynItem())
       return itemList
 
 
    def getSynItem(self,synObj):
 
-      for mname,member in self.members.items():
+      for mid,member in self.members.items():
          if (member.getSynObj() == synObj):
             return member.getSynItem()
             break
 
    def getSynObj(self,synItem):     
-      for mname,member in self.members.items():
+      for mid,member in self.members.items():
 
          if (member.getSynItem() == synItem):
             return member.getSynObj()
             break
 
 
-
 # class that makes the link between synapse objects and synapse canvas items
 class linker(object):
 
 
-   def __init__(self,synObject,synItem,nbiqueues=1,nboqueues=0):
+   def __init__(self,synObject,synItem):
 
       self.synObject = synObject
       self.synItem = synItem
-
-      self.nbiqueues = nbiqueues
-      self.nboqueus = nboqueues
-      self.iqueues = list()
-      self.oqueues = list() 
-
-      for i in range(0,nbiqueues):
-
-         self.iqueues.append(Queue(0))
-
-      for i in range(0,nboqueues):
-
-         self.oqueues.append(Queue(0))
-     
-   def deleteQReferences(self):
-
-      if (str(self.synObject.__class__) == "synapseObjects.synlink"):
-         self.synObject.getInObj().flushQueues()
-         self.synObject.getOutObj().flushQueues()
-
-      else:
-         try:
-            for peer in self.synObject.getPeers():
-               peer.flushQueues()
-         except:
-            pass
+      self.runvars = dict()
 
 
-   #for conveniency
-   def getIqueue(self):
-      if (self.nbiqueues >= 1):
-         return self.iqueues[0]
-      else:
-         return None
-  
-   def getIqueues(self):
-      return self.iqueues
+   def getRunVars(self):
 
-   def getOqueues(self):
+      return self.runvars
 
-      return self.oqueues
+   def setRunVars(self,runvars):
+
+      self.runvars = runvars
 
 
    def setSynObj(self,synObject):
@@ -296,6 +260,27 @@ class synobj:
    nbinst = 0
 
 
+   def genId(self):
+
+      rand = random.randint(1,100000000)
+      date_str = str(datetime.datetime.now())
+      hash_id = hashlib.sha1()
+      hash_id.update("%s %d" % (date_str, rand) )
+
+      self.id = hash_id.hexdigest()
+
+      
+   def getId(self):
+
+      return self.id
+      
+
+   def setId(self,nid):
+
+      self.id = nid
+
+
+
    def delete(self):
 
       del self
@@ -335,6 +320,8 @@ class synobj:
  
    def init_common(self):
 
+      self.genId()
+
       self.iqueue = None
       self.color = "DEFAULT"
       self.mInput = False
@@ -353,8 +340,7 @@ class synobj:
          if (peerobj.mInput == True):
 
             IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-            #peerobj.setIbuff(input_num,self.obuff)
-            peerobj.getIqueues()[input_num].put("%d:%s" % (input_num,self.obuff) )
+            peerobj.getIbuffs()[input_num].append("%d:%s" % (input_num,self.obuff) )
             
    
          else:
@@ -362,19 +348,15 @@ class synobj:
             if (peerobj.needSender == False):
 
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-               #peerobj.setIbuff(str(input_num) + ":" +self.obuff)
-               peerobj.getIqueue().put("%d:%s" % (input_num,self.obuff) )
+               peerobj.getIbuff().append("%d:%s" % (input_num,self.obuff) )
 
             else:
 
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-               #peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
-               peerobj.getIqueue().put("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
-
-         #peerobj.getILock().release()
-
-         
-      self.ibuff = None
+               peerobj.getIbuff().append("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
+       
+  
+      #self.ibuff = None
 
    #method to override for each building block
    def run(self):
@@ -925,7 +907,7 @@ class syntest(synobj):
       self.ret = "Stream"
 
       self.opeers = list()   
-      self.ibuff = None
+      self.ibuff = list()
       self.obuff = ""
 
 
@@ -956,9 +938,8 @@ class syntest(synobj):
 
             if (peerobj.mInput == True):
                IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
-
                #peerobj.setIbuff(input_num,self.obuff)
-               peerobj.getIqueues()[input_num].put("%d:%s" % (input_num,self.obuff) )
+               peerobj.getIbuffs()[input_num].append("%d:%s" % (input_num,self.obuff) )
   
             else:
 
@@ -966,40 +947,32 @@ class syntest(synobj):
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                   #peerobj.setIbuff(str(input_num) + ":" +self.obuff)
-                  peerobj.getIqueue().put("%d:%s" % (input_num,self.obuff) )
+                  peerobj.getIbuff().append("%d:%s" % (input_num,self.obuff) )
 
                else:
 
                   IMVEC.dbg.debug("SENDING MESSAGE \"%s\" TO %s, INPUT NUM %d",(self.obuff,peerobj.getName(),input_num),dbg.DEBUG)
                   #peerobj.setIbuff(self.getName() + ":" + str(input_num) + ":" +self.obuff)
-                  peerobj.getIqueue().put("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
+                  peerobj.getIbuff().append("%s:%d:%s" % (self.getName(),input_num,self.obuff) )
 
+
+
+   def init_run(self):
+
+      self.alive = True
 
    def run(self):
 
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
- 
-      self.alive = True
+          if (len(self.ibuff) != 0):
 
-      while (self.alive):
+            input_buffer = self.ibuff.pop(0)
 
-          try:  
-            self.ibuff = self.iqueue.get(False)
-          except:
-            pass          
-
-          if (self.ibuff != None):
-
-            (input_num,sep,content) = self.ibuff.partition(":")
+            (input_num,sep,content) = input_buffer.partition(":")
 
             self.obuff = content
 
             exec "if %s :\n   self.bcast(True)\nelse:\n   self.bcast(False)" % ( self.operation_dict[self.testType][0] ) 
-            self.ibuff = None
-
-
-                       
-
+            
 
    def getTestType(self):
       return self.testType
@@ -1236,11 +1209,13 @@ class synmux(synobj):
    def setIbuff(self,input_num,ibuff):
       self.buffs[input_num] = ibuff
 
-   def run(self):
+   def init_run(self):
 
       self.alive = True
-
       self.buffs = ["","","","","",""]
+
+
+   def run(self):
 
       
       while(self.alive):
@@ -1272,6 +1247,7 @@ class synmux(synobj):
             self.obuff = ""
             self.buffs = ["","","","","",""]
             
+
 
    def __init__(self,name,data="[[SI0]] [[SI1]] [[SI2]] [[SI3]] [[SI4]] [[SI5]]",timeout=2000):
 
@@ -1522,29 +1498,22 @@ class synmonitor(synobj):
       return 0
 
 
+
+   def init_run(self):
+
+      self.alive = True
+      self.fullContent = ""
+      self.displayBuff = "" 
+
    def run(self):
  
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
-      self.alive = True
-      xref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem()
-      self.fullContent = ""
-      self.displayBuff = ""     
+         xref = IMVEC.activeDoc.getContainer().getMembers()[self.id].getSynItem()
+         while (len(self.ibuff) != 0):
 
-      
-
-      while(self.alive == True):
-          
-         #print "MONITOR IBUFF: %s" % self.ibuff
-
-         try:  
-            self.ibuff = self.iqueue.get(False)
-         except:
-            pass
-
-         if (self.ibuff != None):
+            input_buffer = self.ibuff.pop(0)
            
-            IMVEC.dbg.debug("PROCESSED BUFF: %s" , (self.ibuff),dbg.EXDEBUG)
-            (input_num,sep,content) = self.ibuff.partition(":")
+            IMVEC.dbg.debug("PROCESSED BUFF: %s" , (input_buffer),dbg.EXDEBUG)
+            (input_num,sep,content) = input_buffer.partition(":")
             self.fullContent += content
             self.displayBuff = ""
             fclist = self.fullContent.split("\n")
@@ -1560,7 +1529,7 @@ class synmonitor(synobj):
             gtk.gdk.threads_enter() 
             xref.setText(self.displayBuff)
             gtk.gdk.threads_leave()
-            self.ibuff = None
+
             
          
 
@@ -1572,7 +1541,7 @@ class synmonitor(synobj):
       synmonitor.nbinst += 1
       self.name = name
       self.WOI = False
-      self.ibuff = None
+      self.ibuff = list()
       self.obuff = ""
       self.fullContent = ""
       self.displayBuff = ""
@@ -1610,11 +1579,12 @@ class synapp(synobj):
                IMVEC.dbg.debug("UPDATING LINK FOR %s",(self),dbg.NOTICE)
                self.peersSTDERR.append([obj.getInputNum(),obj.getInObj()])
 
-   def run(self):
-          
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
+
+   def init_run(self):
+
       self.alive = True
-  
+      runvars = dict()
+
       if (self.buffured_output):
 
          IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT BUFFURED MODE",tuple(),dbg.DEBUG)
@@ -1623,75 +1593,47 @@ class synapp(synobj):
          IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT UNBUFFURED MODE",tuple(),dbg.DEBUG)
          proc = pexpect.spawn(self.cmd,maxread=1)
 
+      runvars['proc'] = proc
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
-      #proc = Popen(self.cmd, shell=True, stdout=PIPE,stdin=PIPE,stderr=PIPE,bufsize=4096)
-      #fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
-      #fcntl(proc.stdin,F_SETFL,fcntl(proc.stdin,F_GETFL) | os.O_NONBLOCK)            
-      #fcntl(proc.stderr,F_SETFL,fcntl(proc.stderr,F_GETFL) | os.O_NONBLOCK) 
- 
-      line = ""
-      lineErr = ""
-      while(self.alive):
 
-         self.obuff = ""
-         try:
-            self.obuff = proc.read_nonblocking(size=4096,timeout=1)
-         except:
-            pass
+   def run(self):
+          
+      proc = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['proc']
 
-         
-         if (self.obuff != ""): 
-
-            if self.split_lines:
-               splitted_list = list()
-               splitted_list = self.obuff.split("\n")
-               #IMVEC.dbg.debug("SPLITTED_LIST: %s",(splitted_list),dbg.EXDEBUG)
-               for sp_line in splitted_list:
-                  if sp_line != "":
-                     self.obuff = sp_line + "\n"
-                     self.broadcast()
-            else:
-               self.broadcast()
-         
-         #proc.poll()
-
-         #(rr,wr,er) = select.select([proc.stdout],[proc.stdin],[proc.stderr],0)
-         #for fd in rr:    
-            #line = fd.read()
-            #if (line != ""):
-               #self.obuff = line 
-               #self.broadcast() 
-            
-         #try:
-            #lineErr = proc.stderr.read()
-            #if (lineErr != ""):
-               #self.obuff2 = lineErr 
-               #self.bcastSTDERR()
-         #except:
-             #pass
- 
-         try:  
-            self.ibuff = self.iqueue.get(False)
-         except:
-            pass
-
-         if (self.ibuff != None):
-            (input_num,sep,content) = self.ibuff.partition(":")
-            IMVEC.dbg.debug("WRTIING TO %s STDIN",(self.name),dbg.DEBUG)
-
-            proc.send(content)
-            #proc.sendeof()
-            #proc.stdin.write(content)
-            #proc.stdin.flush()
-            #self.ibuff = None
-            
+      ## read pexpect process stdout and broadcast it
+      self.obuff = ""
       try:
-         #proc.kill()
-         pass
+         self.obuff = proc.read_nonblocking(size=4096,timeout=0)
       except:
-         
-         IMVEC.dbg.debug("SUBPROCESS ALREADY CLOSED FOR %s (RETURN CODE %d)",(self,proc.returncode),dbg.DEBUG)
+         pass
 
+      
+      if (self.obuff != ""): 
+
+         if self.split_lines:
+            splitted_list = list()
+            splitted_list = self.obuff.split("\n")
+            #IMVEC.dbg.debug("SPLITTED_LIST: %s",(splitted_list),dbg.EXDEBUG)
+            for sp_line in splitted_list:
+               if sp_line != "":
+                  self.obuff = sp_line + "\n"
+                  self.broadcast()
+         else:
+            self.broadcast()
+         
+
+      ## if input buffer not null, send to pexpect process stdin
+      while (len(self.ibuff) != 0):
+         input_buffer = self.ibuff.pop(0)
+         (input_num,sep,content) = input_buffer.partition(":")
+         IMVEC.dbg.debug("WRTIING TO %s STDIN",(self.name),dbg.DEBUG)
+
+         proc.send(content)
+            
+      
+           
+                  
    def __init__(self,name,cmd="",keepalive=True):
 
       synapp.nbinst+=1
@@ -1705,7 +1647,7 @@ class synapp(synobj):
       self.peers = list()
       self.peersSTDERR = list()
       
-      self.ibuff = None
+      self.ibuff = list()
       self.obuff = ""
       self.buffured_output = False
       self.split_lines = False
@@ -1748,7 +1690,7 @@ class synapp(synobj):
          self.cmd = synappGTK.icmd.get_text()
 
       elif (widget == synappGTK.iwoi):
-         synapseHistory.history.addHistory()
+         #synapseHistory.history.addHistory()
          if synappGTK.iwoi.get_active_text() == "True":
             self.WOI = True
          else:
@@ -1856,37 +1798,39 @@ class synserv(synobj):
       
       return sockfd
 
-      #s.send('Hello, world')
-      #data = s.recv(1024)
-      #s.close()
-   
-   def run(self):
      
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()     
+
+   def init_run(self):
+
       self.alive = True
+      runvars = dict()
       sockfd = self.sockConnect()
 
-      while(self.alive == True and (self.autoreco or sockfd != -1) ):
-
-         while(sockfd == -1 and self.autoreco and self.alive):
-            IMVEC.dbg.debug("RECONNECTING SOCKET ON %s",(self.connectInfos),dbg.NOTICE)
-            sockfd = self.sockConnect()
-
-         (rr,wr,er) = select.select([sockfd],[],[],2)
-         for fd in rr:    
-            line = fd.recv(4096)
-            if (line != ""):
-               self.obuff = line
-               self.broadcast() 
+      runvars['sockfd'] = sockfd
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+ 
       
-         try:  
-            self.ibuff = self.iqueue.get(False)
-         except:
-            pass
 
-         if (self.ibuff != None ):
-            (input_num,sep,content) = self.ibuff.partition(":")
-            sockfd.send(content)
+   def run(self):
+     
+      sockfd = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['sockfd']
+
+      if (self.autoreco or sockfd != -1):
+
+         self.sockConnect()
+
+      (rr,wr,er) = select.select([sockfd],[],[],2)
+      for fd in rr:    
+         line = fd.recv(4096)
+         if (line != ""):
+            self.obuff = line
+            self.broadcast() 
+      
+      if (len(self.ibuff) != 0 ):
+
+         input_buffer = self.ibuff.pop(0)
+         (input_num,sep,content) = input_buffer.partition(":")
+         sockfd.send(content)
          
 
    def __init__(self,name,proto="Tcp",connectInfos="",keepalive=True):
@@ -1903,7 +1847,7 @@ class synserv(synobj):
 
       self.peers = list()
       
-      self.ibuff = None
+      self.ibuff = list()
       self.obuff = ""
   
    def getConnectInfos(self):
@@ -2264,7 +2208,7 @@ class syncontainer(synobj):
       self.objlist = list()
 
       self_canvas_ref = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getSynItem().getO()
-      for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
+      for mid,member in IMVEC.activeDoc.getContainer().getMembers().items():
  
          if member.getSynItem().getO().get_property("parent") == self_canvas_ref:
 
@@ -2439,29 +2383,24 @@ class synkbd(synobj):
       self.name = name
       self.WOI = False
 
-      self.ibuff = None
-      self.obuff = None
+      self.ibuff = list()
+      self.obuff = ""
       self.content = ""
       self.ilock = False
    
 
+   def init_run(self):
+
+      self.alive = True  
+
    def run(self):
 
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
-      self.alive = True
+      while (len(self.ibuff) != 0):
 
-      while (self.alive):
+         self.obuff = self.ibuff.pop(0)
 
-         try:  
-            self.obuff = self.iqueue.get(False)
-         except:
-            pass
-
-         if (self.obuff != None):
-
-            #print "KBD IBUFF:%s\n" % (self.ibuff)
-            self.broadcast()
-            self.obuff = None
+         self.broadcast()
+         self.obuff = ""
 
 
 class synsel:

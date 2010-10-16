@@ -129,9 +129,8 @@ class document(object):
 
       obj_list = list()
 
-      for mname,member in self.container.getMembers().items():
+      for mid,member in self.container.getMembers().items():
 
-         member.deleteQReferences()
          member.updateSynObjCanvasProperties(clipboard=True)
          sobj = member.getSynObj()
          
@@ -1007,7 +1006,7 @@ class MainWindow(object):
 
 
          #IMVEC.activeDoc.getKeyboard().getIqueue().put(chr(gtk.gdk.keyval_to_unicode(event.keyval)))
-         IMVEC.activeDoc.getKeyboard().getIqueue().put(content)
+         IMVEC.activeDoc.getKeyboard().getIbuff().append(content)
 
          
       
@@ -1577,9 +1576,7 @@ class MainWindow(object):
             pickled_objects.append(IMVEC.activeDoc.getHeader().getSynObj())
 
             for mname,member in IMVEC.activeDoc.getContainer().getMembers().items():
-                  
-                  #removes queue for pickle serialization.
-                  member.deleteQReferences()
+                 
                   member.updateSynObjCanvasProperties()
                   pickled_objects.append(member.getSynObj())
             try:

@@ -43,40 +43,60 @@ class synapseEngine:
 
 
 
+
+
+   def run(self):
+
+      ### MAIN RUNNING LOOP ###
+      while(self.running):
+       
+         for obj in self.runObjects:
+
+            obj.run()
+
+
+
    def playWorkflow(self,objlist):
   
       self.woiObjects = list()
+
+      self.runObjects = list()
 
       if (self.running == False):
       #define a boolean executable attr for synObjects to avoid repeted and ...
 
          for obj in objlist:
-            if (str(obj.__class__) == "dummy"):
-               obj.run()
-               self.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
 
-            elif (str(obj.__class__) != "synapseObjects.syncom") \
+            if (str(obj.__class__) != "synapseObjects.syncom") \
             and (str(obj.__class__) != "synapseObjects.synlink") \
             and (str(obj.__class__) != "synapseObjects.syncontainer") \
             and (obj.getWOI() == False):
-               th0 = thwrapper()
-               th0.setMethod(obj.run)
-               th0.start()
-               self.dbg.debug("THREAD FOR ITEM %s STARTED",(obj),dbg.NOTICE)
+               self.runObjects.append(obj)
+               obj.init_run()
+               self.dbg.debug("ITEM %s INITIALIZED",(obj),dbg.NOTICE)
+
             elif (str(obj.__class__) != "synapseObjects.syncom") \
             and (str(obj.__class__) != "synapseObjects.synlink") \
             and (str(obj.__class__) != "synapseObjects.syncontainer") \
             and (obj.getWOI() == True):
                self.woiObjects.append(obj)
 
-         if len(self.woiObjects) != 0:
-            th1 = thwrapper()
-            th1.setMethod(self.woiWatchThread)
-            self.woiWatchAlive = True
-            th1.start()
-            self.dbg.debug("THREAD WOI WATCHER STARTED",tuple(),dbg.NOTICE)
+
+         self.running = True
+
+         th0 = thwrapper()
+         th0.setMethod(self.run)
+         th0.start()
+
+
+         #if len(self.woiObjects) != 0:
+            #th1 = thwrapper()
+            #th1.setMethod(self.woiWatchThread)
+            #self.woiWatchAlive = True
+            #th1.start()
+            #self.dbg.debug("THREAD WOI WATCHER STARTED",tuple(),dbg.NOTICE)
         
-         self.running = True    
+         #self.running = True    
 
 
    def stopWorkflow(self,objlist):
