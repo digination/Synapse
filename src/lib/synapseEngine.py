@@ -22,7 +22,8 @@ class synapseEngine:
 
       self.dbg = debugger
       self.woiWatchAlive = False
-      self.running = False  
+      self.running = False
+      self.time = 0
 
    def woiWatchThread(self):
 
@@ -52,18 +53,31 @@ class synapseEngine:
        
          for obj in self.runObjects:
 
-            obj.run()
+            if obj.isRunning():
+               obj.run()
 
+
+
+   def timer(self):
+
+      while (self.running):
+
+         self.time += 100
+         time.sleep(.1) 
+
+
+   def getTime(self):
+
+      return self.time
 
 
    def playWorkflow(self,objlist):
   
-      self.woiObjects = list()
-
-      self.runObjects = list()
-
       if (self.running == False):
       #define a boolean executable attr for synObjects to avoid repeted and ...
+
+         self.woiObjects = list()
+         self.runObjects = list()
 
          for obj in objlist:
 
@@ -87,6 +101,12 @@ class synapseEngine:
          th0 = thwrapper()
          th0.setMethod(self.run)
          th0.start()
+
+         self.time = 0
+
+         time_thread = thwrapper()
+         time_thread.setMethod(self.timer)
+         time_thread.start()
 
 
          #if len(self.woiObjects) != 0:

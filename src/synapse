@@ -25,7 +25,6 @@ from synapseUtils import *
 from synapseHistory import *
 from synapseEngine import synapseEngine
 import pickle
-from Queue import Queue
 
 
 
@@ -995,6 +994,8 @@ class MainWindow(object):
             IMVEC.status_lbl.set_text("")
          
       else:
+
+         print "USING KEYBOARD"
          
          if (event.keyval == 65288):
             content = chr(8)
@@ -1004,8 +1005,6 @@ class MainWindow(object):
 
             content = chr(gtk.gdk.keyval_to_unicode(event.keyval))            
 
-
-         #IMVEC.activeDoc.getKeyboard().getIqueue().put(chr(gtk.gdk.keyval_to_unicode(event.keyval)))
          IMVEC.activeDoc.getKeyboard().getIbuff().append(content)
 
          
@@ -1062,67 +1061,6 @@ class MainWindow(object):
       return
 
 
-   def getRecursiveRoot(self,pickled_objects,root_dict,root_name,created_c):
-
-
-      for  i in range (0, len(pickled_objects)) :
-
-         pobj = pickled_objects[i]
-
-         if pobj.getName() == root_name:
-
-
-            IMVEC.dbg.debug("FOUND CONTAINER",tuple(),dbg.EXDEBUG)
-
-            canvasProperties = list(pobj.getCanvasProperties())
-
-            try:
-               root = root_dict[canvasProperties[6]]
-               IMVEC.dbg.debug("CONTAINER'S ROOT NOT FOUND",tuple(),dbg.DEBUG)
-
-            except:
-               root = getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6],created_c)
-
-            newitem = containerItem(root)
-            created_c.append(1)
-            
-            IMVEC.dbg.debug("CONTAINER CREATED",tuple(),dbg.DEBUG)
-
-            newitem.getMF().set_property("width",canvasProperties[4])
-            newitem.getMF().set_property("height",canvasProperties[5])
-            newitem.getExtender().set_property("x",canvasProperties[4]-10)
-            newitem.getExtender().set_property("y",canvasProperties[5]-10)
-
-            newitem.setText(pobj.getName())
-         
-
-            newitem.getO().set_property("x",canvasProperties[0])
-            newitem.getO().set_property("y",canvasProperties[1])
-            newitem.getO().set_property("width",canvasProperties[2])
-            newitem.getO().set_property("height",canvasProperties[3])
-            
-            if pobj.getColor() != "DEFAULT":
-               newitem.getMF().set_property("fill_color",pobj.getColor())
-               newitem.getLtext().set_property("fill_color",pobj.getColor())
-
-            IMVEC.dbg.debug("CONTAINER PROPERTIES ADDED",tuple(),dbg.DEBUG)
-         
-            nlinker = linker(pobj,newitem)
-
-            IMVEC.activeDoc.getSyncontainersList().append(nlinker)         
-            IMVEC.activeDoc.getContainer().append(nlinker)
-
-            IMVEC.dbg.debug("CONTAINER ADDED TO LIST",tuple(),dbg.DEBUG)
-
-            root_dict[root_name] = newitem.getO()
-            del pickled_objects[i]
-            return newitem.getO()
-            break
-         
-      return None
-
-
-
    def loadDoc(self,filename):
    
       fh = open(filename,"r")
@@ -1141,7 +1079,7 @@ class MainWindow(object):
       docprops = pickled_objects[0] 
       del pickled_objects[0]
 
-      nh = pickled_objects[0]   
+      nh = pickled_objects[0] 
       del pickled_objects[0]
       
       IMVEC.activeDoc.getHeader().setSynObj(nh)
@@ -1164,7 +1102,51 @@ class MainWindow(object):
       nbreports = 0
       nblabels = 0
 
-      
+
+ 
+      #loads containers first
+      for pobj in pickled_objects:
+
+         if str(pobj.__class__) == "synapseObjects.syncontainer":
+
+            canvasProperties = list(pobj.getCanvasProperties())
+            root = root_dict['___root___']
+
+            newitem = containerItem(root)
+            
+
+            newitem.setText(pobj.getName())
+            nbcontainers +=1
+            newlinker = linker(pobj,newitem)
+            IMVEC.activeDoc.getSyncontainersList().append(newlinker)
+            IMVEC.activeDoc.getContainer().append(newlinker)
+            root_dict[pobj.getId()] = newitem.getO()
+
+            
+      #once all the containers are loaded, replace them back to their initial root, coords,color and dimentions
+      for container in IMVEC.activeDoc.getSyncontainersList():
+
+         pobj = container.getSynObj()
+         canvasProperties = pobj.getCanvasProperties()
+
+         container.getSynItem().getO().set_property("parent",root_dict[canvasProperties[6]])
+
+         container.getSynItem().getO().set_property("x",canvasProperties[0])
+         container.getSynItem().getO().set_property("y",canvasProperties[1])
+         container.getSynItem().getMF().set_property("width",canvasProperties[4])
+         container.getSynItem().getMF().set_property("height",canvasProperties[5])
+         container.getSynItem().getExtender().set_property("x",canvasProperties[4]-10)
+         container.getSynItem().getExtender().set_property("y",canvasProperties[5]-10)
+         container.getSynItem().replaceIcon()
+
+         if pobj.getColor() != "DEFAULT":
+               container.getSynItem().getMF().set_property("fill_color",pobj.getColor())
+               container.getSynItem().getLtext().set_property("fill_color",pobj.getColor())
+
+         
+
+
+
       for pobj in pickled_objects:
 
          newitem = None
@@ -1179,10 +1161,8 @@ class MainWindow(object):
 
          except:
             
-            created_c = list()
-            root = self.getRecursiveRoot(pickled_objects,root_dict,canvasProperties[6],created_c)
-            nbcontainers += len(created_c)
-
+            IMVEC.dbg.debug("ROOT ITEM WITH ID %s NOT FOUND,SKIPPING LOAD",(canvasProperties[6]),dbg.CRITICAL)
+            return
 
          if str(pobj.__class__) == "synapseObjects.synapp":
             newitem = synappItem(root)
@@ -1247,18 +1227,6 @@ class MainWindow(object):
             nbfilters +=1
 
 
-         elif str(pobj.__class__) == "synapseObjects.syncontainer":
-
-            newitem = containerItem(root)
-            newitem.getMF().set_property("width",canvasProperties[4])
-            newitem.getMF().set_property("height",canvasProperties[5])
-            newitem.getExtender().set_property("x",canvasProperties[4]-10)
-            newitem.getExtender().set_property("y",canvasProperties[5]-10)
-
-            newitem.setText(pobj.getName())
-            nbcontainers +=1
-            IMVEC.activeDoc.getSyncontainersList().append(linker(pobj,newitem))
-
          elif str(pobj.__class__) == "synapseObjects.synreport":
             IMVEC.dbg.debug("REPORT ITEM ADDED: %s",(pobj),dbg.DEBUG)
             newitem = reportItem(root)
@@ -1286,11 +1254,7 @@ class MainWindow(object):
                if str(pobj.__class__) != "synapseObjects.syncom":
                   newitem.getLtext().set_property("fill_color",pobj.getColor())
 
-
-            #recreates queue
-            if pobj.getIqueue() == "queue":
-               pobj.init_queue()
-                  
+       
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
 
          
@@ -1460,11 +1424,6 @@ class MainWindow(object):
                   newitem.getLtext().set_property("fill_color",pobj.getColor())
 
 
-            #recreates queue
-            if pobj.getIqueue() == "queue":
-               pobj.setIqueue(Queue())
-                  
-      
             IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
             IMVEC.activeDoc.refresh_objects_list()
 
@@ -1490,9 +1449,6 @@ class MainWindow(object):
                   member.getO().raise_(None)
       
       
-
-
-
       if widget == self.stop_btn:
   
          IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())         
@@ -1670,11 +1626,8 @@ class MainWindow(object):
                if ( member.getSynItem().getO().get_property("parent") ==  IMVEC.activeDoc.getSelObject().getSynItem().getO() ):
 
                   cobj = member.getSynObj()
-                  tmpqueue =  cobj.getIqueue()
-                  cobj.setIqueue(None)
                   member.updateSynObjCanvasProperties(clipboard ="True")
                   serial_list.append(pickle.dumps(cobj))
-                  cobj.setIqueue(tmpqueue)
 
             copy_string += pickle.dumps(serial_list)
             IMVEC.cb.set_text(copy_string)
@@ -1683,11 +1636,9 @@ class MainWindow(object):
          elif (IMVEC.activeDoc.getActiveM()  != None):
 
             print "Copying %s" % (IMVEC.activeDoc.getActiveM().getSynObj())
-            tmpqueue =  IMVEC.activeDoc.getActiveM().getSynObj().getIqueue()
-            IMVEC.activeDoc.getActiveM().getSynObj().setIqueue(None)
+
             IMVEC.activeDoc.getActiveM().updateSynObjCanvasProperties()
             pickled_object = pickle.dumps(IMVEC.activeDoc.getActiveM().getSynObj())
-            IMVEC.activeDoc.getActiveM().getSynObj().setIqueue(tmpqueue)
 
             copy_string = "SYNAPSE_CLIPBOARD_SERIALIZED_BB: %s" % (pickled_object)
             IMVEC.cb.set_text(copy_string)
