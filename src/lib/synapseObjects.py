@@ -76,6 +76,13 @@ class container:
 
       return self.members[mid]
 
+   def findName(self,name):
+
+      for mid,member in self.members.items():
+
+         if member.getSynObj().getName() == name:
+            return True
+      return False
 
    def delete(self,dmember):
 

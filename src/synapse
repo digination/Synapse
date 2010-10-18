@@ -1312,6 +1312,7 @@ class MainWindow(object):
       while(IMVEC.activeDoc.getContainer().findName(newobj_name)):
          newobj_name += "_1"
 
+      pobj.genId()
       pobj.setName(newobj_name)
 
 
