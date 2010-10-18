@@ -57,6 +57,18 @@ class synapseEngine:
                obj.run()
 
 
+         ### awake objects which need it
+         for obj in self.woiObjects:
+
+            if len(obj.getIbuff()) != 0:
+
+               obj.init_run()
+               self.dbg.debug("ITEM %s INITIALIZED",(obj),dbg.NOTICE)
+               obj.run()
+               self.runObjects.append(obj)
+               #del self.woiObjects[self.woiObjects.index(obj)]
+               self.woiObjects.remove(obj)
+
 
    def timer(self):
 
