@@ -118,6 +118,8 @@ def motion_notify(widget, event):
         
          for syn_c in IMVEC.activeDoc.getSyncontainersList():
 
+            print syn_c.getSynObj().getName()
+
             sync_width = syn_c.getSynItem().getMF().get_property("width")
             sync_height = syn_c.getSynItem().getMF().get_property("height")
             sync_x = syn_c.getSynItem().getO().get_property("x") -20

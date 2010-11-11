@@ -10,6 +10,7 @@ class dbg:
    NOTICE = 0x04
    DEBUG = 0x05
    EXDEBUG = 0x06
+   SEXDEBUG = 0x07
 
 
    prefixes = {
@@ -19,9 +20,9 @@ class dbg:
    0x03: "[WARNING]\t",
    0x04: "[NOTICE]\t",
    0x05: "[DEBUG]\t",
-   0x06: "[EXDEBUG]\t"
+   0x06: "[EXDEBUG]\t",
+   0x07: "[SEXDEBUg]\t"
   
-
 
    }
 
