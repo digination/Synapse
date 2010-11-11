@@ -1480,57 +1480,9 @@ class synapp(synobj):
       IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
 
-<<<<<<< HEAD
-         self.obuff = ""
-         try:
-            self.obuff = proc.read_nonblocking(size=4096,timeout=0)
-         except:
-            pass
-
-         
-         if (self.obuff != ""): 
-
-            if self.split_lines:
-               splitted_list = list()
-               splitted_list = self.obuff.split("\n")
-               #IMVEC.dbg.debug("SPLITTED_LIST: %s",(splitted_list),dbg.EXDEBUG)
-               for sp_line in splitted_list:
-                  if sp_line != "":
-                     self.obuff = sp_line + "\n"
-                     self.broadcast()
-            else:
-               self.broadcast()
-         
-         #proc.poll()
-
-         #(rr,wr,er) = select.select([proc.stdout],[proc.stdin],[proc.stderr],0)
-         #for fd in rr:    
-            #line = fd.read()
-            #if (line != ""):
-               #self.obuff = line 
-               #self.broadcast() 
-            
-         #try:
-            #lineErr = proc.stderr.read()
-            #if (lineErr != ""):
-               #self.obuff2 = lineErr 
-               #self.bcastSTDERR()
-         #except:
-             #pass
- 
-         try:  
-            self.ibuff = self.iqueue.get(False)
-         except:
-            pass
-
-         if (self.ibuff != None):
-            (input_num,sep,content) = self.ibuff.partition(":")
-            IMVEC.dbg.debug("WRTIING TO %s STDIN",(self.name),dbg.DEBUG)
-=======
    def run(self):
           
       proc = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['proc']
->>>>>>> threadless
 
       ## read pexpect process stdout and broadcast it
       self.obuff = ""
