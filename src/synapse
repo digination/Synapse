@@ -1731,10 +1731,10 @@ class MainWindow(object):
 
       elif widget == self.menu_play:
 
-         self.playWorkflow()
+         IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
 
       elif widget == self.menu_stop:
-         self.stopWorkflow()
+         IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
 
       elif widget == self.menu_zoomout:
          IMVEC.activeDoc.zoomOut()

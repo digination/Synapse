@@ -562,160 +562,6 @@ class synheader(synobj):
       return synheaderGTK.o
 
 
-
-class synfilter(synobj):
-
-
-   def run(self):
-
-      self.iqueue = IMVEC.activeDoc.getContainer().getMemberFromSynObj(self).getIqueue()
-
-      if (self.filterType == "Simple Grep"):
-         filterCmd = "grep --line-buffered " + self.data
-      elif (self.filterType == "PCRE Grep"):
-         filterCmd = "pcregrep " + self.data
-      elif (self.filterType == "Sed Expression"):
-         filterCmd = "sed -u " + self.data
-      elif (self.filterType == "Awk Script"):
-         filterCmd = "awk " + self.data
-
-      self.alive = True
-
-      IMVEC.dbg.debug("%s FILTERCMD: %s",(self,filterCmd),dbg.DEBUG)
-     
-      proc = Popen(filterCmd, shell=True, stdout=PIPE,stdin=PIPE,bufsize=4096)
-      fcntl(proc.stdout,F_SETFL,fcntl(proc.stdout,F_GETFL) | os.O_NONBLOCK)
-      fcntl(proc.stdin,F_SETFL,fcntl(proc.stdin,F_GETFL) | os.O_NONBLOCK)            
-      
-      line = ""
-
-      while(proc.returncode == None and self.alive):
-         
-         proc.poll()
-         (rr,wr,er) = select.select([proc.stdout],[],[],0)
-         
-         for fd in rr:    
-            line = fd.read()
-            if (line != ""):
-               self.obuff = line 
-               self.broadcast() 
-      
-         try:  
-            self.ibuff = self.iqueue.get(False)
-         except:
-            pass         
-       
-         if (self.ibuff != None):
-
-            IMVEC.dbg.debug("WRITING IBUFF TO FILTER %s",(self),dbg.DEBUG)
-
-            (input_num,sep,content) = self.ibuff.partition(":")
-            proc.stdin.write(content)
-            proc.stdin.flush()
-            proc.stdout.flush()
-            #proc.stdin.close()
-            self.ibuff = None
-       
-           
-      try:
-         proc.kill()
-      except:
-
-         IMVEC.dbg.debug("SUBPROCESS ALREADY CLOSED FOR %s (RETURN CODE %d)",(self,proc.returncode),dbg.DEBUG)
-
-       
-   def __init__(self,name,filter_type="Simple Grep",data=""):
-
-      self.init_common()
-      self.name = name
-      self.filterType = filter_type
-      self.data = data
-
-      
-      self.ibuff = None
-      self.obuff = ""
-
-      self.peers = list()
-
-
-   def getFilterType(self):
-      return self.filterType
-
-   def getData(self):
-      return self.data
-
-
-   def onColorChange(self,widget):
-
-      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
-      colorsel = colorseldlg.colorsel
-
-      response = colorseldlg.run()
-   	
-      if response == gtk.RESPONSE_OK:
-        ncolor = colorsel.get_current_color()
-       
-        self.color = resclaleColorSel(ncolor.to_string())
-        synfilterGTK.icolor.set_text(self.color)
-
-        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
-        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
-
-        
-        colorseldlg.destroy()
-      elif response == gtk.RESPONSE_CANCEL:
-        colorseldlg.destroy()
-
-
-   def on_widget_changed(self,widget):
-
-
-      if (widget == synfilterGTK.iname):
-         self.name = widget.get_text()
-
-      elif (widget == synfilterGTK.ift):
-
-         IMVEC.dbg.debug("SYNFILTER FILTERTYPE CHANGED",tuple(),dbg.DEBUG)
-
-         self.filterType = widget.get_active_text()
-
-      elif (widget == synfilterGTK.idataBuffer):
-
-         IMVEC.dbg.debug("SYNFILTER DATA CHANGED",tuple(),dbg.DEBUG)
-         self.data = synfilterGTK.idataBuffer.get_text(synfilterGTK.idataBuffer.get_start_iter(),synfilterGTK.idataBuffer.get_end_iter())
-
-
-   def disconnectAll(self):
-   
-      synfilterGTK.iname.disconnect(synfilterGTK.chdict['iname'])
-      synfilterGTK.icolorBtn.disconnect(synfilterGTK.chdict['icolorBtn'])
-      synfilterGTK.ift.disconnect(synfilterGTK.chdict['ift'])
-      synfilterGTK.idataBuffer.disconnect(synfilterGTK.chdict['idata']) 
-
-
-  
-   def getPropWidget(self):
-  
-      synfilterGTK.iname.set_text(self.name)
-      synfilterGTK.icolor.set_text(self.color)
-      synfilterGTK.idataBuffer.set_text(self.data)
-      
-      if (self.filterType == "Simple Grep"):
-         synfilterGTK.ift.set_active(0)
-      elif (self.filterType == "PCRE Grep"):
-         synfilterGTK.ift.set_active(1)
-      elif (self.filterType == "Sed Expression"):
-         synfilterGTK.ift.set_active(2)
-      elif (self.filterType == "Awk Script"):
-         synfilterGTK.ift.set_active(3)        
-
-      synfilterGTK.chdict['iname'] = synfilterGTK.iname.connect("changed",self.on_widget_changed)
-      synfilterGTK.chdict['icolorBtn'] = synfilterGTK.icolorBtn.connect("clicked",self.onColorChange)
-      synfilterGTK.chdict['ift'] = synfilterGTK.ift.connect("changed",self.on_widget_changed)
-      synfilterGTK.chdict['idata'] = synfilterGTK.idataBuffer.connect("changed",self.on_widget_changed)
-    
-      return synfilterGTK.o
-
   
 class syntimer(synobj):
 
@@ -1682,7 +1528,6 @@ class synapp(synobj):
       self.cmd = cmd
       self.keepalive = keepalive
       self.peers = list()
-      self.peersSTDERR = list()
       
       self.ibuff = list()
       self.obuff = ""
@@ -1734,14 +1579,14 @@ class synapp(synobj):
             self.WOI = False
 
       elif (widget == synappGTK.ibo):
-         synapseHistory.history.addHistory()
+         #synapseHistory.history.addHistory()
          if synappGTK.ibo.get_active_text() == "True":
             self.buffured_output = True
          else:
             self.buffured_output = False
 
       elif (widget == synappGTK.isl):
-         synapseHistory.history.addHistory()
+         #synapseHistory.history.addHistory()
          if synappGTK.isl.get_active_text() == "True":
             self.split_lines = True
          else:
@@ -1810,6 +1655,137 @@ class synapp(synobj):
       synappGTK.chdict['icolorBtn'] = synappGTK.icolorBtn.connect("clicked",self.onColorChange)
 
       return synappGTK.o
+
+
+
+
+
+
+class synfilter(synapp):
+
+
+   def init_run(self):
+
+      self.alive = True
+      runvars = dict()
+ 
+      if (self.filterType == "Simple Grep"):
+         filterCmd = "grep " + self.data
+      elif (self.filterType == "PCRE Grep"):
+         filterCmd = "pcregrep " + self.data
+      elif (self.filterType == "Sed Expression"):
+         filterCmd = "sed " + self.data
+      elif (self.filterType == "Awk Script"):
+         filterCmd = "awk " + self.data
+
+      IMVEC.dbg.debug("%s FILTERCMD: %s",(self,filterCmd),dbg.DEBUG)
+
+      if (self.buffured_output):
+
+         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT BUFFURED MODE",tuple(),dbg.DEBUG)
+         proc = pexpect.spawn(filterCmd)
+      else:
+         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT UNBUFFURED MODE",tuple(),dbg.DEBUG)
+         proc = pexpect.spawn(filterCmd,maxread=1)
+
+      runvars['proc'] = proc
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+
+       
+   def __init__(self,name,filter_type="Simple Grep",data=""):
+
+      self.init_common()
+      self.name = name
+      self.filterType = filter_type
+      self.data = data
+      self.WOI = False
+
+      self.ibuff = list()
+      self.obuff = ""
+
+      self.peers = list()
+      self.buffured_output = True
+      self.split_lines = False
+
+
+   def getFilterType(self):
+      return self.filterType
+
+   def getData(self):
+      return self.data
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synfilterGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+
+   def on_widget_changed(self,widget):
+
+
+      if (widget == synfilterGTK.iname):
+         self.name = widget.get_text()
+
+      elif (widget == synfilterGTK.ift):
+
+         IMVEC.dbg.debug("SYNFILTER FILTERTYPE CHANGED",tuple(),dbg.DEBUG)
+
+         self.filterType = widget.get_active_text()
+
+      elif (widget == synfilterGTK.idataBuffer):
+
+         IMVEC.dbg.debug("SYNFILTER DATA CHANGED",tuple(),dbg.DEBUG)
+         self.data = synfilterGTK.idataBuffer.get_text(synfilterGTK.idataBuffer.get_start_iter(),synfilterGTK.idataBuffer.get_end_iter())
+
+
+   def disconnectAll(self):
+   
+      synfilterGTK.iname.disconnect(synfilterGTK.chdict['iname'])
+      synfilterGTK.icolorBtn.disconnect(synfilterGTK.chdict['icolorBtn'])
+      synfilterGTK.ift.disconnect(synfilterGTK.chdict['ift'])
+      synfilterGTK.idataBuffer.disconnect(synfilterGTK.chdict['idata']) 
+
+
+  
+   def getPropWidget(self):
+  
+      synfilterGTK.iname.set_text(self.name)
+      synfilterGTK.icolor.set_text(self.color)
+      synfilterGTK.idataBuffer.set_text(self.data)
+      
+      if (self.filterType == "Simple Grep"):
+         synfilterGTK.ift.set_active(0)
+      elif (self.filterType == "PCRE Grep"):
+         synfilterGTK.ift.set_active(1)
+      elif (self.filterType == "Sed Expression"):
+         synfilterGTK.ift.set_active(2)
+      elif (self.filterType == "Awk Script"):
+         synfilterGTK.ift.set_active(3)        
+
+      synfilterGTK.chdict['iname'] = synfilterGTK.iname.connect("changed",self.on_widget_changed)
+      synfilterGTK.chdict['icolorBtn'] = synfilterGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synfilterGTK.chdict['ift'] = synfilterGTK.ift.connect("changed",self.on_widget_changed)
+      synfilterGTK.chdict['idata'] = synfilterGTK.idataBuffer.connect("changed",self.on_widget_changed)
+    
+      return synfilterGTK.o
+
 
 
 
