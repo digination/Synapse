@@ -1,0 +1,245 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Keyboard (SynKbd)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Synapse Keyboard (SynKbd)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/synkbd.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: No
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    Synapse keyboard is a building block that allows to add key-typing functionality in workflows.
+It can be really useful eg to control an interactive shell in a synapp building block.
+To get The keyboard handle on a synkbd building block, you must click on the lower label , called "Acquire Keyboard"
+When a synkbd has the keyboard handle, its label becomes green. To release the keyboard, make another click
+on the green label,called "Keyboard Acquired"
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Kbd#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: --</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+

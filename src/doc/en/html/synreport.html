@@ -1,0 +1,265 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Report (Synreport)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Synapse Report (Synreport)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/synreport.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: No
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    Synreport is a very cool building block which gathers, sorts and renders the output of its peers, as pdf files. It mostly allows to produce Worflow reports, to keep tracks of the results in a clean, proper way (very useful when performing audits / many checks )
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Report#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: #152233</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Save To</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: None</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Defines the pdf save file, where the report content will be saved. 
+
+
+
+    </div>   
+
+    
+
+
+
+

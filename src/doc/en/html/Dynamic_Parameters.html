@@ -1,0 +1,182 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Dynamic Parameters</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Dynamic Parameters</h1>
+
+
+
+  <div style="width:700px">
+
+
+
+  
+
+
+Synapse wouldn't be complete if the possibility to change building blocks parameters dynamically, at run time wasn't there. Luckily for you, this is the case ;)
+
+Sadly for you, it is kinda hard to do so (that is probably why i put this part of documentation in "Advenced" :D )
+
+
+
+<h2> Then, how can i dynamically change a building block's parameter ?</h2>
+
+
+
+To change a building block parameter at runtime, you have to send a specific String to the concerned BB's input. The String in question have the following template:
+
+
+
+<b>SYNAPSE_CHANGE_ATTR:parameters_name:newvalue</b>
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+
+
+</body>
+
+
+
+</html>
+
+  
+
+  
+
+
+
+

@@ -1,0 +1,138 @@
+<head>
+
+
+<script type="text/javascript">
+
+  function resizeIframe(newsize) {
+
+    document.getElementById('menu_container').style.height = newsize + "px" ;
+    document.getElementById('content').style.height = newsize + "px";
+    
+  }
+
+  function loadFrame(page) {
+
+    document.getElementById('content').src = page;
+
+  }
+
+
+</script>
+
+<style type="text/css">
+
+  body {
+
+    font-size:12px;
+    font-family: Arial,Helvetica,sans-serif;
+    margin:0px;
+
+  }
+
+  #dochead {
+
+    width:100%;
+    height:23px;
+    background:black;
+    font-weight:bold;
+    color:white;
+    padding-top:7px;
+
+  }
+
+  #menu_container {
+
+    width:160px;
+    height:100%;
+    border-right:1px #cccccc solid;
+    float:left;
+    color:#152233;
+    padding:20px;
+
+  }
+
+
+  #menu {
+
+    width:160px;
+    font-weight:bold;
+    font-size: 13px;
+    color:black;
+
+  }
+
+
+  #menu a {
+
+    color:#152233;
+    text-decoration:none;
+    font-size: 13px;
+    font-weight:bold;
+
+  }
+
+  #menu a:hover {
+
+    color:#152290;
+    
+  }
+
+
+  #content {
+
+   width:720px;
+   border:0px;
+   font-size: 13px;
+  }
+
+
+
+</style>
+
+</head>
+
+<body id="body">
+
+  <div id="dochead">
+
+  Synapse 0.1 Documentation
+
+  <img style="width:30px;height:auto;position:relative;top:-7px;float:right" src="images/synapse_small.png" />
+
+  </div>
+
+
+  <div id="menu_container">
+
+  <div id="menu">
+
+    <a href="Javascript:loadFrame('Introduction.html');">Introduction</a><br/>
+    + Getting Started<br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('Terminology.html');">Terminology</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('ui.html');">User Interface</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('firstwf.html');">First Workflow</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('connec.html');">Connections</a><br/>
+    + Building Blocks<br/>
+
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synapp.html');">Synapse Application</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synclient.html');">Synapse Client</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('syncontainer.html');">Synapse Container</a><br/>
+     &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('syntimer.html');">Synapse Timer</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synmonitor.html');">Synapse Monitor</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synlabel.html');">Synapse Label</a><br/> 
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synkbd.html');">Synapse Keyboard</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('syncomment.html');">Synapse Comment</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('synreport.html');">Synapse Report</a><br/>
+
+
+
+    + Advanced Usage<br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('Dynamic_Parameters.html');">Dynamic Parameters</a><br/>
+    &nbsp;&nbsp;&nbsp;<a href="Javascript:loadFrame('scripting.html');">Scripting</a><br/>
+
+  </div>
+  </div>
+
+  <iframe frameboder=0 scrolling="no" id="content" src="introduction.html"><p>Your Browser does not support iframes</p></iframe>
+
+</body>

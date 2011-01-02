@@ -1,0 +1,36 @@
+object_name Synapse Keyboard (SynKbd)
+nbinputs 1
+nboutputs 1
+resizable No
+icon synkbd.png
+
+behaviour
+Synapse keyboard is a building block that allows to add key-typing functionality in workflows.
+It can be really useful eg to control an interactive shell in a synapp building block.
+To get The keyboard handle on a synkbd building block, you must click on the lower label , called "Acquire Keyboard"
+When a synkbd has the keyboard handle, its label becomes green. To release the keyboard, make another click
+on the green label,called "Keyboard Acquired"
+end_behaviour
+
+
+option
+option_title Name
+option_type String
+option_default Kbd#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default --
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+

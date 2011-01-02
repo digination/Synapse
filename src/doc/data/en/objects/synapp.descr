@@ -1,0 +1,66 @@
+object_name Synapse Application (Synapp)
+nbinputs 1
+nboutputs 1
+resizable No
+icon synapp.png
+
+behaviour
+This is probably the most important primitive building block of All. The synapp block allows to spawn an application (specified by the "cmd" option).
+Its I/O operations are controlled through a pexpect object (Expect implementation in python). When a synapp block recieves something on its input, the data
+will be directly forwarded to the process's STDIN. In the same way, when the spawned process tries to display something on STDOUT/STDERR, then it is forwarded to 
+the building block output. <br><br>Please note that STDOUT and STDERR streams are merged, because this is how pexpect rolls.
+end_behaviour
+
+
+option
+option_title Name
+option_type String
+option_default Application#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default #152233
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+
+option
+option_title cmd
+option_type String
+option_default Empty
+option_descr
+the cmd option simply tells pexpect which command/program to run. Since it is "$PATH-aware", you don't have to specify full command paths
+(except if the command you wanna run is not located in one of the $PATH directories )
+end_descr
+end_option
+
+option
+option_title Wake On Input
+option_type Boolean
+option_default True
+option_descr
+When True, this option allows to spawn the linked process only if the block's input receives some data.
+Else, the process will spawn as soon as the workflow will start. This mainly allows to save some resources,
+allowing processes to be started only when and if we need them. 
+end_descr
+end_option
+
+option
+option_title Split Lines
+option_type Boolean
+option_default False
+option_descr
+Allows to split the stream for each line. When its "Split Lines" parameter is set to False, a synapp block will send its output buffer at once, in one big message to its peers. But when it is True, the synapp block will send one message per line in its output buffer. It can be useful for specific data processings requiring one line at once.
+end_descr
+end_option
+
+

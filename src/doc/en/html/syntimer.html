@@ -1,0 +1,266 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Timer (SynTimer)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Synapse Timer (SynTimer)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/syntimer.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: No
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    When the syntimer building block receives data on its input buffer, it will wait a specific amount of time before releasing it on its output.
+<br><br>Notes on syntimer: Like any other time-based component in synapse, it has a 50ms resolution ( can't do much better because of python limitations). Also, take into consideration that the syntimer input buffer is a queue, meaning that if it recieves some data while there is already some data waiting to be released, it will not matter and the additional data will be added to the queue. When the counter reaches "Period" milliseconds, it will then restart to count instantly to release the second element in the queue.
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Timer#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: None</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Period</h3>
+
+    <b>type: Integer</b><br/>
+
+    <b>Default Value: 0</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Specifies the amount of time (in milliseconds) the syntimer must wait until being able to release its output buffer.
+
+
+
+    </div>   
+
+    
+
+
+
+

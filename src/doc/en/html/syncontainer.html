@@ -1,0 +1,243 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Container (SynContainer)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Synapse Container (SynContainer)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/syncontainer.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: Yes
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    As its name says, a Synapse container is a block that can contain other building blocks ( included other containers ).
+Since each container can be played independantly from the workfow they're in, we can consider containers as "subworkflows"
+It is useful to split workfows logically into subparts. 
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Container#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: None</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+

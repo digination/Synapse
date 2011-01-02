@@ -895,6 +895,7 @@ class splashWindow(object):
 
       self.window.hide()
       win1 = MainWindow()
+      return False
 
 
    def __init__(self):
@@ -914,11 +915,6 @@ class splashWindow(object):
 
 class aboutWindow(object):
 
-
-   def start(self):
-
-      self.window.hide()
-      win1 = MainWindow()
 
    def getWindow(self):
 
@@ -1008,7 +1004,20 @@ class MainWindow(object):
          IMVEC.activeDoc.getKeyboard().getIbuff().append(content)
 
          
+  
+   def checkCPULoad(self):
+
+      cpusage = CPUsage()
+      cpu_percent = int(cpusage.getResult())
+      #self.cpulabel.set_text(" cpu (%.0f%%) " % (cpu_percent) )
+      self.cpurect.set_property("width",(cpu_percent/2)+1)
+
       
+
+      return True
+      #self.
+
+    
 
    def on_zoomlvl_change(self,widget):
   
@@ -2058,6 +2067,12 @@ class MainWindow(object):
       self.synject_img = builder.get_object("synject_img")
       self.synject_img.set_from_pixbuf(IMVEC.injectorPixbuf)
 
+
+      self.syndb_btn = builder.get_object("syndb_btn")
+      syndb_img = builder.get_object("syndb_img")
+      syndb_img.set_from_pixbuf(IMVEC.dbPixbuf)
+
+
       self.syncontainer_btn = builder.get_object("syncontainer_btn")
       self.syncontainer_img = builder.get_object("syncontainer_img")
       self.syncontainer_img.set_from_pixbuf(IMVEC.containerPixbuf)
@@ -2116,6 +2131,31 @@ class MainWindow(object):
 
       self.status_lbl = builder.get_object("status_lbl")
       IMVEC.status_lbl = self.status_lbl
+
+
+      cpuicon = builder.get_object("cpuicon")
+      cpuicon.set_from_pixbuf(IMVEC.cpuPixbuf)
+
+      cpubox = builder.get_object("cpubox")
+
+      cpucanvas = goocanvas.Canvas()
+      cpucanvas.set_size_request(50,14)
+      cpucanvas.set_bounds(0, 0,50,14)
+
+      cpuroot = cpucanvas.get_root_item()
+      self.cpurect = goocanvas.Rect(parent=cpuroot,x=0, y=0, width=2, height=14,
+				stroke_color="black", fill_color="#00FF00",
+				line_width=0)
+
+  
+      cpubox.pack_start(cpucanvas,False,True,10)
+      cpucanvas.show()    
+
+
+      
+      #self.cpulabel = builder.get_object("cpulabel")
+
+
 
       ls = gtk.ListStore(str)
 
@@ -2271,6 +2311,8 @@ class MainWindow(object):
 
 
       self.window.connect("key-press-event",self.on_key_press)
+
+      gobject.timeout_add(1500,self.checkCPULoad)
 
       self.window.show()
 

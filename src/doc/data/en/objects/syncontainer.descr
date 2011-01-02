@@ -1,0 +1,34 @@
+object_name Synapse Container (SynContainer)
+nbinputs 1
+nboutputs 1
+resizable Yes
+icon syncontainer.png
+
+behaviour
+As its name says, a Synapse container is a block that can contain other building blocks ( included other containers ).
+Since each container can be played independantly from the workfow they're in, we can consider containers as "subworkflows"
+It is useful to split workfows logically into subparts. 
+end_behaviour
+
+
+option
+option_title Name
+option_type String
+option_default Container#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default None
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+

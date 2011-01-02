@@ -1,0 +1,18 @@
+Synapse responds to its own vocabulary, that the user needs to be aware of in order to fully understand this documentation, and of course to use the software (Nothing huge, though ;) )<br/><br/>
+
+<h3>Building Block (somethimes abreviated to "BB"):</h3> Building blocks are the elementary bricks in synapse, and making them interact together is what Synapse is for. It exists many kinds of building block, for more informations see the building blocks definititions later in this documentation.<br/>
+
+<h3>Pipe:</h3> This is the link between two building block. It can be either uni or bi directonnal. It is graphically represented on synapse schemes by a line between the two peered blocks.<br/>
+
+<h3>Workflow:</h3> Workflows in Synapse gather the building blocks and the definition of their interactions. They are simply the documents on which the user will work. Synapse workflows are playable. When started, a Synapse workflow will start to act as defined by the user, starting its building blocks and initiating communications between them.<br/>
+
+<h3>Workflow Schemes:</h3> Workflow Schemes are the graphical representation of synapse workflows. This is the central, drawing area in the User Interface<br/>
+
+
+
+ 
+
+  
+
+
+

@@ -547,10 +547,31 @@ Drag'n'drop it to the drawing area.</property>
                                       </packing>
                                     </child>
                                     <child>
+                                      <object class="GtkButton" id="syndb_btn">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip-text" translatable="yes">Adds a Timer item to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <object class="GtkImage" id="syndb_img">
+                                            <property name="visible">True</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <object class="GtkButton" id="syntimer_btn">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
                                         <property name="tooltip-text" translatable="yes">Adds a Timer item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">none</property>
@@ -562,7 +583,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">1</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -582,7 +603,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">2</property>
+                                        <property name="position">3</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -602,7 +623,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">3</property>
+                                        <property name="position">4</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -622,7 +643,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">4</property>
+                                        <property name="position">5</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -642,7 +663,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">5</property>
+                                        <property name="position">6</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -662,7 +683,7 @@ Drag'n'drop it to the drawing area.</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">6</property>
+                                        <property name="position">7</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -1109,20 +1130,37 @@ Drag'n'drop it to the drawing area.</property>
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
             <child>
-              <object class="GtkLabel" id="status_lbl">
+              <object class="GtkImage" id="cpuicon">
+                <property name="width_request">25</property>
                 <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkProgressBar" id="progressbar1">
+              <object class="GtkVBox" id="cpubox">
                 <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="status_lbl">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

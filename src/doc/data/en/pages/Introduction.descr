@@ -1,0 +1,18 @@
+<h2>ForeWords</h2>
+Welcome to the synapse documentation. This paper tries to cover evey aspect of the software, starting from the most basic usages to the more complexes.
+The documentation also covers the Synapse components reference
+
+<h2>About Synapse</h2>
+
+Synapse is a DGRM, acronym for "Datastreams Graphical Routing and Manipulation"
+It is a powerful, and Open Source projet that aims to make the communication between the many possible applications and network components, a very easy task...as easy as checking mails or opening an excel sheet.
+
+
+<h2>Usages</h2>
+
+You can use Synapse for almost anything you want, yet there are some tasks where the Software perticuliary fits the need. Beyond them we can find:
+
+<b>Automated Penetration Tests:</b> 
+
+
+

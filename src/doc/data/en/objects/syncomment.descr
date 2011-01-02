@@ -1,0 +1,39 @@
+object_name Synapse Comment (Syncomment)
+nbinputs 0
+nboutputs 0
+resizable Yes
+icon syncomment.png
+
+behaviour
+The syncomment building blocks are non-interactive, resizable labels which are used to put comments in a workflow, for instance to explain more prceisely the interractions between the blocks
+end_behaviour
+
+
+option
+option_title Name
+option_type String
+option_default Comment#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default #152233
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+option
+option_title Comment
+option_type String
+option_default None
+option_descr
+Defines the text that will be put in the comment label. 
+end_descr
+end_option

@@ -1,0 +1,41 @@
+object_name Synapse Timer (SynTimer)
+nbinputs 1
+nboutputs 1
+resizable No
+icon syntimer.png
+
+behaviour
+When the syntimer building block receives data on its input buffer, it will wait a specific amount of time before releasing it on its output.
+<br><br>Notes on syntimer: Like any other time-based component in synapse, it has a 50ms resolution ( can't do much better because of python limitations). Also, take into consideration that the syntimer input buffer is a queue, meaning that if it recieves some data while there is already some data waiting to be released, it will not matter and the additional data will be added to the queue. When the counter reaches "Period" milliseconds, it will then restart to count instantly to release the second element in the queue.
+end_behaviour
+
+option
+option_title Name
+option_type String
+option_default Timer#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default None
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+
+
+option
+option_title Period
+option_type Integer
+option_default 0
+option_descr
+Specifies the amount of time (in milliseconds) the syntimer must wait until being able to release its output buffer.
+end_descr
+end_option

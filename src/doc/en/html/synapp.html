@@ -1,0 +1,316 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Application (Synapp)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+
+
+
+  <h1>Synapse Application (Synapp)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/synapp.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: No
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    This is probably the most important primitive building block of All. The synapp block allows to spawn an application (specified by the "cmd" option).
+Its I/O operations are controlled through a pexpect object (Expect implementation in python). When a synapp block recieves something on its input, the data
+will be directly forwarded to the process's STDIN. In the same way, when the spawned process tries to display something on STDOUT/STDERR, then it is forwarded to 
+the building block output. <br><br>Please note that STDOUT and STDERR streams are merged, because this is how pexpect rolls.
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Application#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: #152233</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>cmd</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Empty</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      the cmd option simply tells pexpect which command/program to run. Since it is "$PATH-aware", you don't have to specify full command paths(except if the command you wanna run is not located in one of the $PATH directories )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Wake On Input</h3>
+
+    <b>type: Boolean</b><br/>
+
+    <b>Default Value: True</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      When True, this option allows to spawn the linked process only if the block's input receives some data.Else, the process will spawn as soon as the workflow will start. This mainly allows to save some resources,allowing processes to be started only when and if we need them. 
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Split Lines</h3>
+
+    <b>type: Boolean</b><br/>
+
+    <b>Default Value: False</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Allows to split the stream for each line. When its "Split Lines" parameter is set to False, a synapp block will send its output buffer at once, in one big message to its peers. But when it is True, the synapp block will send one message per line in its output buffer. It can be useful for specific data processings requiring one line at once.
+
+
+
+    </div>   
+
+    
+
+
+
+

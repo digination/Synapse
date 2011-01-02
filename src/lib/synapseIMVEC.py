@@ -61,7 +61,7 @@ class IMVEC:
    monitorPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),32,32)
    containerPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),32,32)
    reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
-
+   dbPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/dbItem.png" % (RES_PATH),32,32)
 
    kbdPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),32,32)
    kbdPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),16,16)
@@ -89,7 +89,10 @@ class IMVEC:
    monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
    containerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),16,16)
    reportPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),16,16)
+   dbPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/dbItem.png" % (RES_PATH),16,16)  
+ 
    
+
    labelPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),16,16)   
 
 
@@ -98,14 +101,11 @@ class IMVEC:
    monitorMaximizePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monMax.xpm" % (RES_PATH),16,16)
    monitorHidePixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/16/monHide.xpm" % (RES_PATH),16,16)
 
-
+ 
    linkPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/linkItem.png" % (RES_PATH),16,16)
-
    synapse_logo = gtk.gdk.pixbuf_new_from_file("%s/images/synapse.png" % (RES_PATH))
-
    loopPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/loop.png" % (RES_PATH),16,16)  
-
-
+   cpuPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/48/cpu.png" % (RES_PATH),16,16) 
 
 
    ioleft = gtk.gdk.pixbuf_new_from_file("%s/images/io_left.png" % (RES_PATH));

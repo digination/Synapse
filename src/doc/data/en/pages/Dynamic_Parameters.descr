@@ -1,0 +1,13 @@
+
+Synapse wouldn't be complete if the possibility to change building blocks parameters dynamically, at run time wasn't there. Luckily for you, this is the case ;)
+Sadly for you, it is kinda hard to do so (that is probably why i put this part of documentation in "Advenced" :D )
+
+<h2> Then, how can i dynamically change a building block's parameter ?</h2>
+
+To change a building block parameter at runtime, you have to send a specific String to the concerned BB's input. The String in question have the following template:
+
+<b>SYNAPSE_CHANGE_ATTR:parameters_name:newvalue</b>
+
+
+
+
