@@ -59,7 +59,7 @@
 
   </head>
 
-  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
+  <body>
 
   <h1>[PAGE_TITLE]</h1>
 

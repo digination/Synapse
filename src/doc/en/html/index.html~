@@ -39,7 +39,7 @@ objToResize.height = innerDoc.body.scrollHeight + 18;
 }
 }
 catch(err){
-alert('Err:' + err.message);
+alert(‘Err: ‘ + err.message);
 window.status = err.message;
 }
 }

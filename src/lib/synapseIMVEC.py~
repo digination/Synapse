@@ -117,9 +117,9 @@ class IMVEC:
 
 
    #Help Browser Icons
-   arrow_l = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/arrow_l.png" % (RES_PATH),20,20)
-   arrow_r = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/arrow_r.png" % (RES_PATH),32,20)
-   doc_search = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/search.png" % (RES_PATH),20,20)   
+   arrow_l = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/arrow_l.png" % (RES_PATH),32,32)
+   arrow_r = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/arrow_r.png" % (RES_PATH),32,32)
+   doc_search = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/search.png" % (RES_PATH),32,32)   
    
 
 

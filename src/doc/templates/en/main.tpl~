@@ -1,7 +1,7 @@
 <html>
   <head>
 
-  <title>Building Block: [OBJECT_NAME]</title>
+  <title>[PAGE_TITLE]</title>
 
   <style type="text/css">
 
@@ -59,36 +59,20 @@
 
   </head>
 
-  <body>
+  <body onload='parent.resizeIframe(document.body.scrollHeight);'>
 
-  <h1>[OBJECT_NAME]</h1>
+  <h1>[PAGE_TITLE]</h1>
 
-  <div style="overflow:hidden">
+  <div style="width:700px">
 
-  <div style="float:left;margin-right:20px;">
-    <img id="icon" src="icons/[OBJECT_ICON]"/>
-  </div>
-
-  <div id="ios">
-
-  # of inputs: 1<br/>
-  # of outputs: 1<br/>
-  Resizable: [RESIZABLE]
-
+  [PAGE_CONTENT]
 
   </div>
 
-  </div>
+</body>
 
-
-  <h2>Behaviour:</h2>
-  <div id="behaviour">
-
-    [BEHAVIOUR]
-
-  </div>
-
-
-  <h2>Building Block Options:</h2>
+</html>
+  
+  
 
 
