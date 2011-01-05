@@ -25,6 +25,12 @@ class synapseEngine:
       self.running = False
       self.time = 0
 
+
+
+   def isRunning(self):
+      return self.running
+
+
    def woiWatchThread(self):
 
       while(self.woiWatchAlive):

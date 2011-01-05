@@ -236,21 +236,32 @@ class document(object):
 
 def parse_cmd(cmd_string):
 
+   cmd_string = cmd_string.rstrip("\n") 
 
-   if (cmd_string.find("s") == 0):
+   if (cmd_string == "st" ):
+      if not IMVEC.engine.isRunning():
+         print "Workflow is stopped !"
+      else:
+         print "Workflow is running !"
+
+   elif (cmd_string == "s"):
       IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
       print "Workflow stopped !"
       
-   if (cmd_string.find("q") == 0):
+   elif (cmd_string == "q"):
       IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
       sys.exit(1)
 
-   if (cmd_string.find("h") == 0):
+   elif (cmd_string == "h"):
       help()     
 
-   if (cmd_string.find("p") == 0):
+   elif (cmd_string == "p"):
       print "playing workflow !"
       IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+
+   else:
+      print "Invalid Command: \"%s\"" % ( cmd_string )
+
 
    return
 
@@ -272,8 +283,9 @@ def help():
 
    print "p|play : starts the workflow of the loaded file\n"
    print "s|stop : stops the workflow, if currently running\n"
+   print "st|status : returns the workflow status (running/stopped)\n"
    print "q|quit : stops the workflow if currently running, and exits synerpreter\n"
-   print "a <building_block_name>|attach <building_block_name> : attaches to the specified building blocks's output and displays it\n
+   print "a <building_block_name>|attach <building_block_name> : attaches to the specified building blocks's output and displays it\n"
    print "h|help: shows this help\n"
 
 

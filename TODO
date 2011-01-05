@@ -7,8 +7,8 @@ containers cannot be filled anymore after being loaded from sws file.
 
 ask for save what to do with unsaved docs before closing
 Add inputs and outputs orientation ( mux/demux will have 2 pos only, monitor, comment and container will have none) (40% done)
-Add loop on itself feature for concerned building blocks
-Implement Wake on input feature (70% done)
+Add loop on itself feature for concerned building blocks (80% done)
+Implement Wake on input feature (70% done, only on synapp bb for now)
 Implement synjector BB
 Finish to implement synfilter component
 Implement saving and loading ( 95% done )
@@ -16,10 +16,11 @@ Implement clipboard (60 % done)
 Implement undu/redo (70 % done)
 Implement display buffer
 Implement building blocks z-index
-Write Documentation
+Write Documentation (20 % done)
+Finish documentation embedding
+
 
 # MAYBE #
 
-Embeeded Documentation
 implement propagation of stop signal
 

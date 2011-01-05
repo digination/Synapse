@@ -178,7 +178,12 @@
     This is probably the most important primitive building block of All. The synapp block allows to spawn an application (specified by the "cmd" option).
 Its I/O operations are controlled through a pexpect object (Expect implementation in python). When a synapp block recieves something on its input, the data
 will be directly forwarded to the process's STDIN. In the same way, when the spawned process tries to display something on STDOUT/STDERR, then it is forwarded to 
-the building block output. <br><br>Please note that STDOUT and STDERR streams are merged, because this is how pexpect rolls.
+the building block output. To make things more clear, below is a scheme explaining how the synapp BB works:<br/><br/>
+
+<img src="images/synapp_explain.png" />
+
+
+<br><br>Please note that STDOUT and STDERR streams are merged, because this is how pexpect rolls.
 
 
 
