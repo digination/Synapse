@@ -25,7 +25,13 @@ from synapseUtils import *
 from synapseHistory import *
 from synapseEngine import synapseEngine
 import pickle
-import gtkmozembed
+
+try:
+  import webkit
+  IMVEC.has_webkit = 1
+except:
+  print "[WARNING] webkit binding not present ! Embedded Documentation / Contextual Help Disabled"
+  
 
 
 
@@ -895,6 +901,25 @@ class document(object):
 class helpWindow(object):
 
 
+   def setProfile(self,profile="doc",otype=None):
+
+      if profile == "doc":
+
+         self.prev_btn.set_visible(True)
+         self.next_btn.set_visible(True)
+         self.prev_btn.set_state(gtk.STATE_INSENSITIVE)
+         self.next_btn.set_state(gtk.STATE_INSENSITIVE)
+         self.browser.open("file://%s/doc/html/index.html" % (RES_PATH))
+         self.window.show()
+
+      elif profile == "contextual":
+
+         self.prev_btn.set_visible(False)
+         self.next_btn.set_visible(False)
+         self.browser.open("file://%s/doc/html/%s.html" % (RES_PATH,otype))
+         self.window.set_size_request(720,600)
+         self.window.show()
+                  
    def getWindow(self):
 
       return self.window   
@@ -907,23 +932,20 @@ class helpWindow(object):
       self.window = builder.get_object("window1")
       self.browse_ct = builder.get_object("hbox3")
 
+      self.prev_btn = builder.get_object("prev_btn")
+      self.next_btn = builder.get_object("next_btn")
+
       prev_img = builder.get_object("prev_img")
       next_img = builder.get_object("next_img")
 
       prev_img.set_from_pixbuf(IMVEC.arrow_l)
       next_img.set_from_pixbuf(IMVEC.arrow_r)
-      
-
-
-      self.browser = gtkmozembed.MozEmbed()
-      gtkmozembed.set_profile_path("/tmp", "foobar") 
-      self.browser.load_url('file:///usr/share/synapse/doc/html/index.html')
+     
+      self.browser = webkit.WebView()
       self.browser.show()
 
-
-
       self.browse_ct.pack_start(self.browser,5,5,False)
-      self.window.connect("destroy", lambda w:self.browser.destroy() )
+
       
 
 
@@ -1113,7 +1135,22 @@ class MainWindow(object):
    
       fh = open(filename,"r")
         
-      pickled_objects = pickle.load(fh)
+      fh = open(filename,"r")
+      pickle_content = "" 
+      pickle_line = ""     
+      
+      first_line = fh.readline()
+      #tells if the sws is also self executable
+      if first_line.find("#") != 0:
+         pickle_content = first_line
+      
+      pickle_line = fh.readline()
+      while pickle_line != "":
+         pickle_content += pickle_line
+         pickle_line = fh.readline()
+
+
+      pickled_objects = pickle.loads(pickle_content)
 
       docname = filename.split("/")[len(filename.split("/"))-1].rstrip(".sws")
 
@@ -1780,10 +1817,19 @@ class MainWindow(object):
        
       elif widget == self.menu_doc:
 
-         self.helpwin.getWindow().show()
-
+         helpwin = helpWindow()
+         helpwin.setProfile("doc")
 
        
+      elif widget == self.menu_contextual_help:
+
+
+         if (IMVEC.activeDoc.getActiveM() != None):
+           
+            helpwin = helpWindow()
+            helpwin.setProfile("contextual",str(IMVEC.activeDoc.getActiveM().getSynObj().__class__).replace("synapseObjects.","") )
+
+
       elif widget == self.menu_play:
 
          IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
@@ -2020,12 +2066,23 @@ class MainWindow(object):
       self.menu_about.connect("activate",self.on_menu_activate)
       self.menu_about.show()
       
+      self.menu_contextual_help = gtk.MenuItem("Contextual Help", agr)
+      key, mod = gtk.accelerator_parse("F1")
+      self.menu_contextual_help.add_accelerator("activate",agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
+      self.menu_contextual_help.connect("activate",self.on_menu_activate)
+      self.menu_contextual_help.show()
 
 
       self.menu_doc = gtk.MenuItem("Documentation", agr)
       self.menu_doc.connect("activate",self.on_menu_activate)
       self.menu_doc.show()
-      helpmenu.append(self.menu_doc)
+
+      
+      if IMVEC.has_webkit:
+         helpmenu.append(self.menu_contextual_help)
+         helpmenu.append(self.menu_doc)
+
       helpmenu.append(self.menu_about)
 
 
@@ -2362,10 +2419,6 @@ class MainWindow(object):
       document("new-workflow-%d" % document.nbnewinst,self.notebook)
       IMVEC.activeDoc = IMVEC.docList[len(IMVEC.docList)-1]
 
-
-      self.helpwin = helpWindow()
-
-      
 
       self.window.connect("key-press-event",self.on_key_press)
 

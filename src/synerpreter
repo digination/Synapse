@@ -1,0 +1,334 @@
+#!/usr/bin/env python
+
+import os
+import time
+import datetime
+import gobject
+import goocanvas
+import getpass
+import getopt
+
+import sys
+sys.path.append("/usr/lib/synapse")
+from synapseObjects import *
+from synapseIMVEC import *
+from synapseCFG import synCFG
+from synapseDebug import dbg
+from synapsePkg import *
+from synapseUtils import *
+from synapseEngine import synapseEngine
+import pickle
+
+import signal
+import threading
+
+#Global variables definition
+
+### 
+
+RES_PATH = "/usr/share/synapse"
+
+SYNAPSE_ASCII_LOGO = "\
+\
+=====================================================================\
+\n\
+     _/_/_/  _/    _/  _/_/_/      _/_/_/  _/_/_/      _/_/_/    _/_/ \n\
+  _/_/      _/    _/  _/    _/  _/    _/  _/    _/  _/_/      _/_/_/_/ \n\
+     _/_/  _/    _/  _/    _/  _/    _/  _/    _/      _/_/  _/       \n\
+_/_/_/      _/_/_/  _/    _/    _/_/_/  _/_/_/    _/_/_/      _/_/_/   \n\
+               _/                      _/                            \n\
+          _/_/                        _/                              \n\
+=====================================================================\n\
+                                               [ Interpreter - v0.1 ]\n"
+
+
+#class that defines the synapse document structure and 
+# manipulation methods
+
+class document(object):
+
+       
+   # takes a serialized document string and puts it back to an actual document
+
+   def deserializeAll(self,serial_string):
+
+      try:
+         IMVEC.activeDoc.getActiveM().getSynObj().disconnectAll()
+      except:
+         pass
+
+      dsobjserial_list = pickle.loads(serial_string)
+
+      for dsobjserial in dsobjserial_list:
+
+         dsobj = pickle.loads(dsobjserial)
+
+         for mname,member in self.container.getMembers().items():
+
+            if mname == dsobj.getName():
+
+               cpobject = deepcopy(dsobj)
+               member.setSynObj(cpobject)
+
+      try:
+         IMVEC.activeDoc.getActiveM().getSynObj().getPropWidget()
+      except:
+         pass
+               
+   def serializeAll(self):
+
+      obj_list = list()
+
+      for mid,member in self.container.getMembers().items():
+
+         member.updateSynObjCanvasProperties(clipboard=True)
+         sobj = member.getSynObj()
+         
+         try:
+            obj_list.append( pickle.dumps(sobj) )
+         except:
+            IMVEC.dbg.debug("UNABLE TO PICKLE OBJECT %s",(sobj.getName()),dbg.CRITICAL)
+
+      return pickle.dumps(obj_list)
+
+
+
+   def hasChanged(self):
+
+      return self.changed
+
+   def setCHFlag(self,changed):
+ 
+      self.changed = changed
+
+
+   def getName(self):
+
+      return self.name
+
+   def getSyncontainersList(self):
+
+      return self.syncontainersList
+
+   def getContainer(self):
+
+      return self.container  
+
+   def setSavedName(self,savedName):
+      self.savedName = savedName
+   def setPath(self,path):
+      self.path = path
+
+
+   def setnbInsts(self,nbinsts):
+
+      (self.nbsynapp,self.nbsyntest,self.nbcomments,self.nbmuxers,self.nbdemuxers,self.nbinjectors,
+      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices,self.nbreports,self.nbcontainers) = tuple(nbinsts)
+
+          
+   def getSyncontainersList(self):
+
+      return self.syncontainersList
+
+
+   def __init__(self,name):
+      
+
+      IMVEC.docList.append(self)
+
+      self.name = name
+      self.selobject = None
+      self.changed = 0
+
+      
+      #define a new empty objects container
+      self.container = container()
+
+      self.syncontainersList = list()
+
+      self.saved = False
+      self.modified = False
+      self.savedName = ""
+      self.path = ""
+
+      self.nbsynapp = 0
+      self.nbsyntest = 0
+      self.nbmux = 0
+      self.nbcomments = 0
+      self.nbmuxers = 0
+      self.nbdemuxers = 0
+      self.nbinjectors = 0
+      self.nbtimers = 0
+      self.nbfilters=0
+      self.nbmonitors = 0
+      self.nbservices = 0
+      self.nbcontainers = 0
+      self.nbreports = 0
+      self.nblabels = 0
+      self.nbkbds = 0
+
+      synheader0 = synheader(title="Your Title Here",author=getpass.getuser(),date=str(datetime.datetime.now()),descr="Your Description Here")
+      self.header = linker(synheader0,None)
+
+   def getHeader(self):
+      return self.header
+
+   def setHeader(self,header):
+      self.header = header
+     
+
+   def loadDoc(self,filename):
+   
+      fh = open(filename,"r")
+      pickle_content = "" 
+      pickle_line = ""     
+      
+      first_line = fh.readline()
+      #tells if the sws is also self executable
+      if first_line.find("#") != 0:
+         pickle_content = first_line
+      
+      pickle_line = fh.readline()
+      while pickle_line != "":
+         pickle_content += pickle_line
+         pickle_line = fh.readline()
+
+      pickled_objects = pickle.loads(pickle_content)
+
+      docname = filename.split("/")[len(filename.split("/"))-1].rstrip(".sws")
+
+      docprops = pickled_objects[0] 
+      del pickled_objects[0]
+
+      nh = pickled_objects[0] 
+      del pickled_objects[0]
+      
+      IMVEC.activeDoc.getHeader().setSynObj(nh)
+      
+      nbsynapp = 0
+      nbsyntest = 0
+      nbcomments = 0
+      nbmuxers = 0
+      nbdemuxers = 0
+      nbinjectors = 0
+      nbtimers = 0
+      nbfilters = 0
+      nbmonitors = 0
+      nbservices = 0
+      nbcontainers = 0
+      nbreports = 0
+      nblabels = 0
+
+      
+      for pobj in pickled_objects:
+
+         newitem = None
+
+         IMVEC.dbg.debug("FOUND PICKLED OBJECT: %s",(str(pobj.__class__)),dbg.DEBUG)
+         IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+
+      nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
+      nbtimers,nbfilters,nbmonitors,nbservices,nbreports,nbcontainers)
+      IMVEC.activeDoc.setnbInsts(nbinsts)
+
+
+
+
+def parse_cmd(cmd_string):
+
+
+   if (cmd_string.find("s") == 0):
+      IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+      print "Workflow stopped !"
+      
+   if (cmd_string.find("q") == 0):
+      IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+      sys.exit(1)
+
+   if (cmd_string.find("h") == 0):
+      help()     
+
+   if (cmd_string.find("p") == 0):
+      print "playing workflow !"
+      IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+
+   return
+
+
+
+
+def shell():
+
+   while(True):
+      line = ""
+      line = sys.stdin.readline()
+      if line != "":
+         parse_cmd(line)      
+
+
+def help():
+
+   print "synerpreter commands\n====================\n"
+
+   print "p|play : starts the workflow of the loaded file\n"
+   print "s|stop : stops the workflow, if currently running\n"
+   print "q|quit : stops the workflow if currently running, and exits synerpreter\n"
+   print "a <building_block_name>|attach <building_block_name> : attaches to the specified building blocks's output and displays it\n
+   print "h|help: shows this help\n"
+
+
+def usage():
+
+   print "Usage: synerpreter [-d | --debug= <debug_level>] <sws_file>\n"
+
+
+if __name__ == "__main__":
+   
+   debug_lvl = 0x3
+   play_on_start = 0
+   vo = None
+
+   print SYNAPSE_ASCII_LOGO
+
+   if (len(sys.argv) < 2):
+      usage()
+      sys.exit(1)   
+
+   options, rem = getopt.getopt(sys.argv[1:], 'd:p', ['debug=','play'])
+
+   open_file =  sys.argv[len(sys.argv)-1]
+
+
+   for opt,arg in options:
+  
+      if opt in ('-d','--debug'):
+
+        debug_lvl = int(arg)
+
+      if opt in ('-p','--play'):
+
+        play_on_start = 1
+
+
+   IMVEC.cfg = synCFG(debugLevel=debug_lvl)
+
+   IMVEC.dbg = dbg(IMVEC.cfg.getDebugLevel())
+
+   IMVEC.engine = synapseEngine(IMVEC.dbg)
+   
+   os.chdir(RES_PATH)
+   os.chdir(os.path.expanduser("~"))
+   
+   IMVEC.activeDoc = document("None")
+   IMVEC.activeDoc.loadDoc(open_file)                      
+
+   if play_on_start:
+      print "playing workflow !"
+      IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+
+   #gives the hand to the synerpreter interactive shell
+   print "starting interactive shell.\ntype \"help\" to get the commands list and other informations"
+   shell()
+
+
+#####################
