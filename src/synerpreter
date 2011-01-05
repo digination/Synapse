@@ -7,6 +7,7 @@ import gobject
 import goocanvas
 import getpass
 import getopt
+import curses
 
 import sys
 sys.path.append("/usr/lib/synapse")
@@ -22,24 +23,50 @@ import pickle
 import signal
 import threading
 
-#Global variables definition
 
-### 
+#Classes Definitions
 
-RES_PATH = "/usr/share/synapse"
+class cli_monitor(synobj):
 
-SYNAPSE_ASCII_LOGO = "\
-\
-=====================================================================\
-\n\
-     _/_/_/  _/    _/  _/_/_/      _/_/_/  _/_/_/      _/_/_/    _/_/ \n\
-  _/_/      _/    _/  _/    _/  _/    _/  _/    _/  _/_/      _/_/_/_/ \n\
-     _/_/  _/    _/  _/    _/  _/    _/  _/    _/      _/_/  _/       \n\
-_/_/_/      _/_/_/  _/    _/    _/_/_/  _/_/_/    _/_/_/      _/_/_/   \n\
-               _/                      _/                            \n\
-          _/_/                        _/                              \n\
-=====================================================================\n\
-                                               [ Interpreter - v0.1 ]\n"
+   def __init__(self):
+
+      self.init_common()
+
+      synmonitor.nbinst += 1
+      self.name = "synapse_cli_monitor_0"
+      self.WOI = False
+      self.ibuff = list()
+      self.obuff = ""
+      self.fullContent = ""
+      self.displayBuff = ""
+      self.displayBuffSize = 10
+      self.alive = True
+
+
+   def getDisplayBuff(self):
+
+      return self.displayBuff
+
+   def run(self):
+
+       while (len(self.ibuff) != 0):
+
+            input_buffer = self.ibuff.pop(0)
+           
+            IMVEC.dbg.debug("PROCESSED BUFF: %s" , (input_buffer),dbg.EXDEBUG)
+            (input_num,sep,content) = input_buffer.partition(":")
+            self.fullContent += content
+            self.displayBuff = ""
+            fclist = self.fullContent.split("\n")
+            if len(fclist)-self.displayBuffSize < 0:
+               init_var = 0
+            else:
+               init_var = len(fclist)-self.displayBuffSize
+
+            for i in range (init_var,len(fclist)):
+               self.displayBuff+= fclist[i] + "\n"
+
+
 
 
 #class that defines the synapse document structure and 
@@ -222,17 +249,76 @@ class document(object):
       
       for pobj in pickled_objects:
 
-         newitem = None
-
          IMVEC.dbg.debug("FOUND PICKLED OBJECT: %s",(str(pobj.__class__)),dbg.DEBUG)
-         IMVEC.activeDoc.getContainer().append(linker(pobj,newitem))
+         IMVEC.activeDoc.getContainer().append(linker(pobj,None))
 
       nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
       nbtimers,nbfilters,nbmonitors,nbservices,nbreports,nbcontainers)
       IMVEC.activeDoc.setnbInsts(nbinsts)
 
 
+#Global variables definition
 
+### 
+
+RES_PATH = "/usr/share/synapse"
+
+SYNAPSE_ASCII_LOGO = "\
+\
+=====================================================================\
+\n\
+     _/_/_/  _/    _/  _/_/_/      _/_/_/  _/_/_/      _/_/_/    _/_/ \n\
+  _/_/      _/    _/  _/    _/  _/    _/  _/    _/  _/_/      _/_/_/_/ \n\
+     _/_/  _/    _/  _/    _/  _/    _/  _/    _/      _/_/  _/       \n\
+_/_/_/      _/_/_/  _/    _/    _/_/_/  _/_/_/    _/_/_/      _/_/_/   \n\
+               _/                      _/                            \n\
+          _/_/                        _/                              \n\
+=====================================================================\n\
+                                               [ Interpreter - v0.1 ]\n"
+
+CLI_MON = cli_monitor() 
+
+
+def attach_mode(monitor,obj=None):
+
+   
+   stdscr = curses.initscr()
+   curses.noecho()
+   curses.cbreak()
+   stdscr.keypad(1)
+   stdscr.nodelay(1)
+   stdscr.addstr(0,0, "[ attach mode ]")
+   if (obj == None):
+ 
+      obj = IMVEC.activeDoc.getContainer().getSynObjects()[0]
+
+   obj.getPeers().append((0,CLI_MON))
+   
+   while True:
+
+    dbuff = CLI_MON.getDisplayBuff()
+    
+    c = stdscr.getch()
+
+    if ( dbuff != "" ):
+
+      stdscr.addstr(dbuff)
+
+    if c == ord('q'): 
+       detach(stdscr)
+       break
+
+
+def detach(stdscr):
+   
+   curses.nocbreak()
+   stdscr.keypad(0)
+   curses.echo()
+
+   curses.endwin()
+
+
+    
 
 def parse_cmd(cmd_string):
 
@@ -248,6 +334,9 @@ def parse_cmd(cmd_string):
       IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
       print "Workflow stopped !"
       
+   elif (cmd_string == "a"):
+      attach_mode(None)
+
    elif (cmd_string == "q"):
       IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
       sys.exit(1)
@@ -300,6 +389,7 @@ if __name__ == "__main__":
    play_on_start = 0
    vo = None
 
+
    print SYNAPSE_ASCII_LOGO
 
    if (len(sys.argv) < 2):
@@ -323,16 +413,19 @@ if __name__ == "__main__":
 
 
    IMVEC.cfg = synCFG(debugLevel=debug_lvl)
-
    IMVEC.dbg = dbg(IMVEC.cfg.getDebugLevel())
-
    IMVEC.engine = synapseEngine(IMVEC.dbg)
    
    os.chdir(RES_PATH)
    os.chdir(os.path.expanduser("~"))
    
    IMVEC.activeDoc = document("None")
-   IMVEC.activeDoc.loadDoc(open_file)                      
+   IMVEC.activeDoc.loadDoc(open_file)
+
+
+   #instanciates a cli monitor object for attach mode
+   IMVEC.activeDoc.getContainer().append(linker(CLI_MON,None))
+                      
 
    if play_on_start:
       print "playing workflow !"

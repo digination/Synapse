@@ -31,6 +31,8 @@ shutil.copytree("./src/doc/en","/usr/share/synapse/doc")
 print "copying library files"
 shutil.copytree("./src/lib","/usr/lib/synapse")
 
-print "copying main synapse script"
+print "copying main synapse scripts"
 shutil.copy("./src/synapse","/usr/bin/")
+shutil.copy("./src/synerpreter","/usr/bin/")
+
 
