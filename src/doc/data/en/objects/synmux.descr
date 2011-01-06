@@ -1,0 +1,52 @@
+object_name Synapse Multiplexer (SynMux)
+nbinputs 6
+nboutputs 1
+resizable No
+icon synmux.png
+
+behaviour
+The synmux building block was created to merge multiple synapse streams into one. How the streams are mreged is defined by a merging template ( the 'data' building block parameter ).
+end_behaviour
+
+option
+option_title Name
+option_type String
+option_default Timer#
+option_descr
+Simply defines the blocks name. Also please note that a block name is not an UID 
+( meaning that you can have multiple blocks having the same name )
+end_descr
+end_option
+
+
+option
+option_title Color
+option_type HexString
+option_default None
+option_descr
+defines the building blocks color in the scheme
+end_descr
+end_option
+
+
+
+option
+option_title data
+option_type String
+option_default 0
+option_descr
+Defines the merging template. In other words, it tells how your input streams should be merged. each synmux input is defined in the data string by "[[SI#]]" , # being a number between 0 and 5. Now let's say that you defined a synmux data string with "Hello [[SI0]]! What a [[SI1]] day !". Then if you send "World" on input 0 , and "sunny" on input 1 , synmuxer will return "Hello World ! What a sunny day !". it is as simple as that !
+end_descr
+end_option
+
+
+
+
+option
+option_title Timeout
+option_type Integer
+option_default 0
+option_descr
+Defines the amount of time (in milleseconds) to wait until forcing to send the output stream to the synmux peers (in case one of the defined inputs in the data template string didn't send any data ) . When timeout is 0 , synmux will wait endlessly to receive data on its 6 inputs. (it can be considered to be in blocking mode, opposed to half-blocking mode when timeout > 0)  
+end_descr
+end_option

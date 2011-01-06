@@ -1,0 +1,294 @@
+
+<html>
+
+  <head>
+
+
+
+  <title>Building Block: Synapse Demultiplexor (SynDemux)
+</title>
+
+
+
+  <style type="text/css">
+
+
+
+    body {
+
+
+
+      font-size:12px;
+
+      font-family: Arial,Helvetica,sans-serif;
+
+
+
+
+
+    }
+
+
+
+
+
+    h1,h2,h3 {
+
+
+
+      color: #152233;
+
+
+
+    }
+
+
+
+
+
+    #behaviour {
+
+  
+
+      text-align:justify;
+
+      width:700px;
+
+
+
+    }
+
+
+
+    #icon {
+
+
+
+      border: 1px #CCCCCC solid;
+
+
+
+    }
+
+
+
+
+
+    #ios {
+
+
+
+      font-weight: bold;
+
+      
+
+      
+
+    }
+
+
+
+    #opt_descr {
+
+
+
+      width: 700px;
+
+      text-align:justify;
+
+
+
+      border-bottom: 1px solid #cccccc;
+
+      margin-bottom: 15px;
+
+      padding-bottom: 15px;
+
+
+
+    }
+
+
+
+
+
+  </style>
+
+
+
+
+
+  </head>
+
+
+
+  <body>
+
+
+
+  <h1>Synapse Demultiplexor (SynDemux)
+</h1>
+
+
+
+  <div style="overflow:hidden">
+
+
+
+  <div style="float:left;margin-right:20px;">
+
+    <img id="icon" src="icons/syndemux.png
+"/>
+
+  </div>
+
+
+
+  <div id="ios">
+
+
+
+  # of inputs: 1<br/>
+
+  # of outputs: 1<br/>
+
+  Resizable: No
+
+
+
+
+
+
+  </div>
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Behaviour:</h2>
+
+  <div id="behaviour">
+
+
+
+    syndemux is sort of the opposite of <a href="Javascript:loadDoc('synmux.html');" />synmux</a> building block. What it does is splitting its input stream given a split string, and forward the splitted parts to its outpurs. Note that syndemux is a 6-inputs building block, and if the input string 
+
+<img src="images/syndemux_stacking.png"/>
+
+
+
+
+
+
+
+  </div>
+
+
+
+
+
+  <h2>Building Block Options:</h2>
+
+
+
+
+
+    <h3>Name</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: Timer#</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Simply defines the blocks name. Also please note that a block name is not an UID ( meaning that you can have multiple blocks having the same name )
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Color</h3>
+
+    <b>type: HexString</b><br/>
+
+    <b>Default Value: None</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      defines the building blocks color in the scheme
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>data</h3>
+
+    <b>type: String</b><br/>
+
+    <b>Default Value: 0</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Defines the merging template. In other words, it tells how your input streams should be merged. each synmux input is defined in the data string by "[[SI#]]" , # being a number between 0 and 5. Now let's say that you defined a synmux data string with "Hello [[SI0]]! What a [[SI1]] day !". Then if you send "World" on input 0 , and "sunny" on input 1 , synmuxer will return "Hello World ! What a sunny day !". it is as simple as that !
+
+
+
+    </div>   
+
+    
+
+
+
+
+
+    <h3>Timeout</h3>
+
+    <b>type: Integer</b><br/>
+
+    <b>Default Value: 0</b><br/><br/>
+
+
+
+    <div id="opt_descr">
+
+
+
+      Defines the amount of time (in milleseconds) to wait until forcing to send the output stream to the synmux peers (in case one of the defined inputs in the data template string didn't send any data ) . When timeout is 0 , synmux will wait endlessly to receive data on its 6 inputs. (it can be considered to be in blocking mode, opposed to half-blocking mode when timeout > 0)  
+
+
+
+    </div>   
+
+    
+
+
+
+
