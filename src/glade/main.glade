@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<!--Generated with glade3 3.4.5 on Fri Jan  7 17:40:47 2011 -->
 <glade-interface>
-  <!-- interface-requires gtk+ 2.16 -->
-  <!-- interface-naming-policy project-wide -->
   <widget class="GtkWindow" id="window1">
     <child>
       <widget class="GtkVBox" id="vbox1">
@@ -13,13 +13,12 @@
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">0</property>
           </packing>
         </child>
         <child>
           <widget class="GtkViewport" id="viewport4">
             <property name="visible">True</property>
-            <property name="resize_mode">queue</property>
+            <property name="resize_mode">GTK_RESIZE_QUEUE</property>
             <child>
               <widget class="GtkHBox" id="hbox5">
                 <property name="visible">True</property>
@@ -29,7 +28,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image1">
                         <property name="visible">True</property>
@@ -39,7 +39,6 @@
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -47,7 +46,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image2">
                         <property name="visible">True</property>
@@ -66,7 +66,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image3">
                         <property name="visible">True</property>
@@ -93,7 +94,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image4">
                         <property name="visible">True</property>
@@ -111,7 +113,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image6">
                         <property name="visible">True</property>
@@ -138,7 +141,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image7">
                         <property name="visible">True</property>
@@ -156,7 +160,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image8">
                         <property name="visible">True</property>
@@ -174,7 +179,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image9">
                         <property name="visible">True</property>
@@ -202,12 +208,13 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip" translatable="yes">Starts the workflow.</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image10">
                         <property name="visible">True</property>
                         <property name="stock">gtk-media-play</property>
-                        <property name="icon-size">3</property>
+                        <property name="icon_size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -222,12 +229,13 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip" translatable="yes">Stops the workflow.</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image11">
                         <property name="visible">True</property>
                         <property name="stock">gtk-media-stop</property>
-                        <property name="icon-size">3</property>
+                        <property name="icon_size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -250,12 +258,13 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image12">
                         <property name="visible">True</property>
                         <property name="stock">gtk-zoom-out</property>
-                        <property name="icon-size">3</property>
+                        <property name="icon_size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -269,12 +278,13 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image13">
                         <property name="visible">True</property>
                         <property name="stock">gtk-zoom-in</property>
-                        <property name="icon-size">3</property>
+                        <property name="icon_size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -298,12 +308,13 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip" translatable="yes">Sends block to back</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image14">
                         <property name="visible">True</property>
+                        <property name="icon_size">3</property>
                         <property name="icon_name">view-sort-ascending</property>
-                        <property name="icon-size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -318,12 +329,13 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip" translatable="yes">Brings block to front</property>
-                    <property name="relief">none</property>
+                    <property name="relief">GTK_RELIEF_NONE</property>
+                    <property name="response_id">0</property>
                     <child>
                       <widget class="GtkImage" id="image15">
                         <property name="visible">True</property>
+                        <property name="icon_size">3</property>
                         <property name="icon_name">view-sort-descending</property>
-                        <property name="icon-size">3</property>
                       </widget>
                     </child>
                   </widget>
@@ -361,13 +373,12 @@
                           </widget>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkViewport" id="viewport3">
                             <property name="visible">True</property>
-                            <property name="resize_mode">queue</property>
+                            <property name="resize_mode">GTK_RESIZE_QUEUE</property>
                             <child>
                               <widget class="GtkHBox" id="hbox4">
                                 <property name="visible">True</property>
@@ -383,16 +394,17 @@
                                         <property name="receives_default">True</property>
                                         <property name="tooltip" translatable="yes">Adds an application to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synapp_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -402,10 +414,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip" translatable="yes">Adds an Injector item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synject_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -421,10 +435,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Demultiplexor item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syndemux_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -440,10 +456,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Filter item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synfilter_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -460,10 +478,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Commentary item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syncom_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -480,16 +500,40 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Commentary item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synkbd_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="position">5</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="synpy_btn">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip" translatable="yes">Adds a python item to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
+                                        <child>
+                                          <widget class="GtkImage" id="synpy_img">
+                                            <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">6</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -501,22 +545,21 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Container to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syncontainer_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">6</property>
+                                        <property name="position">7</property>
                                       </packing>
                                     </child>
                                   </widget>
-                                  <packing>
-                                    <property name="position">0</property>
-                                  </packing>
                                 </child>
                                 <child>
                                   <widget class="GtkVBox" id="vbox8">
@@ -529,16 +572,17 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip" translatable="yes">Adds a service item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synserv_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -549,10 +593,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Timer item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syndb_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -569,10 +615,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Timer item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syntimer_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -589,10 +637,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a label item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synlabel_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -609,10 +659,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Multiplexor item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synmux_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -629,10 +681,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Test item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="syntest_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -649,10 +703,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Commentary item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synmon_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -669,10 +725,12 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip" translatable="yes">Adds a Report item to the workflow.
 Drag'n'drop it to the drawing area.</property>
-                                        <property name="relief">none</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
                                         <child>
                                           <widget class="GtkImage" id="synreport_img">
                                             <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
                                           </widget>
                                         </child>
                                       </widget>
@@ -697,7 +755,6 @@ Drag'n'drop it to the drawing area.</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -710,18 +767,17 @@ Drag'n'drop it to the drawing area.</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkScrolledWindow" id="scrolledwindow1">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                             <child>
                               <widget class="GtkViewport" id="viewport5">
                                 <property name="visible">True</property>
-                                <property name="resize_mode">queue</property>
+                                <property name="resize_mode">GTK_RESIZE_QUEUE</property>
                                 <child>
                                   <widget class="GtkTreeView" id="libtree">
                                     <property name="visible">True</property>
@@ -769,15 +825,13 @@ Drag'n'drop it to the drawing area.</property>
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">No-Title-1</property>
                           </widget>
-                          <packing>
-                            <property name="position">0</property>
-                          </packing>
                         </child>
                         <child>
                           <widget class="GtkButton" id="button4">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="response_id">0</property>
                             <child>
                               <widget class="GtkImage" id="image5">
                                 <property name="visible">True</property>
@@ -791,8 +845,8 @@ Drag'n'drop it to the drawing area.</property>
                         </child>
                       </widget>
                       <packing>
-                        <property name="tab_fill">False</property>
                         <property name="type">tab</property>
+                        <property name="tab_fill">False</property>
                       </packing>
                     </child>
                     <child>
@@ -810,9 +864,9 @@ Drag'n'drop it to the drawing area.</property>
                         <property name="label" translatable="yes">page 2</property>
                       </widget>
                       <packing>
+                        <property name="type">tab</property>
                         <property name="position">1</property>
                         <property name="tab_fill">False</property>
-                        <property name="type">tab</property>
                       </packing>
                     </child>
                     <child>
@@ -830,9 +884,9 @@ Drag'n'drop it to the drawing area.</property>
                         <property name="label" translatable="yes">page 3</property>
                       </widget>
                       <packing>
+                        <property name="type">tab</property>
                         <property name="position">2</property>
                         <property name="tab_fill">False</property>
-                        <property name="type">tab</property>
                       </packing>
                     </child>
                   </widget>
@@ -854,8 +908,8 @@ Drag'n'drop it to the drawing area.</property>
                 <child>
                   <widget class="GtkViewport" id="viewport1">
                     <property name="visible">True</property>
-                    <property name="resize_mode">queue</property>
-                    <property name="shadow_type">out</property>
+                    <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                    <property name="shadow_type">GTK_SHADOW_OUT</property>
                     <child>
                       <widget class="GtkVBox" id="vbox3">
                         <property name="visible">True</property>
@@ -866,19 +920,18 @@ Drag'n'drop it to the drawing area.</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkScrolledWindow" id="scrolledwindow2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                             <child>
                               <widget class="GtkViewport" id="viewport6">
                                 <property name="visible">True</property>
-                                <property name="resize_mode">queue</property>
-                                <property name="shadow_type">none</property>
+                                <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                                <property name="shadow_type">GTK_SHADOW_NONE</property>
                                 <child>
                                   <widget class="GtkTreeView" id="obrowser">
                                     <property name="visible">True</property>
@@ -903,8 +956,8 @@ Drag'n'drop it to the drawing area.</property>
                 <child>
                   <widget class="GtkViewport" id="viewport2">
                     <property name="visible">True</property>
-                    <property name="resize_mode">queue</property>
-                    <property name="shadow_type">out</property>
+                    <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                    <property name="shadow_type">GTK_SHADOW_OUT</property>
                     <child>
                       <widget class="GtkVBox" id="vbox2">
                         <property name="visible">True</property>
@@ -916,7 +969,6 @@ Drag'n'drop it to the drawing area.</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -929,7 +981,6 @@ Drag'n'drop it to the drawing area.</property>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
@@ -939,12 +990,12 @@ Drag'n'drop it to the drawing area.</property>
                                   <widget class="GtkScrolledWindow" id="scrolledwindow3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="hscrollbar_policy">automatic</property>
+                                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                     <child>
                                       <widget class="GtkViewport" id="viewport7">
                                         <property name="visible">True</property>
-                                        <property name="resize_mode">queue</property>
-                                        <property name="shadow_type">none</property>
+                                        <property name="resize_mode">GTK_RESIZE_QUEUE</property>
+                                        <property name="shadow_type">GTK_SHADOW_NONE</property>
                                         <child>
                                           <widget class="GtkNotebook" id="oprop">
                                             <property name="visible">True</property>
@@ -969,8 +1020,8 @@ Drag'n'drop it to the drawing area.</property>
                                                 <property name="label" translatable="yes">General</property>
                                               </widget>
                                               <packing>
-                                                <property name="tab_fill">False</property>
                                                 <property name="type">tab</property>
+                                                <property name="tab_fill">False</property>
                                               </packing>
                                             </child>
                                             <child>
@@ -987,7 +1038,6 @@ Drag'n'drop it to the drawing area.</property>
                                                       </widget>
                                                       <packing>
                                                         <property name="expand">False</property>
-                                                        <property name="position">0</property>
                                                       </packing>
                                                     </child>
                                                     <child>
@@ -1011,9 +1061,6 @@ Drag'n'drop it to the drawing area.</property>
                                                       </packing>
                                                     </child>
                                                   </widget>
-                                                  <packing>
-                                                    <property name="position">0</property>
-                                                  </packing>
                                                 </child>
                                                 <child>
                                                   <widget class="GtkVBox" id="vbox12">
@@ -1023,18 +1070,15 @@ Drag'n'drop it to the drawing area.</property>
                                                       <widget class="GtkEntry" id="entry1">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">True</property>
-                                                        <property name="invisible_char">&#x25CF;</property>
                                                       </widget>
                                                       <packing>
                                                         <property name="expand">False</property>
-                                                        <property name="position">0</property>
                                                       </packing>
                                                     </child>
                                                     <child>
                                                       <widget class="GtkEntry" id="entry2">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">True</property>
-                                                        <property name="invisible_char">&#x25CF;</property>
                                                       </widget>
                                                       <packing>
                                                         <property name="expand">False</property>
@@ -1045,7 +1089,6 @@ Drag'n'drop it to the drawing area.</property>
                                                       <widget class="GtkEntry" id="entry3">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">True</property>
-                                                        <property name="invisible_char">&#x25CF;</property>
                                                         <property name="text" translatable="yes">localhost:5222</property>
                                                       </widget>
                                                       <packing>
@@ -1069,9 +1112,9 @@ Drag'n'drop it to the drawing area.</property>
                                                 <property name="label" translatable="yes">XMPP</property>
                                               </widget>
                                               <packing>
+                                                <property name="type">tab</property>
                                                 <property name="position">1</property>
                                                 <property name="tab_fill">False</property>
-                                                <property name="type">tab</property>
                                               </packing>
                                             </child>
                                             <child>
@@ -1083,9 +1126,9 @@ Drag'n'drop it to the drawing area.</property>
                                                 <property name="label" translatable="yes">page 3</property>
                                               </widget>
                                               <packing>
+                                                <property name="type">tab</property>
                                                 <property name="position">2</property>
                                                 <property name="tab_fill">False</property>
-                                                <property name="type">tab</property>
                                               </packing>
                                             </child>
                                           </widget>
@@ -1093,9 +1136,6 @@ Drag'n'drop it to the drawing area.</property>
                                       </widget>
                                     </child>
                                   </widget>
-                                  <packing>
-                                    <property name="position">0</property>
-                                  </packing>
                                 </child>
                                 <child>
                                   <widget class="GtkLabel" id="label13">
@@ -1147,7 +1187,6 @@ Drag'n'drop it to the drawing area.</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">0</property>
               </packing>
             </child>
             <child>
