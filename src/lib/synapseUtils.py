@@ -67,6 +67,25 @@ def resclaleColorSel(color):
 
 
 
+
+def resolve(objname):
+
+   found_results = list()
+
+   for obj in IMVEC.activeDoc.getContainer().getSynObjects():
+
+      if obj.getName() == objname:
+
+         found_results.append(obj)
+
+   if (len(found_results) == 0 ):
+      return None
+   elif (len(found_results) == 1 ):
+      return found_results[0]
+   else:
+      return found_results
+
+
 class CPUsage:
    def __init__(self, interval=0.1, percentage=True):
        self.interval=interval

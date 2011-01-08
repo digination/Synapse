@@ -1033,3 +1033,144 @@ class synkbdGTK:
    o.show()
 
 
+
+
+class synpyGTK:
+
+   o = gtk.HBox()
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+   lname = gtk.Label(str="Name")
+   lpcuni = gtk.Label(str="PCUNI")
+
+
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+   
+   iname = gtk.Entry()
+
+   ipcuni = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   ipcuni.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   ipcuni.pack_start(cellr0)
+   ipcuni.add_attribute(cellr0, 'text', 0)
+
+   ipcuni.append_text("True")
+   ipcuni.append_text("False")
+   ipcuni.set_active(0)
+
+
+
+
+   gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lpcuni,False,True,10)  
+
+
+   gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(ipcuni,False,True,5)
+
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      child2.show()
+
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()
+
+
+class syndbGTK:
+
+   o = gtk.HBox()
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+   lname = gtk.Label(str="Name")
+   lconnec = gtk.Label(str="Connector")
+   lbtype = gtk.Label(str="Block Type")
+   lhostport = gtk.Label(str="Host:port")
+   ldb = gtk.Label(str="Database")
+   luser = gtk.Label(str="Username")
+   lpassword = gtk.Label(str="Password")
+   lquery  = gtk.Label(str="Query")
+
+   
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+   
+   iname = gtk.Entry()
+
+   iconnec = gtk.ComboBox()
+  
+   ls0 = gtk.ListStore(str)
+   iconnec.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   iconnec.pack_start(cellr0)
+   iconnec.add_attribute(cellr0, 'text', 0)
+
+   iconnec.append_text("MySQL")
+   iconnec.append_text("Postgres")
+   iconnec.set_active(0)
+
+
+   ibtype = gtk.ComboBox()
+  
+   ls1 = gtk.ListStore(str)
+   ibtype.set_model(ls1)
+   cellr1 = gtk.CellRendererText()
+   ibtype.pack_start(cellr0)
+   ibtype.add_attribute(cellr0, 'text', 0)
+
+   ibtype.append_text("No Input")
+   ibtype.append_text("Has Input")
+   ibtype.set_active(0)
+
+   ihostport = gtk.Entry()
+   idb = gtk.Entry()
+   iuser = gtk.Entry()
+   ipassword = gtk.Entry()
+
+   gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lconnec,False,True,10)  
+   gtkPVbox1.pack_start(lbtype,False,True,10)
+   gtkPVbox1.pack_start(lhostport,False,True,10) 
+   gtkPVbox1.pack_start(ldb,False,True,10)
+   gtkPVbox1.pack_start(luser,False,True,10)
+   gtkPVbox1.pack_start(lpassword,False,True,10)    
+
+   gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(iconnec,False,True,5)
+   gtkPVbox2.pack_start(ibtype,False,True,5)
+   gtkPVbox2.pack_start(ihostport,False,True,5)
+   gtkPVbox2.pack_start(idb,False,True,5)
+   gtkPVbox2.pack_start(iuser,False,True,5)
+   gtkPVbox2.pack_start(ipassword,False,True,5)
+
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+      child1.show()
+      child2.show()
+
+   o.pack_start(gtkPVbox1,False,True,10)
+   o.pack_start(gtkPVbox2,False,True,0)
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()

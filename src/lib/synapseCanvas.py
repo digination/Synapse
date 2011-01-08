@@ -1757,7 +1757,12 @@ class labelItem(synItem):
 
       IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj().setContent(new_input)
 
-      self.content_label.set_property("text",new_input)
+      if (len(new_input) > 21 ):
+         ni_resized = new_input[:19] + ".."
+      else:
+         ni_resized = new_input 
+
+      self.content_label.set_property("text",ni_resized)
 
 
    def on_clickable_change(self,item,target_item,event):
@@ -1896,6 +1901,122 @@ class kbdItem(synItem):
       self.clickable.connect("button-press-event",self.on_clickable_change)
       self.content_label.connect("button-press-event",self.on_clickable_change)
 
+
+
+
+class pyItem(synItem):
+
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
+				stroke_color="#cccccc", fill_color="#00CC66",
+				line_width=4)
+
+      self.pixbuf = IMVEC.pyPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+
+    
+
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.inputs[0].set_property("x",0)
+      self.inputs[0].set_property("y",10)
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#00CC66")
+
+      self.connectAll()
+
+
+
+
+
+
+
+class dbItem(synItem):
+
+
+
+   def setInput(self,inptv):
+
+      if inptv:
+         self.potential_input.set_property("x",0)
+         self.potential_input.raise_(None)
+         self.inputs.append(self.potential_input)
+         for inp in self.inputs:
+            self.iconnList[0] = inp.connect("button-press-event",self.on_input_clicked)
+            self.iconnList[1] = inp.connect("enter-notify-event",self.on_inp_enter)
+            self.iconnList[2] = inp.connect("leave-notify-event",self.on_conn_leave)
+
+      else:
+
+         self.potential_input.set_property("x",10)
+         self.mf.raise_(None)
+         self.icon.raise_(None)
+         self.outputs[0].raise_(None)
+
+         for inp in self.inputs:
+            inp.disconnect(self.iconnList[0])
+            inp.disconnect(self.iconnList[1])
+            inp.disconnect(self.iconnList[2])
+
+         del self.inputs[0]
+
+
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.iconnList = [0,0,0]
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
+				stroke_color="#cccccc", fill_color="#0000FF",
+				line_width=4)
+
+      self.pixbuf = IMVEC.dbPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+
+    
+
+
+      self.potential_input = goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1)
+
+      self.potential_input.set_property("x",10)
+      self.potential_input.set_property("y",10)
+      self.mf.raise_(None)
+      self.icon.raise_(None)
+ 
+      
+
+
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.outputs[0].set_property("x",51)
+      self.outputs[0].set_property("y",10)
+
+      
+
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#0000FF")
+
+      self.connectAll()
 
 
 

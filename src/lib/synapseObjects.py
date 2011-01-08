@@ -42,7 +42,7 @@ except:
 
 try:
 
-   from MySQLdb import *
+   import MySQLdb
 
 except:
 
@@ -51,7 +51,7 @@ except:
 
 try:
 
-   from psycopg2 import *
+   import psycopg2
 
 except:
 
@@ -324,6 +324,10 @@ class synobj:
 
    def kill(self):
       self.alive = False
+
+   def start(self):
+
+      self.alive = True
 
    def getIbuff(self):
       return self.ibuff
@@ -1451,11 +1455,105 @@ class synmonitor(synobj):
 
 
    def disconnectAll(self):
+     
       return 0
 
    def getPropWidget(self):
 
       return synmonitorGTK.o
+
+
+
+
+
+
+
+class synpy(synobj):
+
+   nbinst = 0
+
+
+   def on_widget_changed(self,widget):
+
+       if (widget == synpyGTK.iname):
+         self.name = widget.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+         
+       elif (widget == synpyGTK.iwoi):
+         #synapseHistory.history.addHistory()
+         if synpyGTK.ipcuni.get_active_text() == "True":
+            self.pcuni = True
+         else:
+            self.pcuni = False
+
+
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synpyGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+
+   def init_run(self):
+
+      self.alive = True
+
+   def run(self):
+ 
+         xref = IMVEC.activeDoc.getContainer().getMembers()[self.id].getSynItem()
+         while (len(self.ibuff) != 0):
+
+            input_buffer = self.ibuff.pop(0)
+            (input_num,sep,content) = input_buffer.partition(":")
+            content = content.rstrip("\r\n")
+            #try:
+            exec content
+            #except:
+               #IMVEC.dbg.debug("ISSUE WHILE EXECUTING PYTHON CODE BLOCK",tuple(),dbg.CRITICAL)
+            
+
+         
+   def __init__(self,name):
+
+      self.init_common()
+
+      synpy.nbinst += 1
+      self.name = name
+      self.WOI = False
+      self.ibuff = list()
+      self.obuff = ""
+      self.pcuni = False 
+      
+
+   def disconnectAll(self):
+      synpyGTK.iname.disconnect( synpyGTK.chdict['iname'])
+      synpyGTK.icolor.disconnect( synpyGTK.chdict['icolorBtn'])
+
+   def getPropWidget(self):
+
+
+      synpyGTK.iname.set_text(self.name)
+      synpyGTK.icolor.set_text(self.color)
+      
+      
+      synpyGTK.chdict['iname'] = synpyGTK.iname.connect("changed",self.on_widget_changed)
+      synpyGTK.chdict['icolorBtn'] = synpyGTK.icolorBtn.connect("clicked",self.onColorChange)
+      
+      return synpyGTK.o
+
 
 
 class synapp(synobj):
@@ -2430,40 +2528,66 @@ class syndb(synobj):
 
       self.alive = True
       runvars = dict()
+      
+      try:
+         (dbhost,dbport) = self.hostport.split(":")
+      except:
+         IMVEC.dbg.debug("CANNOT PARSE HOST:PORT PARAMETERS. STOPPING DB BLOCK",tuple(),dbg.CRITICAL)
+         self.alive = False
 
-      if (self.buffured_output):
+      if (self.connec == "MySQL" ):
 
-         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT BUFFURED MODE",tuple(),dbg.DEBUG)
-         proc = pexpect.spawn(self.cmd)
+         IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
+         dbh = MySQLdb.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
       else:
-         IMVEC.dbg.debug("SPAWNING PEXPECT PROCESS, OUTPUT UNBUFFURED MODE",tuple(),dbg.DEBUG)
-         proc = pexpect.spawn(self.cmd,maxread=1)
-
-      runvars['proc'] = proc
+         IMVEC.dbg.debug("STARTING A NEW POSTGRES CONNECTION",tuple(),dbg.DEBUG)
+         dbh = psycopg2.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
+      runvars['dbh'] = dbh
+      runvars['dbcurs'] = dbcurs
+      
       IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
 
    def run(self):
+
+      dbcurs = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['dbcurs']
+
+      if (self.btype == "No Input"):
+
+         dbcurs.execute(self.query)
+         self.obuff = dbcurs.fetchall()
+         print self.obuff
+         self.alive = False
+
+         
   
-      return                
-   def __init__(self,name,connector="MYSQL"):
+
+               
+   def __init__(self,name):
 
       synapp.nbinst+=1
       self.init_common()
 
-      self.WOI = True
+      self.WOI = False
       self.name = name
 
-      self.connector=connector
-      self.query =""
-      self.connectURI=""
-      self.connectPassword=""
+      self.query ="select * from news limit 1"
 
       self.peers = list()
       self.ibuff = list()
       self.obuff = ""
-      self.split_lines = False
-      self.WFI = False
+      self.connec = "MySQL"
+      self.btype = "No Input"
+      self.hostport="127.0.0.1:3306"
+      self.database = ""
+      self.user = ""
+      self.password = ""
+      
+      
       
  
    def getQuery(self):
@@ -2482,49 +2606,45 @@ class syndb(synobj):
 
       return self.connector
 
-
+         
    def onTextChange(self,widget):
 
 
       if (widget == syndbGTK.iname):
 
-         if synappGTK.iname.get_text()[len(synappGTK.iname.get_text())-1] == " ":
-            synapseHistory.history.addHistory()
-
-         self.name = synappGTK.iname.get_text()
-         IMVEC.activeDoc.getActiveM().getSynItem().setText(synappGTK.iname.get_text())
+         self.name = syndbGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
          #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
 
 
-      elif (widget == syndbGTK.icmd):
+      elif (widget == syndbGTK.ihostport):
+         self.hostport = syndbGTK.ihostport.get_text()
 
-         if syndbGTK.icmd.get_text()[len(synappGTK.icmd.get_text())-1] == " ":
-            synapseHistory.history.addHistory()
-         self.cmd = synappGTK.icmd.get_text()
+      elif (widget == syndbGTK.idb):
+         self.database = syndbGTK.idb.get_text()
+         
+      elif (widget == syndbGTK.iuser):
+         self.user = syndbGTK.iuser.get_text()
 
-      elif (widget == syndbGTK.iwoi):
-         #synapseHistory.history.addHistory()
-         if synappGTK.iwoi.get_active_text() == "True":
-            self.WOI = True
+      elif (widget == syndbGTK.ipassword):
+         self.password = syndbGTK.ipassword.get_text()      
+
+
+      elif (widget == syndbGTK.ibtype):
+         if syndbGTK.ibtype.get_active_text() == "No Input":
+            self.btype = "No Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(False)
          else:
-            self.WOI = False
+            self.btype = "Has Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(True)
 
-      elif (widget == synappGTK.ibo):
-         #synapseHistory.history.addHistory()
-         if synappGTK.ibo.get_active_text() == "True":
-            self.buffured_output = True
+      elif (widget == syndbGTK.iconnec):
+         if syndbGTK.iconnec.get_active_text() == "MySQL":
+            self.connec = "MySQL"
          else:
-            self.buffured_output = False
+            self.connec = "Postgres"
 
-      elif (widget == synappGTK.isl):
-         #synapseHistory.history.addHistory()
-         if synappGTK.isl.get_active_text() == "True":
-            self.split_lines = True
-         else:
-            self.split_lines = False
-
-
-
+        
    def onColorChange(self,widget):
 
       colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
@@ -2550,42 +2670,44 @@ class syndb(synobj):
 
    def disconnectAll(self):
 
-         synappGTK.iname.disconnect(synappGTK.chdict['iname'])
-         synappGTK.icmd.disconnect(synappGTK.chdict['icmd'])
-         synappGTK.iwoi.disconnect(synappGTK.chdict['iwoi'])
-         synappGTK.ibo.disconnect(synappGTK.chdict['ibo'])
-         synappGTK.isl.disconnect(synappGTK.chdict['isl'])
-         synappGTK.icolorBtn.disconnect(synappGTK.chdict['icolorBtn'])
+         for key,value in syndbGTK.chdict.items():
+
+            exec "syndbGTK.%s.disconnect(%d)" % (key,value)
+
+
+
 
    def getPropWidget(self):
 
-      synappGTK.iname.set_text(self.name)
-      synappGTK.icmd.set_text(self.cmd)
-      synappGTK.icolor.set_text(self.color)
+      syndbGTK.iname.set_text(self.name)
+      syndbGTK.ihostport.set_text(self.hostport)
+      syndbGTK.idb.set_text(self.database)
+      syndbGTK.iuser.set_text(self.user)
+      syndbGTK.ipassword.set_text(self.password)
 
-      if self.WOI == True:
-         synappGTK.iwoi.set_active(0)
+
+      syndbGTK.icolor.set_text(self.color)
+
+      if self.connec == "MySQL":
+         syndbGTK.iconnec.set_active(0)
       else:
-         synappGTK.iwoi.set_active(1)
+         syndbGTK.iconnec.set_active(1)
 
-      if self.buffured_output == True:
-         synappGTK.ibo.set_active(0)
+      if self.btype == "No Input":
+         syndbGTK.ibtype.set_active(0)
       else:
-         synappGTK.ibo.set_active(1)
+         syndbGTK.ibtype.set_active(1)
+  
+      syndbGTK.chdict['iname'] = syndbGTK.iname.connect("changed",self.onTextChange)
+      syndbGTK.chdict['icolorBtn'] = syndbGTK.icolorBtn.connect("clicked",self.onColorChange)
+      syndbGTK.chdict['iconnec'] = syndbGTK.iconnec.connect("changed",self.onTextChange)
+      syndbGTK.chdict['ibtype'] = syndbGTK.ibtype.connect("changed",self.onTextChange)
+      syndbGTK.chdict['idb'] = syndbGTK.idb.connect("changed",self.onTextChange)
+      syndbGTK.chdict['iuser'] = syndbGTK.iuser.connect("changed",self.onTextChange)
+      syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
 
-      if self.split_lines == True:
-         synappGTK.isl.set_active(0)
-      else:
-         synappGTK.isl.set_active(1)
 
-      synappGTK.chdict['iname'] = synappGTK.iname.connect("changed",self.onTextChange)
-      synappGTK.chdict['icmd'] = synappGTK.icmd.connect("changed",self.onTextChange)
-      synappGTK.chdict['iwoi'] = synappGTK.iwoi.connect("changed",self.onTextChange)
-      synappGTK.chdict['ibo'] = synappGTK.ibo.connect("changed",self.onTextChange)
-      synappGTK.chdict['isl'] = synappGTK.isl.connect("changed",self.onTextChange)
-      synappGTK.chdict['icolorBtn'] = synappGTK.icolorBtn.connect("clicked",self.onColorChange)
-
-      return synappGTK.o
+      return syndbGTK.o
 
 
 

@@ -234,6 +234,11 @@ class document(object):
             pixbuf = IMVEC.labelPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synkbd"):
             pixbuf = IMVEC.kbdPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synpy"):
+            pixbuf = IMVEC.pyPixbuf_s
+
+         elif (str(obj.__class__) == "synapseObjects.syndb"):
+            pixbuf = IMVEC.dbPixbuf_s
 
 
          if sorting == 'name': 
@@ -470,8 +475,34 @@ class document(object):
          self.refresh_objects_list()
 
 
+      elif (context.get_source_widget().get_name() == "synpy_btn"):
 
-       
+         self.nbpys+=1
+         newobj = synpy("Pyhton%d" % (self.nbpys))
+         newitem = pyItem(root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
+         newitem.setText("Python%d" % (self.nbpys))
+
+         self.refresh_objects_list()
+
+
+      elif (context.get_source_widget().get_name() == "syndb_btn"):
+
+         self.nbdbs+=1
+         newobj = syndb("Db%d" % (self.nbdbs))
+         newitem = dbItem(root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
+         newitem.setText("Db%d" % (self.nbdbs))
+
+         self.refresh_objects_list()
+
+
    def zoomOut(self):
       
       if (self.zoom == 0.5): 
@@ -764,6 +795,8 @@ class document(object):
       self.nbservices = 0
       self.nbcontainers = 0
       self.nbreports = 0
+      self.nbpys = 0
+      self.nbdbs = 0
       self.nblabels = 0
       self.nbkbds = 0
 
@@ -1185,6 +1218,7 @@ class MainWindow(object):
       nbcontainers = 0
       nbreports = 0
       nblabels = 0
+      nbpys = 0
 
 
  
@@ -1256,6 +1290,10 @@ class MainWindow(object):
             newitem = testItem(root)
             nbsyntest += 1
      
+         elif str(pobj.__class__) == "synapseObjects.synpy":
+            newitem = pyItem(root)
+            nbpys += 1
+
          elif str(pobj.__class__) == "synapseObjects.syntimer":
             newitem = timerItem(root)
             nbtimers +=1
@@ -2371,6 +2409,15 @@ class MainWindow(object):
                                gtk.gdk.ACTION_COPY)
 
 
+      self.synpy_btn.connect("drag_data_get", self.sendCallback)
+      self.synpy_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+      self.syndb_btn.connect("drag_data_get", self.sendCallback)
+      self.syndb_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
       self.syncontainer_btn.connect("drag_data_get", self.sendCallback)
       self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
@@ -2401,6 +2448,8 @@ class MainWindow(object):
       self.synreport_btn.set_name("synreport_btn")
       self.synlabel_btn.set_name("synlabel_btn")
       self.synkbd_btn.set_name("synkbd_btn")
+      self.syndb_btn.set_name("syndb_btn")
+      self.synpy_btn.set_name("synpy_btn")
 
 
       self.hpaned1.set_position(800)
