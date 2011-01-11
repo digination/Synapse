@@ -2768,6 +2768,241 @@ class syndb(synobj):
 
 
 
+
+
+class synxmpp(synobj):
+
+   nbinst = 0
+  
+
+   def init_run(self):
+
+      self.alive = True
+      runvars = dict()
+      
+      try:
+         (dbhost,dbport) = self.hostport.split(":")
+      except:
+         IMVEC.dbg.debug("CANNOT PARSE HOST:PORT PARAMETERS. STOPPING DB BLOCK",tuple(),dbg.CRITICAL)
+         self.alive = False
+
+      if (self.connec == "MySQL" ):
+
+         IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
+         dbh = MySQLdb.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
+      else:
+         IMVEC.dbg.debug("STARTING A NEW POSTGRES CONNECTION",tuple(),dbg.DEBUG)
+         dbh = psycopg2.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
+      runvars['dbh'] = dbh
+      runvars['dbcurs'] = dbcurs
+      
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+
+
+   def run(self):
+
+      dbcurs = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['dbcurs']
+
+      if (self.btype == "No Input"):
+
+         dbcurs.execute(self.query)
+         if (self.query.upper().find('INSERT') == 0  or self.query.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
+         self.obuff = dbcurs.fetchall()
+         print self.obuff
+         self.alive = False
+
+      else:
+
+         while len(self.ibuff) != 0:
+
+            input_buffer = self.ibuff.pop(0)
+            (input_num,sep,content) = input_buffer.partition(":")
+            nquery = self.query.replace("[[SYNDB_INPUT]]",content)
+            dbcurs.execute(nquery)
+ 
+            if (nquery.upper().find('INSERT') == 0  or nquery.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
+            self.obuff = dbcurs.fetchall()
+            print self.obuff
+
+
+         
+  
+
+               
+   def __init__(self,name):
+
+      synapp.nbinst+=1
+      self.init_common()
+
+      self.WOI = False
+      self.name = name
+
+      self.query ="select * from [[SYNDB_INPUT]] limit 1"
+
+      self.peers = list()
+      self.ibuff = list()
+      self.obuff = ""
+      self.connec = "MySQL"
+      self.btype = "No Input"
+      
+      
+      
+      
+   def getQuery(self):
+
+      return self.query
+
+   def setQuery(self,query):
+
+      self.query = query
+
+   def setConnector(self,connector):
+
+      self.connector = connector
+
+   def getConnector(self):
+
+      return self.connector
+
+         
+   def onTextChange(self,widget):
+
+
+      if (widget == syndbGTK.iname):
+
+         self.name = syndbGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+         #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
+
+
+      elif (widget == syndbGTK.ihostport):
+         self.hostport = syndbGTK.ihostport.get_text()
+
+      elif (widget == syndbGTK.idb):
+         self.database = syndbGTK.idb.get_text()
+         
+      elif (widget == syndbGTK.iuser):
+         self.user = syndbGTK.iuser.get_text()
+
+      elif (widget == syndbGTK.ipassword):
+         self.password = syndbGTK.ipassword.get_text()      
+
+
+      elif (widget == syndbGTK.ibtype):
+         if syndbGTK.ibtype.get_active_text() == "No Input":
+            self.btype = "No Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(False)
+         else:
+            self.btype = "Has Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(True)
+
+      elif (widget == syndbGTK.iconnec):
+         if syndbGTK.iconnec.get_active_text() == "MySQL":
+            self.connec = "MySQL"
+         else:
+            self.connec = "Postgres"
+
+      elif (widget == syndbGTK.iomode):
+         self.outputMode = syndbGTK.iomode.get_active_text()
+
+      elif (widget == syndbGTK.isep):
+         self.fieldSep = syndbGTK.isep.get_text()
+
+
+
+        
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synappGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+         
+
+
+   def disconnectAll(self):
+
+         for key,value in syndbGTK.chdict.items():
+
+            exec "syndbGTK.%s.disconnect(%d)" % (key,value)
+
+
+
+
+   def getPropWidget(self):
+
+      syndbGTK.iname.set_text(self.name)
+      syndbGTK.ihostport.set_text(self.hostport)
+      syndbGTK.idb.set_text(self.database)
+      syndbGTK.iuser.set_text(self.user)
+      syndbGTK.ipassword.set_text(self.password)
+      syndbGTK.isep.set_text(self.fieldSep)
+      
+      syndbGTK.icolor.set_text(self.color)
+
+      if self.connec == "MySQL":
+         syndbGTK.iconnec.set_active(0)
+      else:
+         syndbGTK.iconnec.set_active(1)
+
+
+      if self.outputMode == "Full Content":
+         syndbGTK.iomode.set_active(0)
+      elif self.outputMode == "Split Lines":
+         syndbGTK.iomode.set_active(1)
+      else:
+         syndbGTK.iomode.set_active(2)
+
+
+      if self.btype == "No Input":
+         syndbGTK.ibtype.set_active(0)
+      else:
+         syndbGTK.ibtype.set_active(1)
+  
+      syndbGTK.chdict['iname'] = syndbGTK.iname.connect("changed",self.onTextChange)
+      syndbGTK.chdict['icolorBtn'] = syndbGTK.icolorBtn.connect("clicked",self.onColorChange)
+      syndbGTK.chdict['iconnec'] = syndbGTK.iconnec.connect("changed",self.onTextChange)
+      syndbGTK.chdict['ibtype'] = syndbGTK.ibtype.connect("changed",self.onTextChange)
+      syndbGTK.chdict['idb'] = syndbGTK.idb.connect("changed",self.onTextChange)
+      syndbGTK.chdict['iuser'] = syndbGTK.iuser.connect("changed",self.onTextChange)
+      syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
+      syndbGTK.chdict['iomode'] = syndbGTK.iomode.connect("changed",self.onTextChange)
+      syndbGTK.chdict['isep'] = syndbGTK.isep.connect("changed",self.onTextChange)
+      
+
+      return syndbGTK.o
+
+
+
+
+
+
+
+
+
+
+
+
 class synsel:
 
 

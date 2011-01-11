@@ -2230,6 +2230,11 @@ class MainWindow(object):
       syndb_img = builder.get_object("syndb_img")
       syndb_img.set_from_pixbuf(IMVEC.dbPixbuf)
 
+      self.synxmpp_btn = builder.get_object("synxmpp_btn")
+      synxmpp_img = builder.get_object("synxmpp_img")
+      synxmpp_img.set_from_pixbuf(IMVEC.xmppPixbuf)
+
+
 
       self.syncontainer_btn = builder.get_object("syncontainer_btn")
       self.syncontainer_img = builder.get_object("syncontainer_img")

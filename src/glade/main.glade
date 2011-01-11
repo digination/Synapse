@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Fri Jan  7 17:40:47 2011 -->
+<!--Generated with glade3 3.4.5 on Tue Jan 11 16:46:56 2011 -->
 <glade-interface>
   <widget class="GtkWindow" id="window1">
     <child>
@@ -591,7 +591,7 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip" translatable="yes">Adds a Timer item to the workflow.
+                                        <property name="tooltip" translatable="yes">Adds a database item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">GTK_RELIEF_NONE</property>
                                         <property name="response_id">0</property>
@@ -737,6 +737,28 @@ Drag'n'drop it to the drawing area.</property>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="position">7</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkButton" id="synxmpp_btn">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip" translatable="yes">Adds a Report item to the workflow.
+Drag'n'drop it to the drawing area.</property>
+                                        <property name="relief">GTK_RELIEF_NONE</property>
+                                        <property name="response_id">0</property>
+                                        <child>
+                                          <widget class="GtkImage" id="synxmpp_img">
+                                            <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">8</property>
                                       </packing>
                                     </child>
                                   </widget>

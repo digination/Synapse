@@ -78,6 +78,9 @@ class IMVEC:
       pyPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/python.png" % (RES_PATH),32,32)
       pyPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/256/python.png" % (RES_PATH),16,16)
 
+      xmppPixbuf =  gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/xmpp.png" % (RES_PATH),32,32)
+      xmppPixbuf_s =  gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/xmpp.png" % (RES_PATH),16,16)
+
 
       labelPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/64/labelItem.png" % (RES_PATH),32,32)
       exportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/32/export.png" % (RES_PATH),32,32)
