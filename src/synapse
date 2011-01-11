@@ -1574,12 +1574,17 @@ class MainWindow(object):
       
       if widget == self.stop_btn:
   
-         IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())         
+         IMVEC.engine.stopWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+         self.stop_btn.set_sensitive(False)
+         self.play_btn.set_sensitive(True)         
 
 
       if widget == self.play_btn:
    
-         IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())                      
+         IMVEC.engine.playWorkflow(IMVEC.activeDoc.getContainer().getSynObjects())
+         self.stop_btn.set_sensitive(True)
+         self.play_btn.set_sensitive(False)
+                             
 
 
       if widget == self.zoomin_btn:
@@ -2165,6 +2170,7 @@ class MainWindow(object):
 
       self.play_btn = builder.get_object("play_btn")
       self.stop_btn = builder.get_object("stop_btn")
+      self.stop_btn.set_sensitive(False)
 
       self.b2f_btn = builder.get_object("b2f_btn")
       self.s2b_btn = builder.get_object("s2b_btn")

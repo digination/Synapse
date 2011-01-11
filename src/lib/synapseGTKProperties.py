@@ -185,7 +185,7 @@ class synappGTK:
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
    lname = gtk.Label(str="Name")
-
+   lrot = gtk.Label(str="Rotation")
    
    #color definition
    icolor = gtk.Entry()
@@ -195,12 +195,32 @@ class synappGTK:
 
    
    iname = gtk.Entry()
+
    lcmd = gtk.Label(str="command")
    icmd = gtk.Entry()
    lwoi = gtk.Label(str= "Wake on Input")
    lbo = gtk.Label(str="Buffured Output")   
    lsl = gtk.Label(str="Split Lines")
 
+
+
+   irot = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   irot.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   irot.pack_start(cellr0)
+   irot.add_attribute(cellr0, 'text', 0)
+
+   irot.append_text("None")
+   irot.append_text("90 Degrees")
+   irot.append_text("-90 Degrees")
+   irot.append_text("180 Degrees")
+   
+   
+   irot.set_active(0)
+
+   
 
    iwoi = gtk.ComboBox()
 
@@ -241,14 +261,9 @@ class synappGTK:
 
 
 
-
-   #position
-
-   pos_box = synapsepositionGTK.o
-
-
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lrot,False,True,10)
    gtkPVbox1.pack_start(lcmd,False,True,10)
    gtkPVbox1.pack_start(lwoi,False,True,10)
    gtkPVbox1.pack_start(lbo,False,True,10)
@@ -256,6 +271,7 @@ class synappGTK:
 
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(irot,False,True,5)
    gtkPVbox2.pack_start(icmd,False,True,5)
    gtkPVbox2.pack_start(iwoi,False,True,5)
    gtkPVbox2.pack_start(ibo,False,True,5)
@@ -279,7 +295,7 @@ class synappGTK:
 
 
    o.pack_start(first_container,False,True,10)
-   o.pack_start(pos_box,False,True,10)
+
 
    o.show()
 
@@ -612,7 +628,6 @@ class synjectorGTK:
    iit.pack_start(cellr0)
    iit.add_attribute(cellr0, 'text', 0)
 
-   iit.append_text("String")
    iit.append_text("String List")
    iit.append_text("File")
 
@@ -1093,9 +1108,34 @@ class synpyGTK:
 
 class syndbGTK:
 
-   o = gtk.HBox()
+   o = gtk.VBox()
+
+   #first parameters
+   hbox1 = gtk.HBox()
+   hbox1.show()
+   #query box
+   hbox2 = gtk.HBox()
+   hbox2.show()
+   #final parameters box
+   hbox3 = gtk.HBox()
+   hbox3.show()
+   
+   
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
+   gtkPVbox1.show()
+   gtkPVbox2.show()
+
+   gtkPVbox3 = gtk.VBox()
+   gtkPVbox4 = gtk.VBox()
+   gtkPVbox3.show()
+   gtkPVbox4.show()
+
+   gtkPVbox5 = gtk.VBox()
+   gtkPVbox6 = gtk.VBox()
+   gtkPVbox5.show()
+   gtkPVbox6.show()
+
    lname = gtk.Label(str="Name")
    lconnec = gtk.Label(str="Connector")
    lbtype = gtk.Label(str="Block Type")
@@ -1103,7 +1143,13 @@ class syndbGTK:
    ldb = gtk.Label(str="Database")
    luser = gtk.Label(str="Username")
    lpassword = gtk.Label(str="Password")
-   lquery  = gtk.Label(str="Query")
+
+   lquery  = gtk.Label(str="    Query    ")
+
+   lomode = gtk.Label(str="Output Mode")
+   lsep = gtk.Label(str="Fields Separator")
+
+   
 
    
    #color definition
@@ -1125,7 +1171,6 @@ class syndbGTK:
    iconnec.append_text("Postgres")
    iconnec.set_active(0)
 
-
    ibtype = gtk.ComboBox()
   
    ls1 = gtk.ListStore(str)
@@ -1143,6 +1188,30 @@ class syndbGTK:
    iuser = gtk.Entry()
    ipassword = gtk.Entry()
 
+   itextBuffer = gtk.TextBuffer()
+   iquery = gtk.TextView(buffer=itextBuffer)
+   iquery.set_size_request(300,200)
+
+
+
+   iomode = gtk.ComboBox()
+   
+   ls1 = gtk.ListStore(str)
+   iomode.set_model(ls1)
+   cellr1 = gtk.CellRendererText()
+   iomode.pack_start(cellr0)
+   iomode.add_attribute(cellr0, 'text', 0)
+
+   iomode.append_text("Full Content")
+   iomode.append_text("Split Line")
+   iomode.append_text("Split Fields")
+   iomode.set_active(1)
+   
+
+
+   isep = gtk.Entry()
+   
+
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lconnec,False,True,10)  
@@ -1150,8 +1219,8 @@ class syndbGTK:
    gtkPVbox1.pack_start(lhostport,False,True,10) 
    gtkPVbox1.pack_start(ldb,False,True,10)
    gtkPVbox1.pack_start(luser,False,True,10)
-   gtkPVbox1.pack_start(lpassword,False,True,10)    
-
+   gtkPVbox1.pack_start(lpassword,False,True,10)
+  
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iconnec,False,True,5)
@@ -1161,14 +1230,67 @@ class syndbGTK:
    gtkPVbox2.pack_start(iuser,False,True,5)
    gtkPVbox2.pack_start(ipassword,False,True,5)
 
+
+   gtkPVbox3.pack_start(lquery,False,True,10)
+   gtkPVbox4.pack_start(iquery,False,True,5)
+
+
+
+   gtkPVbox5.pack_start(lomode,False,True,10)   
+   gtkPVbox5.pack_start(lsep,False,True,10)
+
+   gtkPVbox6.pack_start(iomode,False,True,5)
+   gtkPVbox6.pack_start(isep,False,True,5)
+
+
+
+
    chdict = dict()
 
    for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
-      child1.show()
-      child2.show()
 
-   o.pack_start(gtkPVbox1,False,True,10)
-   o.pack_start(gtkPVbox2,False,True,0)
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   for child1,child2 in map(None,gtkPVbox3.get_children(),gtkPVbox4.get_children()):
+
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   for child1,child2 in map(None,gtkPVbox5.get_children(),gtkPVbox6.get_children()):
+
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   hbox1.pack_start(gtkPVbox1,False,True,10)
+   hbox1.pack_start(gtkPVbox2,False,True,0)
+
+   hbox2.pack_start(gtkPVbox3,False,True,10)
+   hbox2.pack_start(gtkPVbox4,False,True,0)
+
+   hbox3.pack_start(gtkPVbox5,False,True,10)
+   hbox3.pack_start(gtkPVbox6,False,True,0)
+
+
+   o.pack_start(hbox1,False,True,5)
+   o.pack_start(hbox2,False,True,5)
+   o.pack_start(hbox3,False,True,0)
+
 
    for child in o.get_children():
       child.show()

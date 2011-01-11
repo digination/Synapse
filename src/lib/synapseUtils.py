@@ -4,6 +4,20 @@ from synapseIMVEC import *
 from synapseDebug import dbg
 from copy import *
 import time
+from math import *
+
+
+
+def getRotatedCoords(x,y,angle):
+
+   rmatrix = { -90 : (0,-1,1,0) , 90 : (0,1,-1,0), 180 : (-1,0,0,-1) }
+
+   print rmatrix[angle]
+
+   nx = (x * rmatrix[angle][0]) + (y * rmatrix[angle][1])
+   ny = (x * rmatrix[angle][2]) + (y * rmatrix[angle][3])
+
+   return (nx,ny) 
 
 
 
@@ -64,8 +78,6 @@ def resclaleColorSel(color):
 
       result += "%02x%02x%02x" % (r,g,b)
       return result
-
-
 
 
 def resolve(objname):

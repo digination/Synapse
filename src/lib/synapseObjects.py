@@ -358,6 +358,7 @@ class synobj:
       self.needSender = False
       self.alive = False
       self.loop_mode = False
+       
   
 
    def broadcast(self):
@@ -1082,7 +1083,7 @@ class syncom(synobj):
 
    def onITextBufferChanged(self,textbuff):
       self.text = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
-      IMVEC.activeDoc.getContainer().getMember(self.name).getSynItem().setComment(self.text)
+      IMVEC.activeDoc.getContainer().getMember(self.id).getSynItem().setComment(self.text)
 
 
    def disconnectAll(self):
@@ -1663,6 +1664,16 @@ class synapp(synobj):
          #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
 
 
+      elif (widget == synappGTK.irot):
+
+         rotation = synappGTK.irot.get_active_text()
+         if (rotation == "None"):
+            IMVEC.activeDoc.getActiveM().getSynItem().setRotation(0)
+         else:
+            IMVEC.activeDoc.getActiveM().getSynItem().setRotation( int(rotation.replace(" Degrees","")) )
+            IMVEC.activeDoc.getActiveM().getSynItem().rotate(self.rotation)
+
+
       elif (widget == synappGTK.icmd):
 
          if synappGTK.icmd.get_text()[len(synappGTK.icmd.get_text())-1] == " ":
@@ -1718,6 +1729,7 @@ class synapp(synobj):
    def disconnectAll(self):
 
          synappGTK.iname.disconnect(synappGTK.chdict['iname'])
+         synappGTK.irot.disconnect(synappGTK.chdict['irot'])
          synappGTK.icmd.disconnect(synappGTK.chdict['icmd'])
          synappGTK.iwoi.disconnect(synappGTK.chdict['iwoi'])
          synappGTK.ibo.disconnect(synappGTK.chdict['ibo'])
@@ -1746,6 +1758,7 @@ class synapp(synobj):
          synappGTK.isl.set_active(1)
 
       synappGTK.chdict['iname'] = synappGTK.iname.connect("changed",self.onTextChange)
+      synappGTK.chdict['irot'] = synappGTK.irot.connect("changed",self.onTextChange)
       synappGTK.chdict['icmd'] = synappGTK.icmd.connect("changed",self.onTextChange)
       synappGTK.chdict['iwoi'] = synappGTK.iwoi.connect("changed",self.onTextChange)
       synappGTK.chdict['ibo'] = synappGTK.ibo.connect("changed",self.onTextChange)
@@ -2559,9 +2572,26 @@ class syndb(synobj):
       if (self.btype == "No Input"):
 
          dbcurs.execute(self.query)
+         if (self.query.upper().find('INSERT') == 0  or self.query.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
          self.obuff = dbcurs.fetchall()
          print self.obuff
          self.alive = False
+
+      else:
+
+         while len(self.ibuff) != 0:
+
+            input_buffer = self.ibuff.pop(0)
+            (input_num,sep,content) = input_buffer.partition(":")
+            nquery = self.query.replace("[[SYNDB_INPUT]]",content)
+            dbcurs.execute(nquery)
+ 
+            if (nquery.upper().find('INSERT') == 0  or nquery.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
+            self.obuff = dbcurs.fetchall()
+            print self.obuff
+
 
          
   
@@ -2575,7 +2605,7 @@ class syndb(synobj):
       self.WOI = False
       self.name = name
 
-      self.query ="select * from news limit 1"
+      self.query ="select * from [[SYNDB_INPUT]] limit 1"
 
       self.peers = list()
       self.ibuff = list()
@@ -2586,10 +2616,11 @@ class syndb(synobj):
       self.database = ""
       self.user = ""
       self.password = ""
+      self.outputMode = "Split Lines"
+      self.fieldSep = "|"
       
       
       
- 
    def getQuery(self):
 
       return self.query
@@ -2644,6 +2675,14 @@ class syndb(synobj):
          else:
             self.connec = "Postgres"
 
+      elif (widget == syndbGTK.iomode):
+         self.outputMode = syndbGTK.iomode.get_active_text()
+
+      elif (widget == syndbGTK.isep):
+         self.fieldSep = syndbGTK.isep.get_text()
+
+
+
         
    def onColorChange(self,widget):
 
@@ -2684,14 +2723,23 @@ class syndb(synobj):
       syndbGTK.idb.set_text(self.database)
       syndbGTK.iuser.set_text(self.user)
       syndbGTK.ipassword.set_text(self.password)
-
-
+      syndbGTK.isep.set_text(self.fieldSep)
+      
       syndbGTK.icolor.set_text(self.color)
 
       if self.connec == "MySQL":
          syndbGTK.iconnec.set_active(0)
       else:
          syndbGTK.iconnec.set_active(1)
+
+
+      if self.outputMode == "Full Content":
+         syndbGTK.iomode.set_active(0)
+      elif self.outputMode == "Split Lines":
+         syndbGTK.iomode.set_active(1)
+      else:
+         syndbGTK.iomode.set_active(2)
+
 
       if self.btype == "No Input":
          syndbGTK.ibtype.set_active(0)
@@ -2705,7 +2753,9 @@ class syndb(synobj):
       syndbGTK.chdict['idb'] = syndbGTK.idb.connect("changed",self.onTextChange)
       syndbGTK.chdict['iuser'] = syndbGTK.iuser.connect("changed",self.onTextChange)
       syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
-
+      syndbGTK.chdict['iomode'] = syndbGTK.iomode.connect("changed",self.onTextChange)
+      syndbGTK.chdict['isep'] = syndbGTK.isep.connect("changed",self.onTextChange)
+      
 
       return syndbGTK.o
 

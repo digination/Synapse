@@ -135,12 +135,13 @@ def motion_notify(widget, event):
                   PRE_CONTAINER = None
                   IMVEC.activeDoc.getCanvas().window.set_cursor(None)
                
-        
+         mx = int(event.x)
+         my = int(event.y)
+
+         MOVED_OBJECT.set_property("x",mx - COORDS_OFFSET[0] ) 
+         MOVED_OBJECT.set_property("y",my - COORDS_OFFSET[1])
 
 
-
-         MOVED_OBJECT.set_property("x",int(event.x)-COORDS_OFFSET[0])
-         MOVED_OBJECT.set_property("y",int(event.y)-COORDS_OFFSET[1])
 
          for link in IMVEC.linkList:
             link.update()
@@ -241,51 +242,51 @@ class synItem():
          output.set_transform(None)
 
 
-   def changeIOPos(self,input_pos,output_pos):
+   def setRotation(self,rotation):
 
-      self.reinit_pos()
+      self.rotation = rotation
 
-      if (input_pos != "left"):
+   #return coords after being transformed by a rotation matrix
+   def getTCoords(self):
 
-         rotate_coords = compute_bary_internal(self.inputs[0])
+      rx = self.o.get_property("x")
+      ry = self.o.get_property("y")
 
-         self.inputs[0].rotate(self.tr_table_in[input_pos][2],rotate_coords[0],rotate_coords[1])
-         new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(self.inputs[0],self.tr_table_in[input_pos][0],self.tr_table_in[input_pos][1])
+      rwidth = self.o.get_property("width")
+      rheight = self.o.get_property("height")
 
-         self.inputs[0].set_property("x",new_coords[0])
-         self.inputs[0].set_property("y",new_coords[1])      
+      if self.rotation != None:
 
+         rmatrix = { -90 : (0,-1,1,0) , 90 : (0,1,-1,0), 180 : (-1,0,0,-1) }
+      
+         rx = (rx * rmatrix[self.rotation][0]) + (y * rmatrix[self.rotation][1])
+         ry = (rx * rmatrix[self.rotation][2]) + (y * rmatrix[self.rotation][3])
 
-      if (output_pos != "right" and output_pos != None ) :
-
-         process_outputs = 0
-
-         for outp in self.outputs:
-
-            rotate_coords = compute_bary_internal(outp)
-            outp.rotate(self.tr_table_out[output_pos][2],rotate_coords[0],rotate_coords[1])
-
-
-            if (output_pos != "left"):
-
-               new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(outp,self.tr_table_out[output_pos][0]+(17*process_outputs),self.tr_table_out[output_pos][1])
+         rwidth = (rwidth * rmatrix[self.rotation][0]) + (rheight * rmatrix[self.rotation][1])
+         rwidth = (rwidth * rmatrix[self.rotation][2]) + (rheight * rmatrix[self.rotation][3])
 
 
-            else:
+      return (rx,ry,rwidth,rheight)
 
-               new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(outp,self.tr_table_out[output_pos][0],self.tr_table_out[output_pos][1]+(17*process_outputs))
-
-            outp.set_property("x",new_coords[0])
-            outp.set_property("y",new_coords[1])   
-            
-            process_outputs +=1      
+      
+      
 
 
+   def rotate(self,angle):
+
+      #self.inputs[0].rotate(self.tr_table_in[input_pos][2],rotate_coords[0],rotate_coords[1])
+      #new_coords = IMVEC.activeDoc.getCanvas().convert_to_item_space(self.inputs[0],self.tr_table_in[input_pos][0],self.tr_table_in[input_pos][1])
+      #self.inputs[0].set_property("x",new_coords[0])
+      #self.inputs[0].set_property("y",new_coords[1])      
+
+      bary_coords = compute_bary_internal(self.o)
+
+      self.o.rotate(angle,bary_coords[0],bary_coords[1])
+      print self.o.get_simple_transform()
+      
 
 
-
-
-  
+    
    def objectSelectionChange(self,item, target_item, event):
 
       global ACTIVE_OBJECT
@@ -345,9 +346,15 @@ class synItem():
          MOVED_OBJECT = self.getO()
          ACTIVE_OBJECT = self
 
-         (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
+         ref_obj = IMVEC.activeDoc.getContainer().getMemberFromSynItem(self).getSynObj()
+
+         px = self.getO().get_property("x")
+         py = self.getO().get_property("y")
+
+         #Junk Code ???
+         #(abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
          #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
-         COORDS_OFFSET = [ MOUSE_COORDS[0] - self.getO().get_property("x") ,  MOUSE_COORDS[1] - self.getO().get_property("y")]
+         COORDS_OFFSET = [ MOUSE_COORDS[0] - px  ,  MOUSE_COORDS[1] - py ]
          synapseHistory.history.addHistory()
 
 
@@ -550,10 +557,6 @@ class synappItem(synItem):
 
    def __init__(self,parent_canvas):
 
-
-      self.tr_table_in = { 'right' : (135,40,180) , 'top' : (83,0,90), 'bottom' : (53,50,270) }
-      self.tr_table_out = { 'left' : (0,25,180) , 'top' : (53,0,270), 'bottom' : (67,50,90) }
-      
 
       self.outputs = list()
       self.inputs = list()
@@ -762,18 +765,23 @@ class injectorItem(synItem):
       self.root = parent_canvas
       self.o = goocanvas.Group(parent=self.root)
 
-      self.mf = goocanvas.Path(parent = self.o, data="M 10 10 L 60 50 L 10 90 L 10 10 z", stroke_color="#cccccc", fill_color="#cc99ff", line_width=4)
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
+				stroke_color="#cccccc", fill_color="#FF4242",
+				line_width=4)
 
       self.pixbuf = IMVEC.injectorPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=13,y=33,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
 
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.outputs.append(goocanvas.Rect( parent = self.o,x=60, y=45, width=10, height=10,
-				stroke_color="black", fill_color="#00cbff",
-				line_width=1))
+      self.outputs[0].set_property("x",51)
+      self.outputs[0].set_property("y",10)
+
+     
       
-      self.ltext = goocanvas.Text(parent = self.o, text="",font="sans 8", x=7, y=-7,
-						width=100,fill_color="#cc99ff")
+      self.ltext = goocanvas.Text(parent = self.o, text="",font="sans 8", x=3, y=-15,
+						width=100,fill_color="#FF4242")
 
       self.connectAll()
      
@@ -1916,12 +1924,12 @@ class pyItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
-				stroke_color="#cccccc", fill_color="#00CC66",
-				line_width=4)
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, width=80, height=50,
+				stroke_color="#cccccc", fill_color="#00cc66",
+				line_width=4,radius_x=10,radius_y=10)
 
       self.pixbuf = IMVEC.pyPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
 
     
 
@@ -1983,12 +1991,12 @@ class dbItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
 
-      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=50, height=50,
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=80, height=50,
 				stroke_color="#cccccc", fill_color="#0000FF",
 				line_width=4)
 
       self.pixbuf = IMVEC.dbPixbuf
-      self.icon = goocanvas.Image(parent = self.o,x=10,y=10,pixbuf=self.pixbuf)
+      self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
 
     
 
@@ -2007,7 +2015,7 @@ class dbItem(synItem):
       self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
                                       stroke_color="black", fill_color="#00cbff", line_width=1))
 
-      self.outputs[0].set_property("x",51)
+      self.outputs[0].set_property("x",81)
       self.outputs[0].set_property("y",10)
 
       
