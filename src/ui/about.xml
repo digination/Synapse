@@ -27,7 +27,7 @@
         <child>
           <object class="GtkLabel" id="label2">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Copyright 2010 Cl&#xE9;ment Gam&#xE9;.
+            <property name="label" translatable="yes">Copyright 2011 Cl&#xE9;ment "WintermeW" Gam&#xE9;.
 This Program is licensed under the GNU/GPL license V2</property>
           </object>
           <packing>

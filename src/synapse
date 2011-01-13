@@ -236,10 +236,10 @@ class document(object):
             pixbuf = IMVEC.kbdPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synpy"):
             pixbuf = IMVEC.pyPixbuf_s
-
          elif (str(obj.__class__) == "synapseObjects.syndb"):
             pixbuf = IMVEC.dbPixbuf_s
-
+         elif (str(obj.__class__) == "synapseObjects.synxmpp"):
+            pixbuf = IMVEC.xmppPixbuf_s
 
          if sorting == 'name': 
             obrowser_dict[obj.getName()] = (pixbuf,obj.getName())
@@ -501,6 +501,21 @@ class document(object):
          newitem.setText("Db%d" % (self.nbdbs))
 
          self.refresh_objects_list()
+
+      elif (context.get_source_widget().get_name() == "synxmpp_btn"):
+
+         self.nbxmpps+=1
+         newobj = syndb("Xmpp%d" % (self.nbxmpps))
+         newitem = xmppItem(root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
+         newitem.setText("Xmpp%d" % (self.nbxmpps))
+
+         self.refresh_objects_list()
+
+
 
 
    def zoomOut(self):
@@ -797,6 +812,7 @@ class document(object):
       self.nbreports = 0
       self.nbpys = 0
       self.nbdbs = 0
+      self.nbxmpps = 0
       self.nblabels = 0
       self.nbkbds = 0
 
@@ -1219,6 +1235,8 @@ class MainWindow(object):
       nbreports = 0
       nblabels = 0
       nbpys = 0
+      nbdbs = 0
+      nbxmpps = 0
 
 
  
@@ -1262,9 +1280,6 @@ class MainWindow(object):
                container.getSynItem().getLtext().set_property("fill_color",pobj.getColor())
 
          
-
-
-
       for pobj in pickled_objects:
 
          newitem = None
@@ -1301,6 +1316,15 @@ class MainWindow(object):
          elif str(pobj.__class__) == "synapseObjects.synjector":
             newitem = injectorItem(root)
             nbinjectors +=1
+
+         elif str(pobj.__class__) == "synapseObjects.syndb":
+            newitem = dbItem(root)
+            nbdbs +=1
+
+         elif str(pobj.__class__) == "synapseObjects.synpy":
+            newitem = pyItem(root)
+            nbpys +=1
+
 
          elif str(pobj.__class__) == "synapseObjects.syncom":
             newitem = commentItem(root)
@@ -1771,9 +1795,6 @@ class MainWindow(object):
             copy_string = "SYNAPSE_CLIPBOARD_SERIALIZED_BB: %s" % (pickled_object)
             IMVEC.cb.set_text(copy_string)
             
-
-
-
 
 
    def startPaste(self):
@@ -2429,6 +2450,11 @@ class MainWindow(object):
                                gtk.gdk.ACTION_COPY)
 
 
+      self.synxmpp_btn.connect("drag_data_get", self.sendCallback)
+      self.synxmpp_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
       self.syncontainer_btn.connect("drag_data_get", self.sendCallback)
       self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
@@ -2461,7 +2487,7 @@ class MainWindow(object):
       self.synkbd_btn.set_name("synkbd_btn")
       self.syndb_btn.set_name("syndb_btn")
       self.synpy_btn.set_name("synpy_btn")
-
+      self.synxmpp_btn.set_name("synxmpp_btn")
 
       self.hpaned1.set_position(800)
       self.vpaned1.set_position(250)

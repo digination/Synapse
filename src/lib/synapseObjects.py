@@ -37,26 +37,24 @@ try:
 except:
 
    #using print here, because debug object not created yet
-   print "[WARNING] REPORT API NOT LOADED"
-
+   print "[WARNING] REPORT API NOT LOADED: REPORT BB WILL BE UNAVAILABLE"
 
 try:
-
    import MySQLdb
-
 except:
-
    print "[WARNING] MYSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
 
+try:
+   import psycopg2
+except:
+   print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
+
 
 try:
-
-   import psycopg2
-
+   import pyxmpp
+   IMVEC.HAS_XMPP = 1
 except:
-
-   print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
-   
+   print "[WARNING] XMPP LIBRARY NOT LOADED: SYNXMPP BB WILL BE UNAVAILABLE"
 
 
 
@@ -2574,8 +2572,9 @@ class syndb(synobj):
          dbcurs.execute(self.query)
          if (self.query.upper().find('INSERT') == 0  or self.query.upper().find('UPDATE') == 0 ):
                dbcurs.commit()
-         self.obuff = dbcurs.fetchall()
-         print self.obuff
+         results = dbcurs.fetchall()
+         self.formatResults(results)
+
          self.alive = False
 
       else:
@@ -2589,14 +2588,45 @@ class syndb(synobj):
  
             if (nquery.upper().find('INSERT') == 0  or nquery.upper().find('UPDATE') == 0 ):
                dbcurs.commit()
-            self.obuff = dbcurs.fetchall()
-            print self.obuff
+            results = dbcurs.fetchall()
+            self.formatResults(results)
+            
+            
 
 
-         
-  
+   def formatResults(self,results):
 
-               
+      if self.outputMode == "Split Lines":
+
+         for line in results:
+
+            self.obuff = ""
+            for field in line:
+               self.obuff  += str(field) + self.fieldSep
+            self.broadcast()
+
+      elif self.outputMode == "Split Fields":
+
+         for line in results:
+    
+            for field in line:
+               self.obuff = str(field)
+               self.broadcast()
+
+
+      elif self.outputMode == "Full Content":
+
+         self.obuff = ""
+         for line in results:
+    
+            for field in line:
+               self.obuff  += str(field) + self.fieldSep
+            self.obuff += "\n"
+
+         self.broadcast()
+
+
+            
    def __init__(self,name):
 
       synapp.nbinst+=1
@@ -2638,6 +2668,10 @@ class syndb(synobj):
       return self.connector
 
          
+
+   def onITextBufferChanged(self,textbuff):
+      self.query = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
+
    def onTextChange(self,widget):
 
 
@@ -2727,6 +2761,9 @@ class syndb(synobj):
       
       syndbGTK.icolor.set_text(self.color)
 
+      syndbGTK.itextBuffer.set_text(self.query)
+
+
       if self.connec == "MySQL":
          syndbGTK.iconnec.set_active(0)
       else:
@@ -2755,7 +2792,7 @@ class syndb(synobj):
       syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
       syndbGTK.chdict['iomode'] = syndbGTK.iomode.connect("changed",self.onTextChange)
       syndbGTK.chdict['isep'] = syndbGTK.isep.connect("changed",self.onTextChange)
-      
+      syndbGTK.chdict['iquery'] = syndbGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
 
       return syndbGTK.o
 
@@ -2780,27 +2817,12 @@ class synxmpp(synobj):
       self.alive = True
       runvars = dict()
       
-      try:
-         (dbhost,dbport) = self.hostport.split(":")
-      except:
-         IMVEC.dbg.debug("CANNOT PARSE HOST:PORT PARAMETERS. STOPPING DB BLOCK",tuple(),dbg.CRITICAL)
-         self.alive = False
-
-      if (self.connec == "MySQL" ):
-
-         IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
-         dbh = MySQLdb.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
-         dbcurs = dbh.cursor()
-         
-      else:
-         IMVEC.dbg.debug("STARTING A NEW POSTGRES CONNECTION",tuple(),dbg.DEBUG)
-         dbh = psycopg2.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
-         dbcurs = dbh.cursor()
-         
-      runvars['dbh'] = dbh
-      runvars['dbcurs'] = dbcurs
-      
-      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+     
+      #IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
+    
+      #runvars['dbh'] = dbh
+      #runvars['dbcurs'] = dbcurs
+      #IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
 
    def run(self):

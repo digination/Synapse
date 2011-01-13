@@ -20,6 +20,7 @@ class IMVEC:
    cfg = None;
 
    has_webkit = 0
+   HAS_XMPP = 0
    
    #application clipboard. loads only if gtk available
    if HAS_GTK:
@@ -70,6 +71,7 @@ class IMVEC:
       containerPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),32,32)
       reportPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),32,32)
       dbPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/dbItem.png" % (RES_PATH),32,32)
+      dbPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/dbItem.png" % (RES_PATH),16,16)  
 
       kbdPixbuf = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),32,32)
       kbdPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/keyboard.png" % (RES_PATH),16,16)
@@ -103,7 +105,7 @@ class IMVEC:
       monitorPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/monitorItem.png" % (RES_PATH),16,16)
       containerPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/containerItem.png" % (RES_PATH),16,16)
       reportPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/reportItem.png" % (RES_PATH),16,16)
-      dbPixbuf_s = gtk.gdk.pixbuf_new_from_file_at_size("%s/icons/128/dbItem.png" % (RES_PATH),16,16)  
+     
  
    
 

@@ -2032,6 +2032,55 @@ class dbItem(synItem):
 
 
 
+class xmppItem(synItem):
+
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.iconnList = [0,0,0]
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=80, height=50,
+				stroke_color="#cccccc", fill_color="#660033",
+				line_width=4)
+
+      self.pixbuf = IMVEC.xmppPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
+
+
+      self.inputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.inputs[0].set_property("x",0)
+      self.inputs[0].set_property("y",10)
+
+
+
+
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.outputs[0].set_property("x",81)
+      self.outputs[0].set_property("y",10)
+
+      
+
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#660033")
+
+      self.connectAll()
+
+
+
+
+
+
 
 
 class selItem:
