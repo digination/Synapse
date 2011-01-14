@@ -541,6 +541,26 @@ Drag'n'drop it to the drawing area.</property>
                                         <property name="position">7</property>
                                       </packing>
                                     </child>
+                                    <child>
+                                      <widget class="GtkButton" id="synscapy_btn">
+                                        <property name="height_request">46</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <widget class="GtkImage" id="synscapy_img">
+                                            <property name="visible">True</property>
+                                            <property name="stock">gtk-missing-image</property>
+                                          </widget>
+                                        </child>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">8</property>
+                                      </packing>
+                                    </child>
                                   </widget>
                                   <packing>
                                     <property name="position">0</property>

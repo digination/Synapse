@@ -2859,7 +2859,7 @@ class synxmpp(synobj):
                
    def __init__(self,name):
 
-      synapp.nbinst+=1
+      synxmpp.nbinst+=1
       self.init_common()
 
       self.WOI = False
@@ -2870,8 +2870,15 @@ class synxmpp(synobj):
       self.peers = list()
       self.ibuff = list()
       self.obuff = ""
-      self.connec = "MySQL"
-      self.btype = "No Input"
+
+      self.jid = "foo@bar.com"
+      self.password = ""
+      self.hostport = ""
+      
+
+
+
+      
       
       
       
@@ -2973,46 +2980,24 @@ class synxmpp(synobj):
 
    def getPropWidget(self):
 
-      syndbGTK.iname.set_text(self.name)
-      syndbGTK.ihostport.set_text(self.hostport)
-      syndbGTK.idb.set_text(self.database)
-      syndbGTK.iuser.set_text(self.user)
-      syndbGTK.ipassword.set_text(self.password)
-      syndbGTK.isep.set_text(self.fieldSep)
-      
+      synxmppGTK.iname.set_text(self.name)
+      synxmppGTK.ihostport.set_text(self.hostport)
+      synxmppGTK.ijid.set_text(self.jid)
+      synxmppGTK.ipassword.set_text(self.password)
+
       syndbGTK.icolor.set_text(self.color)
 
-      if self.connec == "MySQL":
-         syndbGTK.iconnec.set_active(0)
-      else:
-         syndbGTK.iconnec.set_active(1)
+     
+      synxmppGTK.chdict['iname'] = synxmppGTK.iname.connect("changed",self.onTextChange)
+      synxmppGTK.chdict['icolorBtn'] = synxmppGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synxmppGTK.chdict['ihostport'] = synxmppGTK.ihostport.connect("changed",self.onTextChange)
+      synxmppGTK.chdict['ijid'] = synxmppGTK.ijid.connect("changed",self.onTextChange)
+      synxmppGTK.chdict['ipassword'] = synxmppGTK.ipassword.connect("changed",self.onTextChange)
+      #synxmppGTK.chdict['ijidpeers'] = syndbGTK.iomode.connect("changed",self.onTextChange)
 
-
-      if self.outputMode == "Full Content":
-         syndbGTK.iomode.set_active(0)
-      elif self.outputMode == "Split Lines":
-         syndbGTK.iomode.set_active(1)
-      else:
-         syndbGTK.iomode.set_active(2)
-
-
-      if self.btype == "No Input":
-         syndbGTK.ibtype.set_active(0)
-      else:
-         syndbGTK.ibtype.set_active(1)
-  
-      syndbGTK.chdict['iname'] = syndbGTK.iname.connect("changed",self.onTextChange)
-      syndbGTK.chdict['icolorBtn'] = syndbGTK.icolorBtn.connect("clicked",self.onColorChange)
-      syndbGTK.chdict['iconnec'] = syndbGTK.iconnec.connect("changed",self.onTextChange)
-      syndbGTK.chdict['ibtype'] = syndbGTK.ibtype.connect("changed",self.onTextChange)
-      syndbGTK.chdict['idb'] = syndbGTK.idb.connect("changed",self.onTextChange)
-      syndbGTK.chdict['iuser'] = syndbGTK.iuser.connect("changed",self.onTextChange)
-      syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
-      syndbGTK.chdict['iomode'] = syndbGTK.iomode.connect("changed",self.onTextChange)
-      syndbGTK.chdict['isep'] = syndbGTK.isep.connect("changed",self.onTextChange)
       
 
-      return syndbGTK.o
+      return synxmppGTK.o
 
 
 

@@ -1331,7 +1331,7 @@ class synxmppGTK:
    gtkPVbox6.show()
 
    lname = gtk.Label(str="Name")
-   lserv = gtk.Label(str="XMPP Server (Host:port)")
+   lhostport = gtk.Label(str="XMPP Server (Host:port)")
    ljid = gtk.Label(str="JID")
    lpassword = gtk.Label(str="Password")
    lpeers = gtk.Label(str="peers(JIDs)")
@@ -1344,86 +1344,43 @@ class synxmppGTK:
    
    iname = gtk.Entry()
 
-   iconnec = gtk.ComboBox()
-  
-   ls0 = gtk.ListStore(str)
-   iconnec.set_model(ls0)
-   cellr0 = gtk.CellRendererText()
-   iconnec.pack_start(cellr0)
-   iconnec.add_attribute(cellr0, 'text', 0)
-
-   iconnec.append_text("MySQL")
-   iconnec.append_text("Postgres")
-   iconnec.set_active(0)
-
-   ibtype = gtk.ComboBox()
-  
-   ls1 = gtk.ListStore(str)
-   ibtype.set_model(ls1)
-   cellr1 = gtk.CellRendererText()
-   ibtype.pack_start(cellr0)
-   ibtype.add_attribute(cellr0, 'text', 0)
-
-   ibtype.append_text("No Input")
-   ibtype.append_text("Has Input")
-   ibtype.set_active(0)
-
    ihostport = gtk.Entry()
-   idb = gtk.Entry()
-   iuser = gtk.Entry()
+   ijid = gtk.Entry()
    ipassword = gtk.Entry()
 
    itextBuffer = gtk.TextBuffer()
-   iquery = gtk.TextView(buffer=itextBuffer)
-   iquery.set_size_request(300,200)
+   ijidpeers = gtk.TextView(buffer=itextBuffer)
+   ijidpeers.set_size_request(300,200)
 
-
-
-   iomode = gtk.ComboBox()
-   
-   ls1 = gtk.ListStore(str)
-   iomode.set_model(ls1)
-   cellr1 = gtk.CellRendererText()
-   iomode.pack_start(cellr0)
-   iomode.add_attribute(cellr0, 'text', 0)
-
-   iomode.append_text("Full Content")
-   iomode.append_text("Split Lines")
-   iomode.append_text("Split Fields")
-   iomode.set_active(1)
-   
-   isep = gtk.Entry()
-   
 
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
-   gtkPVbox1.pack_start(lconnec,False,True,10)  
-   gtkPVbox1.pack_start(lbtype,False,True,10)
-   gtkPVbox1.pack_start(lhostport,False,True,10) 
-   gtkPVbox1.pack_start(ldb,False,True,10)
-   gtkPVbox1.pack_start(luser,False,True,10)
-   gtkPVbox1.pack_start(lpassword,False,True,10)
+   gtkPVbox1.pack_start(lhostport,False,True,10)  
+   gtkPVbox1.pack_start(ljid,False,True,10)
+   gtkPVbox1.pack_start(lpassword,False,True,10) 
+   gtkPVbox1.pack_start(lpeers,False,True,10)
+   #gtkPVbox1.pack_start(ijidpeers,False,True,5)
+
   
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
-   gtkPVbox2.pack_start(iconnec,False,True,5)
-   gtkPVbox2.pack_start(ibtype,False,True,5)
    gtkPVbox2.pack_start(ihostport,False,True,5)
-   gtkPVbox2.pack_start(idb,False,True,5)
-   gtkPVbox2.pack_start(iuser,False,True,5)
+   gtkPVbox2.pack_start(ijid,False,True,5)
    gtkPVbox2.pack_start(ipassword,False,True,5)
+   #gtkPVbox2.pack_start(ijid,False,True,5)
+   
 
 
-   gtkPVbox3.pack_start(lquery,False,True,10)
-   gtkPVbox4.pack_start(iquery,False,True,5)
+   #gtkPVbox3.pack_start(lquery,False,True,10)
+   #gtkPVbox4.pack_start(iquery,False,True,5)
 
 
 
-   gtkPVbox5.pack_start(lomode,False,True,10)   
-   gtkPVbox5.pack_start(lsep,False,True,10)
+   #gtkPVbox5.pack_start(lomode,False,True,10)   
+   #gtkPVbox5.pack_start(lsep,False,True,10)
 
-   gtkPVbox6.pack_start(iomode,False,True,5)
-   gtkPVbox6.pack_start(isep,False,True,5)
+   #gtkPVbox6.pack_start(iomode,False,True,5)
+   #gtkPVbox6.pack_start(isep,False,True,5)
 
 
 

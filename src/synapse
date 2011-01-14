@@ -505,7 +505,7 @@ class document(object):
       elif (context.get_source_widget().get_name() == "synxmpp_btn"):
 
          self.nbxmpps+=1
-         newobj = syndb("Xmpp%d" % (self.nbxmpps))
+         newobj = synxmpp("Xmpp%d" % (self.nbxmpps))
          newitem = xmppItem(root)
          self.container.append(linker(newobj,newitem))
 
@@ -2254,6 +2254,11 @@ class MainWindow(object):
       self.synxmpp_btn = builder.get_object("synxmpp_btn")
       synxmpp_img = builder.get_object("synxmpp_img")
       synxmpp_img.set_from_pixbuf(IMVEC.xmppPixbuf)
+
+
+      self.synscapy_btn = builder.get_object("synscapy_btn")
+      synscapy_img = builder.get_object("synscapy_img")
+      synscapy_img.set_from_pixbuf(IMVEC.scapyPixbuf)
 
 
 
