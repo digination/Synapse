@@ -43,16 +43,18 @@ try:
    import MySQLdb
 except:
    print "[WARNING] MYSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
-
 try:
    import psycopg2
 except:
    print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
 
-
 try:
-   import pyxmpp
+
+   from pyxmpp.all import JID,Iq,Presence,Message,StreamError
+   from pyxmpp.jabber.client import JabberClient
+   
    IMVEC.HAS_XMPP = 1
+
 except:
    print "[WARNING] XMPP LIBRARY NOT LOADED: SYNXMPP BB WILL BE UNAVAILABLE"
 

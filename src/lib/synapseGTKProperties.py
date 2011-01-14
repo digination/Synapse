@@ -1214,7 +1214,7 @@ class syndbGTK:
 
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
-   gtkPVbox1.pack_start(lconnec,False,True,10)  
+   gtkPVbox1.pack_start(lconnec,False,True,5)  
    gtkPVbox1.pack_start(lbtype,False,True,10)
    gtkPVbox1.pack_start(lhostport,False,True,10) 
    gtkPVbox1.pack_start(ldb,False,True,10)
@@ -1331,7 +1331,7 @@ class synxmppGTK:
    gtkPVbox6.show()
 
    lname = gtk.Label(str="Name")
-   lhostport = gtk.Label(str="XMPP Server (Host:port)")
+   lhostport = gtk.Label(str="Server:port")
    ljid = gtk.Label(str="JID")
    lpassword = gtk.Label(str="Password")
    lpeers = gtk.Label(str="peers(JIDs)")
@@ -1355,7 +1355,7 @@ class synxmppGTK:
 
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
-   gtkPVbox1.pack_start(lhostport,False,True,10)  
+   gtkPVbox1.pack_start(lhostport,False,True,5)  
    gtkPVbox1.pack_start(ljid,False,True,10)
    gtkPVbox1.pack_start(lpassword,False,True,10) 
    gtkPVbox1.pack_start(lpeers,False,True,10)
