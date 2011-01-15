@@ -576,15 +576,15 @@ Drag'n'drop it to the drawing area.</property>
                                     <property name="visible">True</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkButton" id="synserv_btn">
+                                      <object class="GtkButton" id="syncli_btn">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
-                                        <property name="tooltip-text" translatable="yes">Adds a service item to the workflow.
+                                        <property name="tooltip-text" translatable="yes">Adds a client item to the workflow.
 Drag'n'drop it to the drawing area.</property>
                                         <property name="relief">none</property>
                                         <child>
-                                          <object class="GtkImage" id="synserv_img">
+                                          <object class="GtkImage" id="syncli_img">
                                             <property name="visible">True</property>
                                             <property name="stock">gtk-missing-image</property>
                                           </object>
@@ -789,7 +789,7 @@ Drag'n'drop it to the drawing area.</property>
                         <child>
                           <object class="GtkLabel" id="label15">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Library</property>
+                            <property name="label" translatable="yes">Collections</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>

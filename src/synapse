@@ -201,14 +201,14 @@ class document(object):
       
       for obj in IMVEC.activeDoc.getContainer().getSynObjects():
   
-         # Dirty, replace by dict()
+         # Dirty, replace by hashtable ( dict() ) or dynamic code generation ( exec )
          if (str(obj.__class__) == "synapseObjects.synapp"):         
             pixbuf = IMVEC.appPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syntest"):
             pixbuf = IMVEC.testPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syntimer"):
             pixbuf = IMVEC.timerPixbuf_s
-         elif (str(obj.__class__) == "synapseObjects.synserv"):
+         elif (str(obj.__class__) == "synapseObjects.syncli"):
             pixbuf = IMVEC.servPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synmux"):
             pixbuf = IMVEC.muxPixbuf_s 
@@ -224,7 +224,7 @@ class document(object):
             pixbuf = IMVEC.filterPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synlink"):
             pixbuf = IMVEC.linkPixbuf_s
-         elif (str(obj.__class__) == "synapseObjects.synserv"):
+         elif (str(obj.__class__) == "synapseObjects.syncli"):
             pixbuf = IMVEC.servPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.syncontainer"):
             pixbuf = IMVEC.containerPixbuf_s
@@ -240,6 +240,9 @@ class document(object):
             pixbuf = IMVEC.dbPixbuf_s
          elif (str(obj.__class__) == "synapseObjects.synxmpp"):
             pixbuf = IMVEC.xmppPixbuf_s
+         elif (str(obj.__class__) == "synapseObjects.synscapy"):
+            pixbuf = IMVEC.scapyPixbuf_s
+
 
          if sorting == 'name': 
             obrowser_dict[obj.getName()] = (pixbuf,obj.getName())
@@ -309,17 +312,16 @@ class document(object):
          self.refresh_objects_list()
 
 
-
-      elif (context.get_source_widget().get_name() == "synserv_btn"):
+      elif (context.get_source_widget().get_name() == "syncli_btn"):
          
-         self.nbservices+=1
-         newobj = synserv("Service%d" % (self.nbservices) )
-         newitem = servItem(root)
+         self.nbclients+=1
+         newobj = syncli("Client%d" % (self.nbclients) )
+         newitem = cliItem(root)
          self.container.append(linker(newobj,newitem))
          
          newitem.getO().set_property("x",cx)
          newitem.getO().set_property("y",cy)
-         newitem.setText("Service%d" % (self.nbservices))
+         newitem.setText("Client%d" % (self.nbclients))
          self.refresh_objects_list()
          
 
@@ -516,6 +518,19 @@ class document(object):
          self.refresh_objects_list()
 
 
+      elif (context.get_source_widget().get_name() == "synscapy_btn"):
+
+         self.nbscapys+=1
+         newobj = synscapy("Scapy%d" % (self.nbscapys))
+         newitem = scapyItem(root)
+         self.container.append(linker(newobj,newitem))
+
+         newitem.getO().set_property("x",cx)
+         newitem.getO().set_property("y",cy)
+         newitem.setText("Scapy%d" % (self.nbscapys))
+
+         self.refresh_objects_list()
+
 
 
    def zoomOut(self):
@@ -606,7 +621,7 @@ class document(object):
    def setnbInsts(self,nbinsts):
 
       (self.nbsynapp,self.nbsyntest,self.nbcomments,self.nbmuxers,self.nbdemuxers,self.nbinjectors,
-      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbservices,self.nbreports,self.nbcontainers) = tuple(nbinsts)
+      self.nbtimers,self.nbfilters,self.nbmonitors,self.nbclients,self.nbreports,self.nbcontainers) = tuple(nbinsts)
 
 
    def onResize(self,widget):
@@ -807,12 +822,13 @@ class document(object):
       self.nbtimers = 0
       self.nbfilters=0
       self.nbmonitors = 0
-      self.nbservices = 0
+      self.nbclients = 0
       self.nbcontainers = 0
       self.nbreports = 0
       self.nbpys = 0
       self.nbdbs = 0
       self.nbxmpps = 0
+      self.nbscapys = 0
       self.nblabels = 0
       self.nbkbds = 0
 
@@ -1230,7 +1246,7 @@ class MainWindow(object):
       nbtimers = 0
       nbfilters = 0
       nbmonitors = 0
-      nbservices = 0
+      nbclients = 0
       nbcontainers = 0
       nbreports = 0
       nblabels = 0
@@ -1326,6 +1342,10 @@ class MainWindow(object):
             nbpys +=1
 
 
+         elif str(pobj.__class__) == "synapseObjects.synxmpp":
+            newitem = xmppItem(root)
+            nbxmpps +=1
+
          elif str(pobj.__class__) == "synapseObjects.syncom":
             newitem = commentItem(root)
             newitem.getMF().set_property("width",canvasProperties[4])
@@ -1353,10 +1373,10 @@ class MainWindow(object):
             newitem.getExtender().set_property("y",canvasProperties[5]-10)
             nbmonitors +=1
 
-         elif str(pobj.__class__) == "synapseObjects.synserv":
-            IMVEC.dbg.debug("SERVICE ITEM ADDED: %s",(pobj),dbg.DEBUG)
-            newitem = servItem(root)
-            nbservices +=1
+         elif str(pobj.__class__) == "synapseObjects.syncli":
+            IMVEC.dbg.debug("CLIENT ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = cliItem(root)
+            nbclients +=1
 
          elif str(pobj.__class__) == "synapseObjects.syndemux":
             IMVEC.dbg.debug("DEMUX ITEM ADDED: %s",(pobj),dbg.DEBUG)
@@ -1428,7 +1448,7 @@ class MainWindow(object):
       IMVEC.activeDoc.refresh_objects_list()
 
       nbinsts = (nbsynapp,nbsyntest,nbcomments,nbmuxers,nbdemuxers,nbinjectors,
-      nbtimers,nbfilters,nbmonitors,nbservices,nbreports,nbcontainers)
+      nbtimers,nbfilters,nbmonitors,nbclients,nbreports,nbcontainers)
       IMVEC.activeDoc.setnbInsts(nbinsts)
 
  
@@ -1511,9 +1531,9 @@ class MainWindow(object):
             newitem.getExtender().set_property("y",canvasProperties[5]-10)
             #nbmonitors +=1
 
-      elif str(pobj.__class__) == "synapseObjects.synserv":
-            IMVEC.dbg.debug("SERVICE ITEM ADDED: %s",(pobj),dbg.DEBUG)
-            newitem = servItem(root)
+      elif str(pobj.__class__) == "synapseObjects.syncli":
+            IMVEC.dbg.debug("CLIENT ITEM ADDED: %s",(pobj),dbg.DEBUG)
+            newitem = cliItem(root)
             #nbservices +=1
 
       elif str(pobj.__class__) == "synapseObjects.syndemux":
@@ -2120,12 +2140,13 @@ class MainWindow(object):
       viewmenu.append(self.menu_zoomin)
 
 
-
       helpmenu = gtk.Menu()
       helpmenu.show()  
 
-
       self.menu_about = gtk.ImageMenuItem(gtk.STOCK_ABOUT, agr)
+      key, mod = gtk.accelerator_parse("F12")
+      self.menu_about.add_accelerator("activate",agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
       self.menu_about.connect("activate",self.on_menu_activate)
       self.menu_about.show()
       
@@ -2138,6 +2159,9 @@ class MainWindow(object):
 
 
       self.menu_doc = gtk.MenuItem("Documentation", agr)
+      key, mod = gtk.accelerator_parse("F11")
+      self.menu_doc.add_accelerator("activate",agr, key, 
+      mod, gtk.ACCEL_VISIBLE)
       self.menu_doc.connect("activate",self.on_menu_activate)
       self.menu_doc.show()
 
@@ -2233,9 +2257,9 @@ class MainWindow(object):
       self.synfilter_img = builder.get_object("synfilter_img")
       self.synfilter_img.set_from_pixbuf(IMVEC.filterPixbuf)
 
-      self.synserv_btn = builder.get_object("synserv_btn")
-      self.synserv_img = builder.get_object("synserv_img")
-      self.synserv_img.set_from_pixbuf(IMVEC.servPixbuf)
+      self.syncli_btn = builder.get_object("syncli_btn")
+      self.syncli_img = builder.get_object("syncli_img")
+      self.syncli_img.set_from_pixbuf(IMVEC.servPixbuf)
 
       self.synject_btn = builder.get_object("synject_btn")
       self.synject_img = builder.get_object("synject_img")
@@ -2427,8 +2451,8 @@ class MainWindow(object):
       self.syntimer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
 
-      self.synserv_btn.connect("drag_data_get", self.sendCallback)
-      self.synserv_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+      self.syncli_btn.connect("drag_data_get", self.sendCallback)
+      self.syncli_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
 
 
@@ -2460,6 +2484,11 @@ class MainWindow(object):
                                gtk.gdk.ACTION_COPY)
 
 
+      self.synscapy_btn.connect("drag_data_get", self.sendCallback)
+      self.synscapy_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
+                               gtk.gdk.ACTION_COPY)
+
+
       self.syncontainer_btn.connect("drag_data_get", self.sendCallback)
       self.syncontainer_btn.drag_source_set(gtk.gdk.BUTTON1_MASK, self.fromImage,
                                gtk.gdk.ACTION_COPY)
@@ -2483,7 +2512,7 @@ class MainWindow(object):
       self.syntimer_btn.set_name("syntimer_btn")
       self.synmon_btn.set_name("synmon_btn")
       self.synfilter_btn.set_name("synfilter_btn")
-      self.synserv_btn.set_name("synserv_btn")
+      self.syncli_btn.set_name("syncli_btn")
       self.synject_btn.set_name("synject_btn")
 
       self.syncontainer_btn.set_name("syncontainer_btn")
@@ -2493,6 +2522,7 @@ class MainWindow(object):
       self.syndb_btn.set_name("syndb_btn")
       self.synpy_btn.set_name("synpy_btn")
       self.synxmpp_btn.set_name("synxmpp_btn")
+      self.synscapy_btn.set_name("synscapy_btn")
 
       self.hpaned1.set_position(800)
       self.vpaned1.set_position(250)

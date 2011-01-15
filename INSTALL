@@ -8,15 +8,15 @@ Software Requirements:
  -PyGTK >= 2.17
  -Pygoocanvas >= 0.14
 
-Extra Software dependances: ( required for 
+Extra Software dependances: ( required for some Building Blocks )
 ----------------------------
 
  -python-reportlab
  -python-pyscopg2
  -python-mysldb
-
-
-
+ -python-xmpp
+ -scapy
+ 
 
 Install process:
 ----------------

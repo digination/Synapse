@@ -21,6 +21,7 @@ class IMVEC:
 
    has_webkit = 0
    HAS_XMPP = 0
+   HAS_SCAPY = 0
    
    #application clipboard. loads only if gtk available
    if HAS_GTK:

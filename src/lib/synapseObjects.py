@@ -27,7 +27,17 @@ import pexpect
 from time import strftime
 
 
+try:
+   import xmpp
+   IMVEC.HAS_XMPP = 1
+except:
+   print "[WARNING] xmpp LIBRARY NOT LOADED: SYNXMPP BB WILL BE DISABLED"
 
+try:
+   from scapy import *
+   IMVEC.HAS_SCAPY = 1
+except:
+   print "[WARNING] scapy LIBRARY NOT LOADED: SYNSCAPY BB WILL BE DISABLED"
 
 try:
    from reportlab.pdfgen import canvas
@@ -42,23 +52,11 @@ except:
 try:
    import MySQLdb
 except:
-   print "[WARNING] MYSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
+   print "[WARNING] MYSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN SYNDB"
 try:
    import psycopg2
 except:
-   print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN NJECTOR"
-
-try:
-
-   from pyxmpp.all import JID,Iq,Presence,Message,StreamError
-   from pyxmpp.jabber.client import JabberClient
-   
-   IMVEC.HAS_XMPP = 1
-
-except:
-   print "[WARNING] XMPP LIBRARY NOT LOADED: SYNXMPP BB WILL BE UNAVAILABLE"
-
-
+   print "[WARNING] PSQL LIBRARY NOT LOADED: FUNCTION WILL BE DISABLED IN SYNDB"
 
 
 #class to embbed and manipulate synlinker objects
@@ -1901,7 +1899,7 @@ class synfilter(synapp):
 
 
 
-class synserv(synobj):
+class syncli(synobj):
 
    nbinst = 0
 
@@ -1959,7 +1957,7 @@ class synserv(synobj):
 
    def __init__(self,name,proto="Tcp",connectInfos="",keepalive=True):
 
-      synserv.nbinst+=1
+      syncli.nbinst+=1
       self.init_common()
 
       self.name = name
@@ -2003,7 +2001,7 @@ class synserv(synobj):
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
-        synservGTK.icolor.set_text(self.color)
+        syncliGTK.icolor.set_text(self.color)
 
         IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
         IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
@@ -2017,19 +2015,19 @@ class synserv(synobj):
    def onTextChange(self,widget):
 
 
-      if (widget == synservGTK.iname):
-         self.name = synservGTK.iname.get_text()
-         IMVEC.activeDoc.getActiveM().getSynItem().setText(synservGTK.iname.get_text())
+      if (widget == syncliGTK.iname):
+         self.name = syncliGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(syncliGTK.iname.get_text())
 
-      elif (widget == synservGTK.ici):
-         self.connectInfos = synservGTK.ici.get_text()
+      elif (widget == syncliGTK.ici):
+         self.connectInfos = syncliGTK.ici.get_text()
 
-      elif (widget == synservGTK.iproto):
+      elif (widget == syncliGTK.iproto):
 
          self.proto = widget.get_active_text()
  
 
-      elif (widget == synservGTK.iar):
+      elif (widget == syncliGTK.iar):
          if widget.get_active_text() == "True":
             self.autoreco = True 
         
@@ -2039,43 +2037,43 @@ class synserv(synobj):
 
    def disconnectAll(self):
 
-         synservGTK.iname.disconnect(synservGTK.chdict['iname'])
-         synservGTK.icolorBtn.disconnect(synservGTK.chdict['icolorBtn'])
-         synservGTK.ici.disconnect(synservGTK.chdict['ici'])
-         synservGTK.iproto.disconnect(synservGTK.chdict['iproto'])      
-         synservGTK.iar.disconnect(synservGTK.chdict['iar']) 
+         syncliGTK.iname.disconnect(syncliGTK.chdict['iname'])
+         syncliGTK.icolorBtn.disconnect(syncliGTK.chdict['icolorBtn'])
+         syncliGTK.ici.disconnect(syncliGTK.chdict['ici'])
+         syncliGTK.iproto.disconnect(syncliGTK.chdict['iproto'])      
+         syncliGTK.iar.disconnect(syncliGTK.chdict['iar']) 
 
 
    def getPropWidget(self):
 
-      synservGTK.iname.set_text(self.name)
-      synservGTK.icolor.set_text(self.color)
-      synservGTK.ici.set_text(self.connectInfos)
+      syncliGTK.iname.set_text(self.name)
+      syncliGTK.icolor.set_text(self.color)
+      syncliGTK.ici.set_text(self.connectInfos)
 
 
       if (self.proto == "Tcp"): 
 
-         synservGTK.iproto.set_active(0)
+         syncliGTK.iproto.set_active(0)
       else:
-         synservGTK.iproto.set_active(1)
+         syncliGTK.iproto.set_active(1)
 
 
       if (self.autoreco): 
 
-         synservGTK.iar.set_active(0)
+         syncliGTK.iar.set_active(0)
       else:
-         synservGTK.iar.set_active(1)
+         syncliGTK.iar.set_active(1)
 
 
 
-      synservGTK.chdict['iname'] = synservGTK.iname.connect("changed",self.onTextChange)
-      synservGTK.chdict['icolorBtn'] = synservGTK.icolorBtn.connect("clicked",self.onColorChange)
-      synservGTK.chdict['ici'] = synservGTK.ici.connect("changed",self.onTextChange)
-      synservGTK.chdict['iproto'] = synservGTK.iproto.connect("changed",self.onTextChange)      
-      synservGTK.chdict['iar'] = synservGTK.iar.connect("changed",self.onTextChange) 
+      syncliGTK.chdict['iname'] = syncliGTK.iname.connect("changed",self.onTextChange)
+      syncliGTK.chdict['icolorBtn'] = syncliGTK.icolorBtn.connect("clicked",self.onColorChange)
+      syncliGTK.chdict['ici'] = syncliGTK.ici.connect("changed",self.onTextChange)
+      syncliGTK.chdict['iproto'] = syncliGTK.iproto.connect("changed",self.onTextChange)      
+      syncliGTK.chdict['iar'] = syncliGTK.iar.connect("changed",self.onTextChange) 
 
 
-      return synservGTK.o
+      return syncliGTK.o
 
 
 
@@ -2794,7 +2792,7 @@ class syndb(synobj):
       syndbGTK.chdict['ipassword'] = syndbGTK.ipassword.connect("changed",self.onTextChange)
       syndbGTK.chdict['iomode'] = syndbGTK.iomode.connect("changed",self.onTextChange)
       syndbGTK.chdict['isep'] = syndbGTK.isep.connect("changed",self.onTextChange)
-      syndbGTK.chdict['iquery'] = syndbGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
+      syndbGTK.chdict['itextBuffer'] = syndbGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
 
       return syndbGTK.o
 
@@ -2814,51 +2812,64 @@ class synxmpp(synobj):
    nbinst = 0
   
 
+   def msgHandler(self,session,message):
+
+
+      content = message.getBody()
+      if content != None:
+         self.obuff = content
+         if (self.crlf):
+            self.obuff += "\r\n"
+         self.broadcast()
+
    def init_run(self):
 
       self.alive = True
       runvars = dict()
       
-     
-      #IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
+      try:
+         (host,port) = self.hostport.split(":")
+         port = int(port)
+         print "Using %s:%d" %(host,port)
+      except:
+         host = None
+         port = None
+         print "No HOST/PORT PROVIDED"
+         pass
     
-      #runvars['dbh'] = dbh
+  
+      IMVEC.dbg.debug("STARTING A NEW XMPP CLIENT",tuple(),dbg.DEBUG)
+
+      jid = xmpp.protocol.JID(self.jid)
+      client = xmpp.Client(jid.getDomain(), debug=[])
+      client.connect()
+      client.auth(jid.getNode(), self.password)
+      client.sendInitPresence()
+      client.RegisterHandler('message',self.msgHandler)
+  
+      
+      runvars['client'] = client
       #runvars['dbcurs'] = dbcurs
-      #IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
 
    def run(self):
 
-      dbcurs = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['dbcurs']
+      runvars = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()
+      client = runvars['client']
+      client.Process()
 
-      if (self.btype == "No Input"):
+      while len(self.ibuff) != 0:
 
-         dbcurs.execute(self.query)
-         if (self.query.upper().find('INSERT') == 0  or self.query.upper().find('UPDATE') == 0 ):
-               dbcurs.commit()
-         self.obuff = dbcurs.fetchall()
-         print self.obuff
-         self.alive = False
+         input_buffer = self.ibuff.pop(0)
+         (input_num,sep,content) = input_buffer.partition(":")
 
-      else:
+         for jid in self.jidpeers:
+            client.send(xmpp.protocol.Message(jid,content))      
 
-         while len(self.ibuff) != 0:
-
-            input_buffer = self.ibuff.pop(0)
-            (input_num,sep,content) = input_buffer.partition(":")
-            nquery = self.query.replace("[[SYNDB_INPUT]]",content)
-            dbcurs.execute(nquery)
- 
-            if (nquery.upper().find('INSERT') == 0  or nquery.upper().find('UPDATE') == 0 ):
-               dbcurs.commit()
-            self.obuff = dbcurs.fetchall()
-            print self.obuff
-
-
-         
-  
-
-               
+      return
+    
+          
    def __init__(self,name):
 
       synxmpp.nbinst+=1
@@ -2867,8 +2878,7 @@ class synxmpp(synobj):
       self.WOI = False
       self.name = name
 
-      self.query ="select * from [[SYNDB_INPUT]] limit 1"
-
+    
       self.peers = list()
       self.ibuff = list()
       self.obuff = ""
@@ -2876,78 +2886,51 @@ class synxmpp(synobj):
       self.jid = "foo@bar.com"
       self.password = ""
       self.hostport = ""
+      self.crlf = True
+      self.jidpeers = list()
       
 
 
+   def onITextBufferChanged(self,textbuff):
+     jpcontent = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
 
-      
-      
-      
-      
-      
-   def getQuery(self):
+     self.jidpeers = jpcontent.split("\n")
 
-      return self.query
+     for i in range(0,len(self.jidpeers)):
+        if self.jidpeers[i].find('@') <= 0:
+           del self.jidpeers[i]
 
-   def setQuery(self,query):
 
-      self.query = query
 
-   def setConnector(self,connector):
-
-      self.connector = connector
-
-   def getConnector(self):
-
-      return self.connector
-
-         
    def onTextChange(self,widget):
 
 
-      if (widget == syndbGTK.iname):
+      if (widget == synxmppGTK.iname):
 
          self.name = syndbGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
          #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
 
 
-      elif (widget == syndbGTK.ihostport):
-         self.hostport = syndbGTK.ihostport.get_text()
+      elif (widget == synxmppGTK.ihostport):
+         self.hostport = synxmppGTK.ihostport.get_text()
 
-      elif (widget == syndbGTK.idb):
-         self.database = syndbGTK.idb.get_text()
+      elif (widget == synxmppGTK.ijid):
+         self.jid = synxmppGTK.ijid.get_text()
          
-      elif (widget == syndbGTK.iuser):
-         self.user = syndbGTK.iuser.get_text()
-
-      elif (widget == syndbGTK.ipassword):
-         self.password = syndbGTK.ipassword.get_text()      
+     
+      elif (widget == synxmppGTK.ipassword):
+         self.password = synxmppGTK.ipassword.get_text()      
 
 
-      elif (widget == syndbGTK.ibtype):
-         if syndbGTK.ibtype.get_active_text() == "No Input":
-            self.btype = "No Input"
-            IMVEC.activeDoc.getActiveM().getSynItem().setInput(False)
+      elif (widget == synxmppGTK.icrlf):
+         if synxmppGTK.icrlf.get_active_text() == "False":
+            self.crlf = False
          else:
-            self.btype = "Has Input"
-            IMVEC.activeDoc.getActiveM().getSynItem().setInput(True)
-
-      elif (widget == syndbGTK.iconnec):
-         if syndbGTK.iconnec.get_active_text() == "MySQL":
-            self.connec = "MySQL"
-         else:
-            self.connec = "Postgres"
-
-      elif (widget == syndbGTK.iomode):
-         self.outputMode = syndbGTK.iomode.get_active_text()
-
-      elif (widget == syndbGTK.isep):
-         self.fieldSep = syndbGTK.isep.get_text()
+            self.crlf = True
 
 
-
-        
+     
    def onColorChange(self,widget):
 
       colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
@@ -2973,9 +2956,9 @@ class synxmpp(synobj):
 
    def disconnectAll(self):
 
-         for key,value in syndbGTK.chdict.items():
+         for key,value in synxmppGTK.chdict.items():
 
-            exec "syndbGTK.%s.disconnect(%d)" % (key,value)
+            exec "synxmppGTK.%s.disconnect(%d)" % (key,value)
 
 
 
@@ -2987,7 +2970,13 @@ class synxmpp(synobj):
       synxmppGTK.ijid.set_text(self.jid)
       synxmppGTK.ipassword.set_text(self.password)
 
-      syndbGTK.icolor.set_text(self.color)
+      synxmppGTK.icolor.set_text(self.color)
+
+      jidcontent = ""
+      for jid in self.jidpeers:
+         jidcontent += jid + "\n"
+      synxmppGTK.itextBuffer.set_text(jidcontent)
+  
 
      
       synxmppGTK.chdict['iname'] = synxmppGTK.iname.connect("changed",self.onTextChange)
@@ -2995,6 +2984,10 @@ class synxmpp(synobj):
       synxmppGTK.chdict['ihostport'] = synxmppGTK.ihostport.connect("changed",self.onTextChange)
       synxmppGTK.chdict['ijid'] = synxmppGTK.ijid.connect("changed",self.onTextChange)
       synxmppGTK.chdict['ipassword'] = synxmppGTK.ipassword.connect("changed",self.onTextChange)
+      synxmppGTK.chdict['icrlf'] = synxmppGTK.icrlf.connect("changed",self.onTextChange)
+      synxmppGTK.chdict['itextBuffer'] = synxmppGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
+
+
       #synxmppGTK.chdict['ijidpeers'] = syndbGTK.iomode.connect("changed",self.onTextChange)
 
       
@@ -3003,6 +2996,215 @@ class synxmpp(synobj):
 
 
 
+
+
+
+class synscapy(synobj):
+
+   nbinst = 0
+  
+
+   def init_run(self):
+
+      self.alive = True
+      runvars = dict()
+      
+      try:
+         (dbhost,dbport) = self.hostport.split(":")
+      except:
+         IMVEC.dbg.debug("CANNOT PARSE HOST:PORT PARAMETERS. STOPPING DB BLOCK",tuple(),dbg.CRITICAL)
+         self.alive = False
+
+      if (self.connec == "MySQL" ):
+
+         IMVEC.dbg.debug("STARTING A NEW MYSQL CONNECTION",tuple(),dbg.DEBUG)
+         dbh = MySQLdb.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
+      else:
+         IMVEC.dbg.debug("STARTING A NEW POSTGRES CONNECTION",tuple(),dbg.DEBUG)
+         dbh = psycopg2.connect(host=dbhost,port=int(dbport),user=self.user,db=self.database,passwd=self.password)
+         dbcurs = dbh.cursor()
+         
+      runvars['dbh'] = dbh
+      runvars['dbcurs'] = dbcurs
+      
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+
+
+   def run(self):
+
+      dbcurs = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['dbcurs']
+
+      if (self.btype == "No Input"):
+
+         dbcurs.execute(self.query)
+         if (self.query.upper().find('INSERT') == 0  or self.query.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
+         results = dbcurs.fetchall()
+         self.formatResults(results)
+
+         self.alive = False
+
+      else:
+
+         while len(self.ibuff) != 0:
+
+            input_buffer = self.ibuff.pop(0)
+            (input_num,sep,content) = input_buffer.partition(":")
+            nquery = self.query.replace("[[SYNDB_INPUT]]",content)
+            dbcurs.execute(nquery)
+ 
+            if (nquery.upper().find('INSERT') == 0  or nquery.upper().find('UPDATE') == 0 ):
+               dbcurs.commit()
+            results = dbcurs.fetchall()
+            self.formatResults(results)
+            
+            
+
+
+   def formatResults(self,results):
+
+      if self.outputMode == "Split Lines":
+
+         for line in results:
+
+            self.obuff = ""
+            for field in line:
+               self.obuff  += str(field) + self.fieldSep
+            self.broadcast()
+
+      elif self.outputMode == "Split Fields":
+
+         for line in results:
+    
+            for field in line:
+               self.obuff = str(field)
+               self.broadcast()
+
+
+      elif self.outputMode == "Full Content":
+
+         self.obuff = ""
+         for line in results:
+    
+            for field in line:
+               self.obuff  += str(field) + self.fieldSep
+            self.obuff += "\n"
+
+         self.broadcast()
+
+
+            
+   def __init__(self,name):
+
+      synapp.nbinst+=1
+      self.init_common()
+
+      self.WOI = False
+      self.name = name
+
+      self.query ="select * from [[SYNDB_INPUT]] limit 1"
+
+      self.peers = list()
+      self.ibuff = list()
+      self.obuff = ""
+
+      self.btype = "No Input"
+      self.expr = ""
+      
+      
+      
+   def getQuery(self):
+
+      return self.query
+
+   def setQuery(self,query):
+
+      self.query = query
+
+   def setConnector(self,connector):
+
+      self.connector = connector
+
+   def getConnector(self):
+
+      return self.connector
+
+         
+
+   def onITextBufferChanged(self,textbuff):
+      self.expr = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
+
+   def onTextChange(self,widget):
+
+
+      if (widget == synscapyGTK.iname):
+
+         self.name = synscapyGTK.iname.get_text()
+         IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
+         #IMVEC.activeDoc.getActiveM().getSynItem().changeIOPos("right","left")
+
+
+      elif (widget == synscapyGTK.ibtype):
+         if synscapyGTK.ibtype.get_active_text() == "No Input":
+            self.btype = "No Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(False)
+         else:
+            self.btype = "Has Input"
+            IMVEC.activeDoc.getActiveM().getSynItem().setInput(True)
+
+  
+   def onColorChange(self,widget):
+
+      colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
+      colorsel = colorseldlg.colorsel
+
+      response = colorseldlg.run()
+   	
+      if response == gtk.RESPONSE_OK:
+        ncolor = colorsel.get_current_color()
+       
+        self.color = resclaleColorSel(ncolor.to_string())
+        synscapyGTK.icolor.set_text(self.color)
+
+        IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
+        IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
+
+        
+        colorseldlg.destroy()
+      elif response == gtk.RESPONSE_CANCEL:
+        colorseldlg.destroy()
+         
+
+
+   def disconnectAll(self):
+
+         for key,value in synscapyGTK.chdict.items():
+
+            exec "synscapyGTK.%s.disconnect(%d)" % (key,value)
+
+
+
+
+   def getPropWidget(self):
+
+      synscapyGTK.iname.set_text(self.name)
+      synscapyGTK.icolor.set_text(self.color)
+      synscapyGTK.itextBuffer.set_text(self.expr)
+
+      if self.btype == "No Input":
+         synscapyGTK.ibtype.set_active(0)
+      else:
+         synscapyGTK.ibtype.set_active(1)
+
+  
+      synscapyGTK.chdict['iname'] = synscapyGTK.iname.connect("changed",self.onTextChange)
+      synscapyGTK.chdict['icolorBtn'] = synscapyGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synscapyGTK.chdict['ibtype'] = synscapyGTK.ibtype.connect("changed",self.onTextChange)
+      synscapyGTK.chdict['itextBuffer'] = synscapyGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
+
+      return synscapyGTK.o
 
 
 

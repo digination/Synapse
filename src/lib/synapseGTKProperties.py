@@ -303,7 +303,7 @@ class synappGTK:
 
 
 
-class synservGTK:
+class syncliGTK:
 
    o = gtk.HBox()
    gtkPVbox1 = gtk.VBox()
@@ -1335,6 +1335,8 @@ class synxmppGTK:
    ljid = gtk.Label(str="JID")
    lpassword = gtk.Label(str="Password")
    lpeers = gtk.Label(str="peers(JIDs)")
+   lcrlf =  gtk.Label(str=" Add CRLF ")
+   
    
 
    #color definition
@@ -1352,37 +1354,179 @@ class synxmppGTK:
    ijidpeers = gtk.TextView(buffer=itextBuffer)
    ijidpeers.set_size_request(300,200)
 
+   icrlf = gtk.ComboBox()
+
+   ls0 = gtk.ListStore(str)
+   icrlf.set_model(ls0)
+   cellr0 = gtk.CellRendererText()
+   icrlf.pack_start(cellr0)
+   icrlf.add_attribute(cellr0, 'text', 0)
+
+   icrlf.append_text("True")
+   icrlf.append_text("False")
+   icrlf.set_active(0)
+
+
 
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
    gtkPVbox1.pack_start(lhostport,False,True,5)  
    gtkPVbox1.pack_start(ljid,False,True,10)
    gtkPVbox1.pack_start(lpassword,False,True,10) 
-   gtkPVbox1.pack_start(lpeers,False,True,10)
-   #gtkPVbox1.pack_start(ijidpeers,False,True,5)
-
   
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(ihostport,False,True,5)
    gtkPVbox2.pack_start(ijid,False,True,5)
    gtkPVbox2.pack_start(ipassword,False,True,5)
-   #gtkPVbox2.pack_start(ijid,False,True,5)
+
    
 
 
-   #gtkPVbox3.pack_start(lquery,False,True,10)
-   #gtkPVbox4.pack_start(iquery,False,True,5)
+   gtkPVbox3.pack_start(lpeers,False,True,10)
+   gtkPVbox4.pack_start(ijidpeers,False,True,5)
 
 
 
-   #gtkPVbox5.pack_start(lomode,False,True,10)   
+   gtkPVbox5.pack_start(lcrlf,False,True,10)   
    #gtkPVbox5.pack_start(lsep,False,True,10)
 
-   #gtkPVbox6.pack_start(iomode,False,True,5)
+   gtkPVbox6.pack_start(icrlf,False,True,5)
    #gtkPVbox6.pack_start(isep,False,True,5)
 
 
+
+
+   chdict = dict()
+
+   for child1,child2 in map(None,gtkPVbox1.get_children(),gtkPVbox2.get_children()):
+
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   for child1,child2 in map(None,gtkPVbox3.get_children(),gtkPVbox4.get_children()):
+
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   for child1,child2 in map(None,gtkPVbox5.get_children(),gtkPVbox6.get_children()):
+
+      try:
+         child1.show()
+         child2.show()
+      except:
+         #means columns don't have the same # of childrens. no big deal
+         pass
+
+
+   hbox1.pack_start(gtkPVbox1,False,True,10)
+   hbox1.pack_start(gtkPVbox2,False,True,0)
+
+   hbox2.pack_start(gtkPVbox3,False,True,10)
+   hbox2.pack_start(gtkPVbox4,False,True,0)
+
+   hbox3.pack_start(gtkPVbox5,False,True,10)
+   hbox3.pack_start(gtkPVbox6,False,True,0)
+
+
+   o.pack_start(hbox1,False,True,5)
+   o.pack_start(hbox2,False,True,5)
+   o.pack_start(hbox3,False,True,0)
+
+
+   for child in o.get_children():
+      child.show()
+
+   o.show()
+
+
+
+class synscapyGTK:
+
+   o = gtk.VBox()
+
+   #first parameters
+   hbox1 = gtk.HBox()
+   hbox1.show()
+   #query box
+   hbox2 = gtk.HBox()
+   hbox2.show()
+   #final parameters box
+   hbox3 = gtk.HBox()
+   hbox3.show()
+   
+   
+   gtkPVbox1 = gtk.VBox()
+   gtkPVbox2 = gtk.VBox()
+   gtkPVbox1.show()
+   gtkPVbox2.show()
+
+   gtkPVbox3 = gtk.VBox()
+   gtkPVbox4 = gtk.VBox()
+   gtkPVbox3.show()
+   gtkPVbox4.show()
+
+   gtkPVbox5 = gtk.VBox()
+   gtkPVbox6 = gtk.VBox()
+   gtkPVbox5.show()
+   gtkPVbox6.show()
+
+   lname = gtk.Label(str="Name")
+   lbtype = gtk.Label(str="Block Type")
+   lexpr = gtk.Label(str="Scapy Expr")
+   
+
+   #color definition
+   icolor = gtk.Entry()
+   icolor.set_state(gtk.STATE_INSENSITIVE)
+   icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
+   
+   iname = gtk.Entry()
+
+   ibtype = gtk.ComboBox()
+  
+   ls1 = gtk.ListStore(str)
+   ibtype.set_model(ls1)
+   cellr1 = gtk.CellRendererText()
+   ibtype.pack_start(cellr1)
+   ibtype.add_attribute(cellr1, 'text', 0)
+
+   ibtype.append_text("No Input")
+   ibtype.append_text("Has Input")
+   ibtype.set_active(0)
+
+
+   itextBuffer = gtk.TextBuffer()
+   iexpr = gtk.TextView(buffer=itextBuffer)
+   iexpr.set_size_request(300,200)
+
+   iHelperBtn = gtk.Button("Helper")
+   iHelperBtn.set_tooltip_text("Triggers a component to Help you to construct scapy Expressions")
+
+
+   gtkPVbox1.pack_start(lname,False,True,10)
+   gtkPVbox1.pack_start(icolorBtn,False,True,5)
+   gtkPVbox1.pack_start(lbtype,False,True,5)  
+  
+  
+   gtkPVbox2.pack_start(iname,False,True,5)
+   gtkPVbox2.pack_start(icolor,False,True,5)
+   gtkPVbox2.pack_start(ibtype,False,True,5)
+   
+
+   gtkPVbox3.pack_start(lexpr,False,True,10)
+   gtkPVbox3.pack_start(iHelperBtn,False,True,10)
+   gtkPVbox4.pack_start(iexpr,False,True,5)
 
 
    chdict = dict()

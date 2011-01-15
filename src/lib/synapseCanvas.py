@@ -618,7 +618,7 @@ class synappItem(synItem):
 
 
 
-class servItem(synItem):
+class cliItem(synItem):
 
 
    def __init__(self,parent_canvas):
@@ -630,7 +630,7 @@ class servItem(synItem):
       self.o = goocanvas.Group(parent=self.root)
 
       self.mf = goocanvas.Rect(parent = self.o, x=0, y=0, radius_x=10,radius_y=10,width=134, height=50,
-				stroke_color="#cccccc", fill_color="#ff9932",
+				stroke_color="#cccccc", fill_color="#635a70",
 				line_width=4)
 
 
@@ -655,7 +655,7 @@ class servItem(synItem):
       
       self.ltext = goocanvas.Text(parent = self.o,font="Sans 8", text="", x=5, y=-16,
 						width=100,
-						fill_color="#ff9932")
+						fill_color="#635a70")
    
       self.connectAll()
 
@@ -2120,6 +2120,85 @@ class scapyItem(synItem):
 						width=100,font="sans 8", fill_color="#660033")
 
       self.connectAll()
+
+
+
+
+class scapyItem(synItem):
+
+
+   def setInput(self,inptv):
+
+      if inptv:
+         self.potential_input.set_property("x",0)
+         self.potential_input.raise_(None)
+         self.inputs.append(self.potential_input)
+         for inp in self.inputs:
+            self.iconnList[0] = inp.connect("button-press-event",self.on_input_clicked)
+            self.iconnList[1] = inp.connect("enter-notify-event",self.on_inp_enter)
+            self.iconnList[2] = inp.connect("leave-notify-event",self.on_conn_leave)
+
+      else:
+
+         self.potential_input.set_property("x",10)
+         self.mf.raise_(None)
+         self.icon.raise_(None)
+         self.outputs[0].raise_(None)
+
+         for inp in self.inputs:
+            inp.disconnect(self.iconnList[0])
+            inp.disconnect(self.iconnList[1])
+            inp.disconnect(self.iconnList[2])
+
+         del self.inputs[0]
+
+
+
+   def __init__(self,parent_canvas):
+
+      self.outputs = list()
+      self.inputs = list()
+
+      self.iconnList = [0,0,0]
+      self.root = parent_canvas
+      self.o = goocanvas.Group(parent=self.root)
+
+
+      self.mf = goocanvas.Rect(parent = self.o, x=0, y=0,radius_x=10,radius_y=10, width=80, height=50,
+				stroke_color="#cccccc", fill_color="#000000",
+				line_width=4)
+
+      self.pixbuf = IMVEC.scapyPixbuf
+      self.icon = goocanvas.Image(parent = self.o,x=25,y=10,pixbuf=self.pixbuf)
+
+    
+
+
+      self.potential_input = goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1)
+
+      self.potential_input.set_property("x",10)
+      self.potential_input.set_property("y",10)
+      self.mf.raise_(None)
+      self.icon.raise_(None)
+ 
+      
+
+
+      self.outputs.append(goocanvas.Path( parent = self.o,data="M 0 0 L 10 15 L 0 30 L 0 1 z",
+                                      stroke_color="black", fill_color="#00cbff", line_width=1))
+
+      self.outputs[0].set_property("x",81)
+      self.outputs[0].set_property("y",10)
+
+      
+
+ 
+      self.ltext = goocanvas.Text(parent = self.o, text="", x=3, y=-15,
+						width=100,font="sans 8", fill_color="#000000")
+
+      self.connectAll()
+
 
 
 
