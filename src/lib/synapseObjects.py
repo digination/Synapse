@@ -10,6 +10,7 @@ from synapseIMVEC import *
 from synapseGTKProperties import *
 from synapseUtils import *
 from synapseDebug import dbg
+from synapseHelpers import *
 
 from subprocess import Popen, PIPE
 from fcntl import fcntl , F_GETFL, F_SETFL
@@ -681,16 +682,86 @@ class syntimer(synobj):
 class synjector(synobj):
 
 
-   def __init__(self,name,injectType="string",data="",linesPerBlock=1,loop=False,fileName=""):
+
+   def init_run(self):
+
+      self.alive = True
+      runvars = dict()
+      
+      if self.injectType == "File":
+
+         try:
+            fh = open(self.filename,"r")
+            runvars['fh'] = fh
+
+         except:
+            IMVEC.dbg.debug("CANNOT OPEN FILE %s, STOPPING INJECTOR BLOCK %s",(self.filename,self.name),dbg.CRITICAL)
+            self.alive = False
+
+      else:
+         runvars['fh'] = None
+         
+      IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
+
+   def run(self):
+
+      fh = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['fh']
+
+      if (fh != None):
+
+         content = fh.readlines()
+
+      else:
+
+         content = self.data
+
+      self.formatResults(content)
+
+      
+      if not self.loop:
+         self.alive = False 
+
+
+
+   def formatResults(self,results):
+
+      
+      if self.outputMode == "Split Lines":
+      
+         if self.injectType != "File":
+            results = results.split("\n")
+            trailing_cr = "\n"
+         else:
+            trailing_cr = ""
+
+
+         for line in results:
+            
+            self.obuff = line + trailing_cr
+            self.broadcast()
+          
+
+      elif self.outputMode == "Full Content":
+
+         if self.injectType == "File":
+            res = ""
+            for line in results:
+              res += line
+            results = res
+         self.obuff = results
+         self.broadcast()
+               
+       
+   def __init__(self,name):
 
       self.init_common()
       self.name = name
       self.WOI = False
-      self.injectType = injectType
-      self.data = data
-      self.fileName = fileName    
-      self.linesPerBlock = linesPerBlock
-      self.loop = loop
+      self.injectType = "Strings List"
+      self.outputMode = "Split Lines"
+      self.fileName = ""
+      self.loop = False
+      self.data = ""
 
       self.peers = list()
      
@@ -752,21 +823,121 @@ class synjector(synobj):
         colorseldlg.destroy()
 
 
+
+   def onFileChange(self,widget):
+
+      dialog = gtk.FileChooserDialog(title="Select File to Open", parent=None, action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK), backend=None)
+
+      response = dialog.run()
+      if response == gtk.RESPONSE_OK:
+         openfile = dialog.get_filename()
+         dialog.destroy()
+         synjectorGTK.ifilename.set_text(openfile)
+         self.filename = openfile
+
+      elif response == gtk.RESPONSE_CANCEL:
+         dialog.destroy()
+         return
+
+
+
+
+   def onTextBufferChanged(self,textbuff):
+
+      self.data = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())      
+
+
    def onTextChange(self,widget):
+
+
       if widget == synjectorGTK.iname:
          self.name = synjectorGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synjectorGTK.iname.get_text())
 
+      #sets injector type
+      elif widget == synjectorGTK.iit:
+         self.setMode(widget.get_active_text())
+         self.injectType = widget.get_active_text()
+
+       
+      elif (widget == synjectorGTK.iomode):
+         self.outputMode = synjectorGTK.iomode.get_active_text()
+
+
+
    def disconnectAll(self):
       synjectorGTK.iname.disconnect(synjectorGTK.chdict['iname'])
       synjectorGTK.icolorBtn.disconnect(synjectorGTK.chdict['icolorBtn'])
+      synjectorGTK.iit.disconnect(synjectorGTK.chdict['iit'])
+      synjectorGTK.iomode.disconnect(synjectorGTK.chdict['iomode'])
+      synjectorGTK.iloop.disconnect(synjectorGTK.chdict['iloop'])
+      synjectorGTK.idataBuffer.disconnect(synjectorGTK.chdict['idataBuffer'])
+
+
+      # We encapsulate the next disconnects in a try/except statement 
+      # because we don't really know which widget is connected already.
+
+      try:
+         synjectorGTK.ibrowse.disconnect(synjectorGTK.chdict['ibrowse'])
+      except:
+         try:
+            synjectorGTK.idataBuffer.disconnect(synjectorGTK.chdict['idataBuffer'])
+         except:
+            pass
+
+
+
+
 
    def getPropWidget(self):
+
       synjectorGTK.iname.set_text(self.name)
       synjectorGTK.icolor.set_text(self.color)
       synjectorGTK.chdict['iname'] = synjectorGTK.iname.connect("changed",self.onTextChange)
       synjectorGTK.chdict['icolorBtn'] = synjectorGTK.icolorBtn.connect("clicked",self.onColorChange)
+      synjectorGTK.chdict['iit'] = synjectorGTK.iit.connect("changed",self.onTextChange)
+      synjectorGTK.chdict['iomode'] = synjectorGTK.iomode.connect("changed",self.onTextChange)
+      synjectorGTK.chdict['iloop'] = synjectorGTK.iloop.connect("changed",self.onTextChange)
+      synjectorGTK.chdict['idataBuffer'] = synjectorGTK.idataBuffer.connect("changed",self.onTextBufferChanged)
+
+      
       return synjectorGTK.o
+
+
+   def setMode(self,mode):
+
+      if mode == "Strings List":
+ 
+         #tries to disconnect, but may be disconnected already.
+         try: 
+            synjectorGTK.ibrowse.disconnect(synjectorGTK.chdict['ibrowse'])
+         except:
+            pass
+
+
+         synjectorGTK.hbox2.show()
+         synjectorGTK.ibrowse.hide()
+         synjectorGTK.ifilename.hide()
+
+         synjectorGTK.chdict['idataBuffer'] = synjectorGTK.idataBuffer.connect("changed",self.onTextBufferChanged)
+        
+
+ 
+      elif mode == "File":
+
+
+         #tries to disconnect, but may be disconnected already.
+         try: 
+            synjectorGTK.idataBuffer.disconnect(synjectorGTK.chdict['idataBuffer'])
+         except:
+            pass
+
+
+         synjectorGTK.hbox2.hide()
+         synjectorGTK.ifilename.show()
+         synjectorGTK.ibrowse.show()
+
+         synjectorGTK.chdict['ibrowse'] = synjectorGTK.ibrowse.connect("clicked",self.onFileChange)
 
 
 
@@ -1430,7 +1601,7 @@ class synmonitor(synobj):
                
             #ici mettre la gestion de la taille de buffer suivant taille de monitor item
             gtk.gdk.threads_enter() 
-            xref.setText(self.displayBuff)
+            xref.setContent(self.displayBuff)
             gtk.gdk.threads_leave()
 
             
@@ -3132,6 +3303,14 @@ class synscapy(synobj):
       return self.connector
 
          
+   def onClick(self,widget):
+
+      if (widget == synscapyGTK.iHelperBtn):
+
+         helper = scapyHelper()
+
+         
+
 
    def onITextBufferChanged(self,textbuff):
       self.expr = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
@@ -3153,6 +3332,10 @@ class synscapy(synobj):
          else:
             self.btype = "Has Input"
             IMVEC.activeDoc.getActiveM().getSynItem().setInput(True)
+
+
+
+
 
   
    def onColorChange(self,widget):
@@ -3203,6 +3386,8 @@ class synscapy(synobj):
       synscapyGTK.chdict['icolorBtn'] = synscapyGTK.icolorBtn.connect("clicked",self.onColorChange)
       synscapyGTK.chdict['ibtype'] = synscapyGTK.ibtype.connect("changed",self.onTextChange)
       synscapyGTK.chdict['itextBuffer'] = synscapyGTK.itextBuffer.connect("changed",self.onITextBufferChanged)
+      synscapyGTK.chdict['iHelperBtn'] = synscapyGTK.iHelperBtn.connect("clicked",self.onClick)
+   
 
       return synscapyGTK.o
 

@@ -592,11 +592,37 @@ class syncomGTK:
 class synjectorGTK:
 
 
-   o = gtk.HBox()
+   o = gtk.VBox()
    
-  
+   hbox1 = gtk.HBox()
+   hbox2 = gtk.HBox()
+   hbox3 = gtk.HBox()
+   
+   hbox1.show()
+   hbox2.show()
+   hbox3.show()
+
+
    gtkPVbox1 = gtk.VBox()
    gtkPVbox2 = gtk.VBox()
+
+   gtkPVbox3 = gtk.VBox()
+   gtkPVbox4 = gtk.VBox()   
+
+   gtkPVbox5 = gtk.VBox()
+   gtkPVbox6 = gtk.VBox()   
+
+
+   gtkPVbox1.show()
+   gtkPVbox2.show()
+
+   gtkPVbox3.show()
+   gtkPVbox4.show()   
+
+   gtkPVbox5.show()
+   gtkPVbox6.show()   
+
+
    lname = gtk.Label(str="Name")
    iname = gtk.Entry()
 
@@ -605,33 +631,46 @@ class synjectorGTK:
    icolor.set_state(gtk.STATE_INSENSITIVE)
    icolorBtn = gtk.Button(stock=gtk.STOCK_SELECT_COLOR)
 
-
    lit = gtk.Label(str="Injector Type")
    iit = gtk.ComboBox()
 
-
-   lstring = gtk.Label(str="String")
-   istring = gtk.Entry()
-   
-   lstringList = gtk.Label(str="String List")
-   idataBuffer = gtk.TextBuffer()
-   istringList = gtk.TextView(buffer=idataBuffer)
-   istringList.set_size_request(300,200)  
-
-   llpm = gtk.Label(str="Lines per message")
-   ilpm = gtk.Entry()
-   
-   
    ls0 = gtk.ListStore(str)
    iit.set_model(ls0)
    cellr0 = gtk.CellRendererText()
    iit.pack_start(cellr0)
    iit.add_attribute(cellr0, 'text', 0)
 
-   iit.append_text("String List")
+   iit.append_text("Strings List")
    iit.append_text("File")
 
    iit.set_active(0)
+
+    
+   lstringList = gtk.Label(str="Strings List")
+   idataBuffer = gtk.TextBuffer()
+   istringList = gtk.TextView(buffer=idataBuffer)
+   istringList.set_size_request(300,200)  
+
+   ifilename = gtk.Entry()
+   ibrowse = gtk.Button(label="Open..")  
+
+
+
+   lomode = gtk.Label(str="Output Mode")
+
+   iomode = gtk.ComboBox()
+   
+   ls1 = gtk.ListStore(str)
+   iomode.set_model(ls1)
+   cellr1 = gtk.CellRendererText()
+   iomode.pack_start(cellr0)
+   iomode.add_attribute(cellr0, 'text', 0)
+
+   iomode.append_text("Full Content")
+   iomode.append_text("Split Lines")
+   iomode.set_active(1)
+
+
 
    lloop = gtk.Label(str="Loop Mode")
    
@@ -649,18 +688,25 @@ class synjectorGTK:
    
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
-   gtkPVbox1.pack_start(lit,False,True,10) 
-   gtkPVbox1.pack_start(lloop,False,True,10)   
-   gtkPVbox1.pack_start(lstring,False,True,10)
-   gtkPVbox1.pack_start(lstringList,False,True,10)
-   
+   gtkPVbox1.pack_start(lit,False,True,10)
+   gtkPVbox1.pack_start(ibrowse,False,True,5)
 
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
    gtkPVbox2.pack_start(iit,False,True,5)
-   gtkPVbox2.pack_start(iloop,False,True,5)
-   gtkPVbox2.pack_start(istring,False,True,5)
-   gtkPVbox2.pack_start(istringList,False,True,5)
+   gtkPVbox2.pack_start(ifilename,False,True,5)
+
+
+   gtkPVbox3.pack_start(lstringList,False,True,10)
+   gtkPVbox4.pack_start(istringList,False,True,5)
+
+
+   gtkPVbox5.pack_start(lloop,False,True,10)
+   gtkPVbox5.pack_start(lomode,False,True,10)  
+
+   gtkPVbox6.pack_start(iloop,False,True,5)
+   gtkPVbox6.pack_start(iomode,False,True,5)
+
 
    chdict = dict()
 
@@ -668,17 +714,29 @@ class synjectorGTK:
       child1.show()
       child2.show()
 
+   for child1,child2 in map(None,gtkPVbox3.get_children(),gtkPVbox4.get_children()):
+      child1.show()
+      child2.show()
 
-   lstring.hide()
-   istring.hide()
-
-   o.pack_start(gtkPVbox1,False,True,10)
-   o.pack_start(gtkPVbox2,False,True,0)
+   for child1,child2 in map(None,gtkPVbox5.get_children(),gtkPVbox6.get_children()):
+      child1.show()
+      child2.show()
 
 
-   for child in o.get_children():
+   ibrowse.hide()
+   ifilename.hide()
 
-      child.show()
+   hbox1.pack_start(gtkPVbox1,False,True,10)
+   hbox1.pack_start(gtkPVbox2,False,True,5)
+   hbox2.pack_start(gtkPVbox3,False,True,10)
+   hbox2.pack_start(gtkPVbox4,False,True,15)   
+   hbox3.pack_start(gtkPVbox5,False,True,10)
+   hbox3.pack_start(gtkPVbox6,False,True,3)
+
+
+   o.pack_start(hbox1,False,True,0)
+   o.pack_start(hbox2,False,True,0)
+   o.pack_start(hbox3,False,True,0)
 
    o.show()
 

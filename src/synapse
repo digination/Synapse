@@ -413,7 +413,7 @@ class document(object):
 
          newitem.getO().set_property("x",cx)
          newitem.getO().set_property("y",cy)
-         #newitem.setText("Monitor%d" % (self.nbfilters))
+         newitem.setText("Monitor%d" % (self.nbmonitors))
 
          self.refresh_objects_list()
 

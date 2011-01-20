@@ -102,9 +102,9 @@ def motion_notify(widget, event):
             RESIZED_OBJECT.updateInputs()
             RESIZED_OBJECT.getWinBorder().set_property("width", RESIZED_OBJECT.getMF().get_property("width")  )
              
-            (hidebtn,maxbtn) = RESIZED_OBJECT.getButtons()
-            hidebtn.set_property("x", RESIZED_OBJECT.getMF().get_property("width") -40 )
-            maxbtn.set_property("x",  RESIZED_OBJECT.getMF().get_property("width") -20 )
+            hidebtn = RESIZED_OBJECT.getButtons()
+            hidebtn.set_property("x", RESIZED_OBJECT.getMF().get_property("width") -15 )
+            #maxbtn.set_property("x",  RESIZED_OBJECT.getMF().get_property("width") -20 )
 
          elif str(RESIZED_OBJECT.__class__) == "synapseCanvas.containerItem":
 
@@ -1056,7 +1056,7 @@ class linkItem():
 class monitorItem(synItem):
 
    def flush(self):
-      self.ltext.set_property("text","")
+      self.lcontent.set_property("text","")
 
    def on_extend_click(self,item,target_item,event):
       global RESIZED_OBJECT
@@ -1095,8 +1095,8 @@ class monitorItem(synItem):
 
          self.updateInputs()
             
-         self.hideBtn.set_property("x", self.mf.get_property("width") -40 )
-         self.maxBtn.set_property("x",  self.mf.get_property("width") -20 )
+         self.hideBtn.set_property("x", self.mf.get_property("width") -15 )
+         #self.maxBtn.set_property("x",  self.mf.get_property("width") -20 )
          self.extender.set_property("x",self.mf.get_property("width")-10)
          self.extender.set_property("y",self.mf.get_property("height")-10)
          
@@ -1143,13 +1143,17 @@ class monitorItem(synItem):
       return self.winborder
 
    def getButtons(self):
-      return (self.hideBtn,self.maxBtn)
-
+      #return (self.hideBtn,self.maxBtn)
+       return self.hideBtn
 
    def setComment(self,text):
 
       self.ltext.set_property("text",text)
 
+
+   def setContent(self,text):
+
+      self.lcontent.set_property("text",text)
 
 
    def __init__(self,parent_canvas):
@@ -1181,8 +1185,12 @@ class monitorItem(synItem):
 
 
 
-      self.hideBtn = goocanvas.Image(parent = self.o,x=260,y=5,pixbuf=IMVEC.monitorHidePixbuf)
-      self.maxBtn = goocanvas.Image(parent = self.o,x=280,y=5,pixbuf=IMVEC.monitorMaximizePixbuf) 
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="", x=25, y=7,
+						width=200,
+						fill_color="back")
+
+      self.hideBtn = goocanvas.Image(parent = self.o,x=285,y=5,pixbuf=IMVEC.monitorHidePixbuf)
+      #self.maxBtn = goocanvas.Image(parent = self.o,x=280,y=5,pixbuf=IMVEC.monitorMaximizePixbuf) 
 
       IMVEC.dbg.debug("MF_X_COORD: %d",(self.mf.get_property("x")),dbg.DEBUG)
       
@@ -1218,11 +1226,11 @@ class monitorItem(synItem):
 
 
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="", x=12, y=20,
+      self.lcontent = goocanvas.Text(parent = self.o, font="Sans 8" , text="", x=12, y=20,
 						width=300,
 						fill_color="white")
 
-      self.ltext.set_property("width",300)
+      self.lcontent.set_property("width",300)
 
 
 
@@ -1233,9 +1241,9 @@ class monitorItem(synItem):
      
 
       self.connectAll()
-      self.ltext.connect("button-press-event",self.on_mf_clicked)
-      self.ltext.connect("button-press-event",self.objectSelectionChange)
-      self.ltext.connect("button-release-event",self.on_mf_released)
+      self.lcontent.connect("button-press-event",self.on_mf_clicked)
+      self.lcontent.connect("button-press-event",self.objectSelectionChange)
+      self.lcontent.connect("button-release-event",self.on_mf_released)
 
       self.winborder.connect("button-press-event",self.on_mf_clicked)
       self.winborder.connect("button-press-event",self.objectSelectionChange)
@@ -1251,7 +1259,7 @@ class monitorItem(synItem):
 
 
       self.hideBtn.connect("button-press-event",self.on_hide_click)
-      self.maxBtn.connect("button-press-event",self.on_maximize_click)
+      #self.maxBtn.connect("button-press-event",self.on_maximize_click)
 
       
 
@@ -1630,6 +1638,8 @@ class containerItem(synItem):
 
       self.ltext.set_property("text",text)
 
+
+  
    def __init__(self,parent_canvas):
 
 
@@ -1637,7 +1647,7 @@ class containerItem(synItem):
 
       
 
-      self.min_width = 200
+      self.min_width = 170
       self.min_height = 100
 
       self.outputs = list()
@@ -1662,7 +1672,7 @@ class containerItem(synItem):
       self.replaceIcon()
 
 
-      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=200, height=35,
+      self.head = goocanvas.Rect(parent = self.o, x=6, y=6,radius_x=14, radius_y=14, width=170, height=35,
 				stroke_color="#cccccc", fill_color_rgba=0xcccccccc,
 				line_width=0)
       
@@ -1671,12 +1681,12 @@ class containerItem(synItem):
      
 
      
-      self.exporticon = goocanvas.Image(parent = self.o,x=44,y=7,pixbuf=self.exportPixbuf)
+      #self.exporticon = goocanvas.Image(parent = self.o,x=44,y=7,pixbuf=self.exportPixbuf)
       self.playicon = goocanvas.Image(parent = self.o,x=10,y=7,pixbuf=IMVEC.cplayPixbuf)
 
 
 
-      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="foobar", x=80, y=17,
+      self.ltext = goocanvas.Text(parent = self.o, font="Sans 8" , text="foobar", x=50, y=17,
 						width=200,
 						fill_color="back")
 
@@ -1713,8 +1723,8 @@ class containerItem(synItem):
 
 
 
-      self.exporticon.connect("enter-notify-event",self.on_exporticon_enter)
-      self.exporticon.connect("leave-notify-event",self.on_exporticon_leave)
+      #self.exporticon.connect("enter-notify-event",self.on_exporticon_enter)
+      #self.exporticon.connect("leave-notify-event",self.on_exporticon_leave)
 
 
 

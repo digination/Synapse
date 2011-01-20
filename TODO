@@ -1,3 +1,6 @@
+### KILLER FEATURE ###
+Change the synmux/syndemux behavior with VARIABLE NUMBER of I/Os, and indefinite wait time if timeout = 0 for synmux !!!!
+
 #### CRITICAL BUGS ####
 
 flush objects buffers after kill
