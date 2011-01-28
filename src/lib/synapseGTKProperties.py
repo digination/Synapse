@@ -2,86 +2,6 @@ import gtk
 from synapseIMVEC import *
 
 
-class synapsepositionGTK:
-
-   #position chooser
-   o = gtk.VBox()
-   pos_hbox1 = gtk.HBox()
-   pos_hbox2 = gtk.HBox()
-   pos_hbox3 = gtk.HBox()
-
-   top_label = gtk.Label(str="Inputs/Outputs position                               ")
-   
-   button_left = gtk.Button()
-   button_right = gtk.Button()
-   button_top = gtk.Button(label="None")
-   button_bottom = gtk.Button(label="None")
-
-   
-   image_left = gtk.Image()
-   image_left.set_from_pixbuf(IMVEC.ioleft)
-   image_left.show()   
-
-   image_right = gtk.Image()
-   image_right.set_from_pixbuf(IMVEC.ioleft)
-   image_right.show()
-
-   bb_image = gtk.Image()
-   bb_image.set_from_pixbuf(IMVEC.bbhoriz)
-   bb_image.show()
-
-   
-   button_left.add(image_left)
-   button_right.add(image_right)
-   
-   fill_lbl1 = gtk.Label(str="     ")
-   fill_lbl1.show()
-
-   fill_lbl2 = gtk.Label(str="                       ")
-   fill_lbl2.show()
-
-
-   fill_lbl3 = gtk.Label(str="     ")
-   fill_lbl3.show()
-
-   fill_lbl4 = gtk.Label(str="                       ")
-   fill_lbl4.show()
-
-
-   pos_hbox1.pack_start(fill_lbl1,False,True,10)
-   pos_hbox1.pack_start(button_top,True,True,10)
-   pos_hbox1.pack_start(fill_lbl2,True,True,10)
-
-   pos_hbox2.pack_start(button_left,False,True,10)
-   pos_hbox2.pack_start(bb_image,False,True,10)   
-   pos_hbox2.pack_start(button_right,False,True,10)
-
-
-   pos_hbox3.pack_start(fill_lbl3,False,True,10)
-   pos_hbox3.pack_start(button_bottom,True,True,10)
-   pos_hbox3.pack_start(fill_lbl4,True,True,10)
-
-   o.pack_start(top_label,False,False,5)
-   o.pack_start(pos_hbox1,True,True,5)
-   o.pack_start(pos_hbox2,True,True,5)
-   o.pack_start(pos_hbox3,True,True,5)
-
-
-   top_label.show()
-   button_left.show()
-   button_right.show()
-   button_top.show()
-   button_bottom.show()
-
-   pos_hbox1.show()
-   pos_hbox2.show()
-   pos_hbox3.show()
-
-   o.show()
-
-
-
-
 class documentGTK:
 
    o = gtk.HBox()
@@ -263,7 +183,7 @@ class synappGTK:
 
    gtkPVbox1.pack_start(lname,False,True,10)
    gtkPVbox1.pack_start(icolorBtn,False,True,5)
-   gtkPVbox1.pack_start(lrot,False,True,10)
+   #gtkPVbox1.pack_start(lrot,False,True,10)
    gtkPVbox1.pack_start(lcmd,False,True,10)
    gtkPVbox1.pack_start(lwoi,False,True,10)
    gtkPVbox1.pack_start(lbo,False,True,10)
@@ -271,7 +191,7 @@ class synappGTK:
 
    gtkPVbox2.pack_start(iname,False,True,5)
    gtkPVbox2.pack_start(icolor,False,True,5)
-   gtkPVbox2.pack_start(irot,False,True,5)
+   #gtkPVbox2.pack_start(irot,False,True,5)
    gtkPVbox2.pack_start(icmd,False,True,5)
    gtkPVbox2.pack_start(iwoi,False,True,5)
    gtkPVbox2.pack_start(ibo,False,True,5)

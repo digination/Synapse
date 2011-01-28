@@ -21,7 +21,7 @@ class dbg:
    0x04: "[NOTICE]\t",
    0x05: "[DEBUG]\t",
    0x06: "[EXDEBUG]\t",
-   0x07: "[SEXDEBUg]\t"
+   0x07: "[SEXDEBUG]\t"
   
 
    }

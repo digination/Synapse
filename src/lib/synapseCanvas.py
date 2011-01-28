@@ -131,6 +131,9 @@ def motion_notify(widget, event):
         
                   IMVEC.activeDoc.getCanvas().window.set_cursor(IMVEC.plusCursor)          
                   PRE_CONTAINER = syn_c.getSynItem().getO()
+
+                  MOVED_OBJECT.raise_(PRE_CONTAINER)
+
                else:
                   PRE_CONTAINER = None
                   IMVEC.activeDoc.getCanvas().window.set_cursor(None)
@@ -303,6 +306,8 @@ class synItem():
       global PRE_CONTAINER
 
       if PRE_CONTAINER != None and MOVED_OBJECT.get_parent() != PRE_CONTAINER:
+
+
          MOVED_OBJECT.set_property("parent",PRE_CONTAINER)
          MOVED_OBJECT.set_property("x",MOVED_OBJECT.get_property("x")- PRE_CONTAINER.get_property("x"))
          MOVED_OBJECT.set_property("y",MOVED_OBJECT.get_property("y")- PRE_CONTAINER.get_property("y"))
@@ -355,7 +360,7 @@ class synItem():
          #(abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
          #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
          COORDS_OFFSET = [ MOUSE_COORDS[0] - px  ,  MOUSE_COORDS[1] - py ]
-         synapseHistory.history.addHistory()
+
 
 
 
@@ -1701,6 +1706,12 @@ class containerItem(synItem):
       
       self.extender.set_property("x",self.extender.get_property("x")+6)
       self.extender.set_property("y",self.extender.get_property("y")+6)
+
+ 
+      #for member in IMVEC.activeDoc.getContainer().getSynItems():
+         #if  member != self:
+                  #member.getO().raise_(None)
+
    
       self.connectAll()
       self.ltext.connect("button-press-event",self.on_mf_clicked)
@@ -2227,7 +2238,6 @@ class selItem:
          MOVED_OBJECT = self.getO()
          ACTIVE_OBJECT = self
 
-         synapseHistory.history.addHistory()
          (abs_coord_x,abs_coord_y) = getAbsoluteCoords(IMVEC.activeDoc.getRootItem(),self.getO(),0,0)
          #COORDS_OFFSET = [ MOUSE_COORDS[0] - abs_coord_x ,  MOUSE_COORDS[1] - abs_coord_y]
 

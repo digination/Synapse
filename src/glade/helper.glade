@@ -18,7 +18,18 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <widget class="GtkHBox" id="enclosure">
+            <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkScrolledWindow" id="scrolledwindow1">

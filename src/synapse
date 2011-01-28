@@ -68,7 +68,6 @@ class document(object):
    nbnewinst = 0
 
 
-
    def getKeyboard(self):
 
       return self.keyboard
@@ -99,6 +98,8 @@ class document(object):
    # takes a serialized document string and puts it back to an actual document
 
    def deserializeAll(self,serial_string):
+
+      IMVEC.dbg.debug("DESERIALIZING DOCUMENT",tuple(),dbg.SEXDEBUG)
 
       try:
          IMVEC.activeDoc.getActiveM().getSynObj().disconnectAll()
@@ -185,6 +186,11 @@ class document(object):
    def setHeadLabel(self,text):
 
       self.head_label.set_text(text)
+
+   def getHeadLabelText(self):
+
+      return self.head_label.get_text()
+
 
    def refresh_objects_list(self,sorting='none'):
 
@@ -778,6 +784,19 @@ class document(object):
       return self.syncontainersList
 
 
+   def genId(self):
+
+      rand = random.randint(1,100000000)
+      date_str = str(datetime.datetime.now())
+      hash_id = hashlib.sha1()
+      hash_id.update("%s %d" % (date_str, rand) )
+
+      self.id = hash_id.hexdigest()
+
+
+   def getId(self):
+      return self.id
+
    def __init__(self,name,notebook):
       
       document.nbinst+=1
@@ -792,6 +811,7 @@ class document(object):
       self.selobject = None
       self.changed = 0
 
+      self.genId()
       
       #define a new empty objects container
       self.container = container()
@@ -957,6 +977,64 @@ class document(object):
    #def addObject(self,obj):
 
       #self.objectList.append(obj)
+
+
+
+
+
+class saveWindow(object):
+
+
+   def getAnswer(self):
+
+      return self.answer
+
+
+   def onclick(self,widget):
+
+      if (widget == self.cancel_btn):
+         self.answser = "CANCEL"
+
+      elif (widget == self.save_btn ):
+         self.answer = "SAVE"
+
+      elif (widget == self.close_btn):
+   
+         self.answer = "CLOSE"
+
+      gtk.main_quit()
+
+   def getWindow(self):
+
+      return self.window   
+
+   def __init__(self):
+
+      builder = gtk.Builder()
+      builder.add_from_file("%s/ui/savedoc.xml" % (RES_PATH))
+      self.window = builder.get_object("window1")
+ 
+      self.window.set_title("Save before Closing")
+
+
+      self.cancel_btn = builder.get_object("cancel_btn")
+      self.save_btn = builder.get_object("save_btn") 
+      self.close_btn = builder.get_object("close_btn")
+
+      self.cancel_btn.connect("clicked",self.onclick)
+      self.close_btn.connect("clicked",self.onclick)
+      self.save_btn.connect("clicked",self.onclick)
+
+
+      self.dynlabel = builder.get_object("dynlabel")
+
+      self.window.set_modal(True)
+      self.window.show()
+
+      self.answer = None
+     
+      gtk.main()
+
 
 
 
@@ -1950,6 +2028,36 @@ class MainWindow(object):
          synapseHistory.history.redo()
 
 
+
+   def saveBeforeQuit(self,dummy1):
+
+
+      for unsavedDocId,unsavedDocAddr in IMVEC.unsavedDocs.items():
+
+         
+         sw  = saveWindow()
+         ans = sw.getAnswer()
+         
+         if (ans == "CLOSE"):
+            
+            print "CLOSE"
+
+            gtk.main_quit()
+
+         elif (ans == "CANCEL"):
+
+            print "CANCEL"
+
+            self.window.show()
+            break
+
+         elif (ans == "SAVE"):
+            #save process
+            
+            gtk.main_quit()
+
+
+
    def __init__(self):
         
       global LS0
@@ -2038,7 +2146,7 @@ class MainWindow(object):
       key, mod = gtk.accelerator_parse("<ctrl>Q")
       menu_quit.add_accelerator("activate", agr, key, 
       mod, gtk.ACCEL_VISIBLE)
-      menu_quit.connect("activate",gtk.main_quit)
+      menu_quit.connect("activate",self.saveBeforeQuit)
       menu_quit.show()
       filemenu.append(menu_quit)
 
@@ -2398,8 +2506,13 @@ class MainWindow(object):
 
       self.window.resize(1024,768)
       
- 
-      self.window.connect("destroy", lambda w: gtk.main_quit())
+       
+      #self.window.connect("destroy", lambda w: gtk.main_quit())
+      self.window.connect("destroy", lambda w: self.saveBeforeQuit)
+     
+      
+
+
 
       self.hpaned1.connect("size-allocate",self.on_hpaned_resize)
       self.hpaned2.connect("size-allocate",self.on_hpaned_resize)

@@ -7,6 +7,14 @@ class synapseHistory:
 
    def addHistory(self):
 
+      try:
+         savepath = IMVEC.unsavedDocs[IMVEC.activeDoc.getId()]
+      except:
+         IMVEC.unsavedDocs[IMVEC.activeDoc.getId()] = "foo"
+         IMVEC.activeDoc.setHeadLabel("*%s" % (IMVEC.activeDoc.getHeadLabelText() ))
+  
+
+
       try:      
          curdoc_name = IMVEC.activeDoc.getName()
       except:
@@ -18,7 +26,7 @@ class synapseHistory:
          self.undodict[curdoc_name] = list()
          len_curdoc_history = 0
 
-      print "appending new doc version to history"
+      IMVEC.dbg.debug("APPENDING NEW VERSION IN HISTORY",tuple(),dbg.SEXDEBUG)
       self.append(IMVEC.activeDoc)
       
 
@@ -46,6 +54,8 @@ class synapseHistory:
 
    def undo(self):
 
+      IMVEC.dbg.debug("UNDO LAST CHANGE",tuple(),dbg.SEXDEBUG)
+
       try:
          self.appendR(IMVEC.activeDoc)
       except:
@@ -57,7 +67,7 @@ class synapseHistory:
 
    def redo(self):
 
-      print "REDO"
+      IMVEC.dbg.debug("REDO LAST CHANGE",tuple(),dbg.SEXDEBUG)
       print self.redodict[IMVEC.activeDoc.getName()]
 
       serialdoc_to_use = self.redodict[IMVEC.activeDoc.getName()].pop()

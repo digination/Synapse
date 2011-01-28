@@ -26,6 +26,9 @@ class helper(object):
       self.descrLbl =  builder.get_object("descr")
 
       self.enclosure = builder.get_object("enclosure")
+
+      print str(self.enclosure.__class__)
+
       self.window.show()
       self.setEnclosureContent()
 
@@ -77,7 +80,10 @@ class scapyHelper(helper):
 
       
       vbox1.pack_start(lfct,False,True,10)
-      vbox2.pack_start(self.fct,False,True,10)
+      vbox2.pack_start(self.fct,False,True,5)
+
+
+      
 
       self.enclosure.pack_start(vbox1,False,True,10)
       self.enclosure.pack_start(vbox2,False,True,10)

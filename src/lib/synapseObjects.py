@@ -11,6 +11,9 @@ from synapseGTKProperties import *
 from synapseUtils import *
 from synapseDebug import dbg
 from synapseHelpers import *
+from synapseHistory import *
+
+
 
 from subprocess import Popen, PIPE
 from fcntl import fcntl , F_GETFL, F_SETFL
@@ -35,7 +38,7 @@ except:
    print "[WARNING] xmpp LIBRARY NOT LOADED: SYNXMPP BB WILL BE DISABLED"
 
 try:
-   from scapy import *
+   from scapy.all import *
    IMVEC.HAS_SCAPY = 1
 except:
    print "[WARNING] scapy LIBRARY NOT LOADED: SYNSCAPY BB WILL BE DISABLED"
@@ -530,11 +533,12 @@ class synheader(synobj):
    
     
    def onITextBufferChanged(self,textbuff):
+      synapseHistory.history.addHistory()
       self.descr = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
       IMVEC.activeDoc.getHeader().getSynItem().setWorkflowDescr(self.descr)
 
    def on_widget_changed(self,widget):
-
+      synapseHistory.history.addHistory()
       if (widget == synheaderGTK.iauthor):
          self.author = widget.get_text() 
          IMVEC.activeDoc.getHeader().getSynItem().setWorkflowAuthor(widget.get_text())
@@ -629,6 +633,7 @@ class syntimer(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
       
         self.color = resclaleColorSel(ncolor.to_string())
@@ -637,16 +642,13 @@ class syntimer(synobj):
         IMVEC.activeDoc.getActiveM().getSynItem().getMF().set_property("fill_color",self.color)
         IMVEC.activeDoc.getActiveM().getSynItem().getLtext().set_property("fill_color",self.color)
 
-
-
-        
         colorseldlg.destroy()
       elif response == gtk.RESPONSE_CANCEL:
         colorseldlg.destroy()
 
 
    def on_widget_changed(self,widget):
-
+      synapseHistory.history.addHistory() 
       if (widget == syntimerGTK.iname):
          self.name = widget.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
@@ -809,6 +811,7 @@ class synjector(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -830,6 +833,7 @@ class synjector(synobj):
 
       response = dialog.run()
       if response == gtk.RESPONSE_OK:
+         synapseHistory.history.addHistory()
          openfile = dialog.get_filename()
          dialog.destroy()
          synjectorGTK.ifilename.set_text(openfile)
@@ -843,13 +847,13 @@ class synjector(synobj):
 
 
    def onTextBufferChanged(self,textbuff):
-
+      synapseHistory.history.addHistory()
       self.data = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())      
 
 
    def onTextChange(self,widget):
 
-
+      synapseHistory.history.addHistory()
       if widget == synjectorGTK.iname:
          self.name = synjectorGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synjectorGTK.iname.get_text())
@@ -1051,7 +1055,8 @@ class syntest(synobj):
 
 
    def on_widget_changed(self,widget):
-    
+      synapseHistory.history.addHistory()    
+
       if (widget == syntestGTK.iname):
          self.name = widget.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
@@ -1077,6 +1082,7 @@ class syntest(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -1190,7 +1196,7 @@ class synlink(synobj):
          
 
    def onBidirChanged(self,widget):
- 
+      synapseHistory.history.addHistory()
       if widget.get_active_text() == "False":
          self.bidir = False       
       else:
@@ -1237,6 +1243,7 @@ class syncom(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
 
@@ -1251,6 +1258,7 @@ class syncom(synobj):
         colorseldlg.destroy()
 
    def onITextBufferChanged(self,textbuff):
+      synapseHistory.history.addHistory()
       self.text = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
       IMVEC.activeDoc.getContainer().getMember(self.id).getSynItem().setComment(self.text)
 
@@ -1345,6 +1353,7 @@ class synmux(synobj):
    
    def on_widget_changed(self,widget):
     
+      synapseHistory.history.addHistory()
       if (widget == synmuxGTK.iname):
          self.name = widget.get_text()
       elif (widget == synmuxGTK.itimeout):
@@ -1365,6 +1374,7 @@ class synmux(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -1518,6 +1528,7 @@ class syndemux(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -1531,7 +1542,7 @@ class syndemux(synobj):
         colorseldlg.destroy()
 
    def on_widget_changed(self,widget):
-    
+      synapseHistory.history.addHistory()
       if (widget == syndemuxGTK.iname):
          self.name = widget.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(syndemuxGTK.iname.get_text())
@@ -1645,12 +1656,13 @@ class synpy(synobj):
 
    def on_widget_changed(self,widget):
 
+       synapseHistory.history.addHistory()
+
        if (widget == synpyGTK.iname):
          self.name = widget.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
          
        elif (widget == synpyGTK.iwoi):
-         #synapseHistory.history.addHistory()
          if synpyGTK.ipcuni.get_active_text() == "True":
             self.pcuni = True
          else:
@@ -1659,12 +1671,16 @@ class synpy(synobj):
 
    def onColorChange(self,widget):
 
+      
       colorseldlg = gtk.ColorSelectionDialog('Choose a new color for building block')
       colorsel = colorseldlg.colorsel
 
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
+
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -1822,11 +1838,9 @@ class synapp(synobj):
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
       
       if (widget == synappGTK.iname):
-
-         if synappGTK.iname.get_text()[len(synappGTK.iname.get_text())-1] == " ":
-            synapseHistory.history.addHistory()
 
          self.name = synappGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(synappGTK.iname.get_text())
@@ -1845,26 +1859,24 @@ class synapp(synobj):
 
       elif (widget == synappGTK.icmd):
 
-         if synappGTK.icmd.get_text()[len(synappGTK.icmd.get_text())-1] == " ":
-            synapseHistory.history.addHistory()
          self.cmd = synappGTK.icmd.get_text()
 
       elif (widget == synappGTK.iwoi):
-         #synapseHistory.history.addHistory()
+
          if synappGTK.iwoi.get_active_text() == "True":
             self.WOI = True
          else:
             self.WOI = False
 
       elif (widget == synappGTK.ibo):
-         #synapseHistory.history.addHistory()
+
          if synappGTK.ibo.get_active_text() == "True":
             self.buffured_output = True
          else:
             self.buffured_output = False
 
       elif (widget == synappGTK.isl):
-         #synapseHistory.history.addHistory()
+
          if synappGTK.isl.get_active_text() == "True":
             self.split_lines = True
          else:
@@ -1880,6 +1892,9 @@ class synapp(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
+
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2003,6 +2018,8 @@ class synfilter(synapp):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2019,6 +2036,7 @@ class synfilter(synapp):
 
    def on_widget_changed(self,widget):
 
+      synapseHistory.history.addHistory()
 
       if (widget == synfilterGTK.iname):
          self.name = widget.get_text()
@@ -2169,6 +2187,8 @@ class syncli(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2185,6 +2205,7 @@ class syncli(synobj):
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
 
       if (widget == syncliGTK.iname):
          self.name = syncliGTK.iname.get_text()
@@ -2264,6 +2285,8 @@ class synreport(synobj):
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
+
       if (widget == synreportGTK.iname):
          self.name = synreportGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
@@ -2279,6 +2302,8 @@ class synreport(synobj):
 
       response = dialog.run()
       if response == gtk.RESPONSE_OK:
+
+         synapseHistory.history.addHistory()
          savefile = dialog.get_filename()
          dialog.destroy()
          synreportGTK.ifilename.set_text(savefile)
@@ -2299,6 +2324,8 @@ class synreport(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+ 
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2438,6 +2465,7 @@ class syncontainer(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2453,6 +2481,7 @@ class syncontainer(synobj):
 
 
    def onTextChange(self,widget):
+      synapseHistory.history.addHistory()
 
       if (widget == syncontainerGTK.iname):
          self.name = syncontainerGTK.iname.get_text()
@@ -2517,6 +2546,7 @@ class synlabel(synobj):
 
 
    def onTextChange(self,widget):
+      synapseHistory.history.addHistory()
 
       if (widget == synlabelGTK.iname):
          self.name = synlabelGTK.iname.get_text()
@@ -2537,6 +2567,7 @@ class synlabel(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2615,6 +2646,7 @@ class synkbd(synobj):
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
       if (widget == synkbdGTK.iname):
          self.name = synkbdGTK.iname.get_text()
          IMVEC.activeDoc.getActiveM().getSynItem().setText(self.name)
@@ -2628,6 +2660,7 @@ class synkbd(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -2841,10 +2874,11 @@ class syndb(synobj):
          
 
    def onITextBufferChanged(self,textbuff):
+      synapseHistory.history.addHistory()
       self.query = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
 
    def onTextChange(self,widget):
-
+      synapseHistory.history.addHistory()
 
       if (widget == syndbGTK.iname):
 
@@ -2897,6 +2931,7 @@ class syndb(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -3063,6 +3098,7 @@ class synxmpp(synobj):
 
 
    def onITextBufferChanged(self,textbuff):
+     synapseHistory.history.addHistory()
      jpcontent = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
 
      self.jidpeers = jpcontent.split("\n")
@@ -3075,6 +3111,7 @@ class synxmpp(synobj):
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
 
       if (widget == synxmppGTK.iname):
 
@@ -3110,6 +3147,8 @@ class synxmpp(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
@@ -3203,6 +3242,11 @@ class synscapy(synobj):
       IMVEC.activeDoc.getContainer().getMembers()[self.id].setRunVars(runvars)
 
 
+
+
+   def sniff_callback(pkt):
+        return pkt.sprintf("%ARP.hwsrc% %ARP.psrc%")
+
    def run(self):
 
       dbcurs = IMVEC.activeDoc.getContainer().getMembers()[self.id].getRunVars()['dbcurs']
@@ -3266,6 +3310,10 @@ class synscapy(synobj):
          self.broadcast()
 
 
+
+
+
+
             
    def __init__(self,name):
 
@@ -3313,10 +3361,12 @@ class synscapy(synobj):
 
 
    def onITextBufferChanged(self,textbuff):
+      synapseHistory.history.addHistory()
       self.expr = textbuff.get_text(textbuff.get_start_iter(),textbuff.get_end_iter())
 
    def onTextChange(self,widget):
 
+      synapseHistory.history.addHistory()
 
       if (widget == synscapyGTK.iname):
 
@@ -3346,6 +3396,8 @@ class synscapy(synobj):
       response = colorseldlg.run()
    	
       if response == gtk.RESPONSE_OK:
+
+        synapseHistory.history.addHistory()
         ncolor = colorsel.get_current_color()
        
         self.color = resclaleColorSel(ncolor.to_string())
